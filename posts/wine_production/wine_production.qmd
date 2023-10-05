@@ -50,13 +50,13 @@ We will conclude by taking a look what different state-of-the-art climate models
 
 ## Setting up the analysis environment
 
-To perform this analysis, we will use `Python` and many of the standard data science packages written for it. In particular we will rely heavily on [pandas](https://pandas.pydata.org/matplo) and [matplotlib](https://matplotlib.org/). 
+To perform this analysis, we will use `Python` and many of the standard data science packages written for it. In particular we will rely heavily on [pandas](https://pandas.pydata.org/) and [matplotlib](https://matplotlib.org/). 
 If you have not encountered these before it is highly recommended to get familiar with them first.
 
 In order to ensure a reproducible analysis, we encourage people to use an isolated `Python` environment (a virtual environment). While there are many different ways of doing this, we recommend using `conda/mamba` since it also allows for convenient management of `C` dependencies. A detailed description of how to set up the environment can be found in @sec-env.
 
 
-Let's load all the packages we need and set up some defaults:
+Let's load all the packages we need and set up some defaults (the `matplotlib` style file and additional analysis functions are [here](https://github.com/SergeiOssokine/SergeiOssokine.github.io/tree/main/analysis)):
 
 ```{python}
 import numpy as np
@@ -86,7 +86,7 @@ Our first goal is to map the modern location of European vineyards. To do this, 
 
 The [Corine Land Cover (CLC) inventory](https://land.copernicus.eu/pan-european/corine-land-cover) is the largest database of land cover and land use available for Europe. The first release was 1990 and since then it has been updated several times: 2000, 2006, 2012, and the latest release in 2018. What makes the CLC particularly useful for us is that it explicitly separates vineyards from other types of agricultural use. CLC data is and available freely for research use. We'll use the CLC 2018 dataset to create a map of wine production in Europe.
 
-The data is available in three different formats: raster ([GEOTiff](https://www.loc.gov/preservation/digital/formats/fdd/fdd000279.shtml)), SQLite or [ESRI database](). For simplicity we use the GEOTiff raster format, which represents the data as values on a regularly-spaced grid. It comes with extensive documentation, including how to load and examine the data using the [QGIS](https://qgis.org/en/site/) open-source application. See @sec-corine for details on obtaining the data.
+The data is available in three different formats: raster ([GEOTiff](https://www.loc.gov/preservation/digital/formats/fdd/fdd000279.shtml)), SQLite or [ESRI database](https://docs.fileformat.com/database/gdb/). For simplicity we use the GEOTiff raster format, which represents the data as values on a regularly-spaced grid. It comes with extensive documentation, including how to load and examine the data using the [QGIS](https://qgis.org/en/site/) open-source application. See @sec-corine for details on obtaining the data.
 
 Before diving into the details, it is worth taking a quick look at the data inside the file. This can be done with `gdalinfo`, a command-line utility that comes as part of the [GDAL library](https://gdal.org/index.html) (it was installed as one of the dependencies in the `mamba` environment above). Executing the following:
 
@@ -263,19 +263,18 @@ Let's now look more quantitatively at which countries have the largest amount of
 
 For this purpose, we will use Eurostat's [VIT_T1](https://ec.europa.eu/eurostat/web/products-datasets/-/vit_t1) dataset that lists the land usage by different wine types for every EU member state, as well as the [EF_LUS_MAIN](https://ec.europa.eu/eurostat/web/products-datasets/-/ef_lus_main) dataset that gives a more general overview of all agricultural/farm land area use.  For instructions on how to obtain this data, see @sec-eurostat.
  
-The detailed code that loads the data, selects the appropriate subsets of both datasets, and merges it into something which is easier to plot is found [here](). 
+The detailed code that loads the data, selects the appropriate subsets of both datasets, and merges it into something which is easier to plot below, albeit it's pretty long. 
 
 ```{python}
-#|echo: false
+#| code-fold: true
+#| code-summary: "Show the code"
+
 # Setup dataframe to associate 2 letter country codes with country names
 # Can be found here: https://www.google.com/url?sa=t&source=web&cd=&ved=2ahUKEwiovcD2kr-BAxVMgv0HHRubDdsQFnoECBQQAQ&url=https%3A%2F%2Fec.europa.eu%2Feurostat%2Fstatistics-explained%2Fimages%2F9%2F9f%2FCountry_Codes_and_Names.xlsx&usg=AOvVaw3E1WY8Fd33SHLq3c0FM01U&opi=89978449
 eu_countries = pd.read_excel(f"{DATADIR}/misc/Country_Codes_and_Names.xlsx")
 eu_countries["CODE"] = [x.strip() for x in eu_countries["CODE"].values]
 eu_countries.loc[eu_countries["CODE"] == "DE", "COUNTRY NAME"] = "Germany"
-```
 
-```{python}
-#|echo: false
 # Vineyard area
 df_area = pd.read_json(f"{DATADIR}/wine_statistics/VIT_T1.json")
 # Pick only data from 2020 for EU countries
@@ -348,7 +347,7 @@ for i in range(df_to_plot.shape[0]):
     labels.append(label)
 ```
 
-Armed with the right data, we can finally visualize the land usage statistics. We will use the `matplotlib` package along with `squarify` to create two
+Armed with the right data, we can finally visualize the land usage statistics. We will use the `matplotlib` package along with [`squarify`](https://github.com/laserson/squarify) to create two
 different ways of looking at the data.
 
 ```{python}
@@ -644,7 +643,7 @@ wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforg
 ```
 and then execute the file.
 
-The `yaml` file with all the dependencies can be found [here](). To install everything, run the following command (if you prefer to use `conda`, you will need to first do `conda config --add channels conda-forge` and then replace `mamba` with `conda` everywhere below):
+The `yaml` file with all the dependencies can be found [here](https://github.com/SergeiOssokine/SergeiOssokine.github.io/blob/main/analysis/setup/environment.yml). To install everything, run the following command (if you prefer to use `conda`, you will need to first do `conda config --add channels conda-forge` and then replace `mamba` with `conda` everywhere below):
 
 ```bash
 mamba env create -f environment.yml
@@ -696,7 +695,7 @@ df.head()
 ```
 
 
-The script to retrieve all the datasets (and associated metadata) and dump it to  convenient `json` files is [here]().
+The script to retrieve all the datasets (and associated metadata) and dump it to  convenient `json` files is [here](https://github.com/SergeiOssokine/SergeiOssokine.github.io/blob/main/analysis/scripts/get_data_eurostat_sdmx.py).
 
 ### Wine production data from Directorate-General for Agriculture and Rural Development {#sec-dgard}
 

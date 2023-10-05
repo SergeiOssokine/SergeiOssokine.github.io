@@ -267,9 +267,9 @@ Part IV: Climate change and the future
 </section>
 <section id="setting-up-the-analysis-environment" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="setting-up-the-analysis-environment"><span class="header-section-number">1.2</span> Setting up the analysis environment</h2>
-<p>To perform this analysis, we will use <code>Python</code> and many of the standard data science packages written for it. In particular we will rely heavily on <a href="https://pandas.pydata.org/matplo">pandas</a> and <a href="https://matplotlib.org/">matplotlib</a>. If you have not encountered these before it is highly recommended to get familiar with them first.</p>
+<p>To perform this analysis, we will use <code>Python</code> and many of the standard data science packages written for it. In particular we will rely heavily on <a href="https://pandas.pydata.org/">pandas</a> and <a href="https://matplotlib.org/">matplotlib</a>. If you have not encountered these before it is highly recommended to get familiar with them first.</p>
 <p>In order to ensure a reproducible analysis, we encourage people to use an isolated <code>Python</code> environment (a virtual environment). While there are many different ways of doing this, we recommend using <code>conda/mamba</code> since it also allows for convenient management of <code>C</code> dependencies. A detailed description of how to set up the environment can be found in <a href="#sec-env">Section&nbsp;2.1</a>.</p>
-<p>Let’s load all the packages we need and set up some defaults:</p>
+<p>Let’s load all the packages we need and set up some defaults (the <code>matplotlib</code> style file and additional analysis functions are <a href="https://github.com/SergeiOssokine/SergeiOssokine.github.io/tree/main/analysis">here</a>):</p>
 <div class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -297,7 +297,7 @@ Part IV: Climate change and the future
 <p>The EU is the largest producer and exporter of wine in the world. Making and consuming wine is a long-held tradition in many European countries. Traditionally, this production has been mostly limited to southern parts of the EU where the conditions are optimal for growing different types of wine. Wine needs warm weather, lots of sun, and a fair amount of rain.</p>
 <p>Our first goal is to map the modern location of European vineyards. To do this, we will of course need an extensive dataset of vineyard locations. While it’s possible to attempt to build such a dataset from scratch - starting for example from registration data for wineries in the EU - satellite land usage maps already provide a very complete data set. These surveys divide the surface of the Earth into a grid and classify the satellite data within each cell into different classes based on what the land is used for.</p>
 <p>The <a href="https://land.copernicus.eu/pan-european/corine-land-cover">Corine Land Cover (CLC) inventory</a> is the largest database of land cover and land use available for Europe. The first release was 1990 and since then it has been updated several times: 2000, 2006, 2012, and the latest release in 2018. What makes the CLC particularly useful for us is that it explicitly separates vineyards from other types of agricultural use. CLC data is and available freely for research use. We’ll use the CLC 2018 dataset to create a map of wine production in Europe.</p>
-<p>The data is available in three different formats: raster (<a href="https://www.loc.gov/preservation/digital/formats/fdd/fdd000279.shtml">GEOTiff</a>), SQLite or <a href="">ESRI database</a>. For simplicity we use the GEOTiff raster format, which represents the data as values on a regularly-spaced grid. It comes with extensive documentation, including how to load and examine the data using the <a href="https://qgis.org/en/site/">QGIS</a> open-source application. See <a href="#sec-corine">Section&nbsp;2.2.1</a> for details on obtaining the data.</p>
+<p>The data is available in three different formats: raster (<a href="https://www.loc.gov/preservation/digital/formats/fdd/fdd000279.shtml">GEOTiff</a>), SQLite or <a href="https://docs.fileformat.com/database/gdb/">ESRI database</a>. For simplicity we use the GEOTiff raster format, which represents the data as values on a regularly-spaced grid. It comes with extensive documentation, including how to load and examine the data using the <a href="https://qgis.org/en/site/">QGIS</a> open-source application. See <a href="#sec-corine">Section&nbsp;2.2.1</a> for details on obtaining the data.</p>
 <p>Before diving into the details, it is worth taking a quick look at the data inside the file. This can be done with <code>gdalinfo</code>, a command-line utility that comes as part of the <a href="https://gdal.org/index.html">GDAL library</a> (it was installed as one of the dependencies in the <code>mamba</code> environment above). Executing the following:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">gdalinfo</span> <span class="va">${DATADIR}</span>/wine_statistics/u2018_clc2018_v2020_20u1_raster100m/DATA/u2018_clc2018_v2020_20u1_raster100m.tif <span class="kw">|</span> <span class="fu">nl</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>yields (we suppress some output for clarity but the line numbers correspond to what one would see)</p>
@@ -388,7 +388,7 @@ Note
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>DATADIR<span class="sc">}</span><span class="ss">/wine_statistics/u2018_clc2018_v2020_20u1_raster100m/DATA/U2018_CLC2018_V2020_20u1.tif"</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>dset</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
+<div class="cell-output cell-output-display" data-execution_count="42">
 
 <div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
 <defs>
@@ -773,17 +773,17 @@ Attributes: (12/13)
     STATISTICS_STDDEV:       11.680310194836
     _FillValue:              -128
     scale_factor:            1.0
-    add_offset:              0.0</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.DataArray</div><div class="xr-array-name"></div><ul class="xr-dim-list"><li><span class="xr-has-index">band</span>: 1</li><li><span class="xr-has-index">y</span>: 46000</li><li><span class="xr-has-index">x</span>: 65000</li></ul></div><ul class="xr-sections"><li class="xr-section-item"><div class="xr-array-wrap"><input id="section-3bd413c4-1d88-4673-808d-52883e2723ce" class="xr-array-in" type="checkbox" checked=""><label for="section-3bd413c4-1d88-4673-808d-52883e2723ce" title="Show/hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-array-preview xr-preview"><span>...</span></div><div class="xr-array-data"><pre>[2990000000 values with dtype=int8]</pre></div></div></li><li class="xr-section-item"><input id="section-295808fb-e148-4d6e-ac2b-ccb77a20b6b0" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-295808fb-e148-4d6e-ac2b-ccb77a20b6b0" class="xr-section-summary">Coordinates: <span>(4)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">band</span></div><div class="xr-var-dims">(band)</div><div class="xr-var-dtype">int64</div><div class="xr-var-preview xr-preview">1</div><input id="attrs-e916241d-30a4-4f14-848c-bbca8c8b9c60" class="xr-var-attrs-in" type="checkbox" disabled=""><label for="attrs-e916241d-30a4-4f14-848c-bbca8c8b9c60" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-fa0c41c8-a520-49f9-a600-83272ce534ea" class="xr-var-data-in" type="checkbox"><label for="data-fa0c41c8-a520-49f9-a600-83272ce534ea" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"></dl></div><div class="xr-var-data"><pre>array([1])</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">x</span></div><div class="xr-var-dims">(x)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">9e+05 9.002e+05 ... 7.4e+06 7.4e+06</div><input id="attrs-a850d2c2-b954-4b95-9443-2c965afcb20d" class="xr-var-attrs-in" type="checkbox" disabled=""><label for="attrs-a850d2c2-b954-4b95-9443-2c965afcb20d" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-2fb8530e-4325-4b8d-bb22-4b1003d2279f" class="xr-var-data-in" type="checkbox"><label for="data-2fb8530e-4325-4b8d-bb22-4b1003d2279f" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"></dl></div><div class="xr-var-data"><pre>array([ 900050.,  900150.,  900250., ..., 7399750., 7399850., 7399950.])</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">y</span></div><div class="xr-var-dims">(y)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">5.5e+06 5.5e+06 ... 9.002e+05 9e+05</div><input id="attrs-22e3ab0c-7e1c-460e-9eff-d48ad32b6b00" class="xr-var-attrs-in" type="checkbox" disabled=""><label for="attrs-22e3ab0c-7e1c-460e-9eff-d48ad32b6b00" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-eb1dac9c-6169-486d-abe2-72aa80149434" class="xr-var-data-in" type="checkbox"><label for="data-eb1dac9c-6169-486d-abe2-72aa80149434" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"></dl></div><div class="xr-var-data"><pre>array([5499950., 5499850., 5499750., ...,  900250.,  900150.,  900050.])</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>spatial_ref</span></div><div class="xr-var-dims">()</div><div class="xr-var-dtype">int64</div><div class="xr-var-preview xr-preview">0</div><input id="attrs-e00129d1-4dd0-461d-804d-a69f3596997b" class="xr-var-attrs-in" type="checkbox"><label for="attrs-e00129d1-4dd0-461d-804d-a69f3596997b" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-4690e6ce-88d3-4a0a-8043-3691865a83d3" class="xr-var-data-in" type="checkbox"><label for="data-4690e6ce-88d3-4a0a-8043-3691865a83d3" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>crs_wkt :</span></dt><dd>PROJCS["ETRS89-extended / LAEA Europe",GEOGCS["ETRS89",DATUM["European_Terrestrial_Reference_System_1989",SPHEROID["GRS 1980",6378137,298.257222101004,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6258"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4258"]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",52],PARAMETER["longitude_of_center",10],PARAMETER["false_easting",4321000],PARAMETER["false_northing",3210000],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","3035"]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314140356</dd><dt><span>inverse_flattening :</span></dt><dd>298.257222101004</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>GRS 1980</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>ETRS89</dd><dt><span>horizontal_datum_name :</span></dt><dd>European Terrestrial Reference System 1989</dd><dt><span>projected_crs_name :</span></dt><dd>ETRS89-extended / LAEA Europe</dd><dt><span>grid_mapping_name :</span></dt><dd>lambert_azimuthal_equal_area</dd><dt><span>latitude_of_projection_origin :</span></dt><dd>52.0</dd><dt><span>longitude_of_projection_origin :</span></dt><dd>10.0</dd><dt><span>false_easting :</span></dt><dd>4321000.0</dd><dt><span>false_northing :</span></dt><dd>3210000.0</dd><dt><span>spatial_ref :</span></dt><dd>PROJCS["ETRS89-extended / LAEA Europe",GEOGCS["ETRS89",DATUM["European_Terrestrial_Reference_System_1989",SPHEROID["GRS 1980",6378137,298.257222101004,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6258"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4258"]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",52],PARAMETER["longitude_of_center",10],PARAMETER["false_easting",4321000],PARAMETER["false_northing",3210000],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","3035"]]</dd><dt><span>GeoTransform :</span></dt><dd>900000.0 100.0 0.0 5500000.0 0.0 -100.0</dd></dl></div><div class="xr-var-data"><pre>array(0)</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-2dac2f50-5383-47de-92aa-8d8383f5bccb" class="xr-section-summary-in" type="checkbox"><label for="section-2dac2f50-5383-47de-92aa-8d8383f5bccb" class="xr-section-summary">Indexes: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>band</div></div><div class="xr-index-preview">PandasIndex</div><div></div><input id="index-1f7247bb-87a7-43ea-af2b-de4cf1701f71" class="xr-index-data-in" type="checkbox"><label for="index-1f7247bb-87a7-43ea-af2b-de4cf1701f71" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([1], dtype='int64', name='band'))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>x</div></div><div class="xr-index-preview">PandasIndex</div><div></div><input id="index-19a91fe6-34ac-4526-9bcf-ed57b2c8a779" class="xr-index-data-in" type="checkbox"><label for="index-19a91fe6-34ac-4526-9bcf-ed57b2c8a779" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 900050.0,  900150.0,  900250.0,  900350.0,  900450.0,  900550.0,
+    add_offset:              0.0</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.DataArray</div><div class="xr-array-name"></div><ul class="xr-dim-list"><li><span class="xr-has-index">band</span>: 1</li><li><span class="xr-has-index">y</span>: 46000</li><li><span class="xr-has-index">x</span>: 65000</li></ul></div><ul class="xr-sections"><li class="xr-section-item"><div class="xr-array-wrap"><input id="section-4c006d49-e3c5-4643-b73e-98edb995b448" class="xr-array-in" type="checkbox" checked=""><label for="section-4c006d49-e3c5-4643-b73e-98edb995b448" title="Show/hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-array-preview xr-preview"><span>...</span></div><div class="xr-array-data"><pre>[2990000000 values with dtype=int8]</pre></div></div></li><li class="xr-section-item"><input id="section-7d340eaf-cba7-4839-91ca-c6de5be07447" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-7d340eaf-cba7-4839-91ca-c6de5be07447" class="xr-section-summary">Coordinates: <span>(4)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">band</span></div><div class="xr-var-dims">(band)</div><div class="xr-var-dtype">int64</div><div class="xr-var-preview xr-preview">1</div><input id="attrs-d5fb3cae-9fdb-4601-b06c-f8da2c5c4236" class="xr-var-attrs-in" type="checkbox" disabled=""><label for="attrs-d5fb3cae-9fdb-4601-b06c-f8da2c5c4236" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-0e5655c2-8d22-4a0b-a027-1e1146ae8324" class="xr-var-data-in" type="checkbox"><label for="data-0e5655c2-8d22-4a0b-a027-1e1146ae8324" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"></dl></div><div class="xr-var-data"><pre>array([1])</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">x</span></div><div class="xr-var-dims">(x)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">9e+05 9.002e+05 ... 7.4e+06 7.4e+06</div><input id="attrs-fbf0ed43-ce7e-4475-9f90-9eddbb9e8eaa" class="xr-var-attrs-in" type="checkbox" disabled=""><label for="attrs-fbf0ed43-ce7e-4475-9f90-9eddbb9e8eaa" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-81df1383-b2f4-4a1d-a288-05da2ed5751f" class="xr-var-data-in" type="checkbox"><label for="data-81df1383-b2f4-4a1d-a288-05da2ed5751f" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"></dl></div><div class="xr-var-data"><pre>array([ 900050.,  900150.,  900250., ..., 7399750., 7399850., 7399950.])</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">y</span></div><div class="xr-var-dims">(y)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">5.5e+06 5.5e+06 ... 9.002e+05 9e+05</div><input id="attrs-2514e6ad-ec1d-495b-b5ea-1019847c7134" class="xr-var-attrs-in" type="checkbox" disabled=""><label for="attrs-2514e6ad-ec1d-495b-b5ea-1019847c7134" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-b37812d5-cf09-4779-8038-ec49dbe0624d" class="xr-var-data-in" type="checkbox"><label for="data-b37812d5-cf09-4779-8038-ec49dbe0624d" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"></dl></div><div class="xr-var-data"><pre>array([5499950., 5499850., 5499750., ...,  900250.,  900150.,  900050.])</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>spatial_ref</span></div><div class="xr-var-dims">()</div><div class="xr-var-dtype">int64</div><div class="xr-var-preview xr-preview">0</div><input id="attrs-468537b1-1e5e-4565-ac63-5fbfef2131bf" class="xr-var-attrs-in" type="checkbox"><label for="attrs-468537b1-1e5e-4565-ac63-5fbfef2131bf" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-aad24831-b6f2-4819-9e31-06172fb2ef17" class="xr-var-data-in" type="checkbox"><label for="data-aad24831-b6f2-4819-9e31-06172fb2ef17" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>crs_wkt :</span></dt><dd>PROJCS["ETRS89-extended / LAEA Europe",GEOGCS["ETRS89",DATUM["European_Terrestrial_Reference_System_1989",SPHEROID["GRS 1980",6378137,298.257222101004,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6258"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4258"]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",52],PARAMETER["longitude_of_center",10],PARAMETER["false_easting",4321000],PARAMETER["false_northing",3210000],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","3035"]]</dd><dt><span>semi_major_axis :</span></dt><dd>6378137.0</dd><dt><span>semi_minor_axis :</span></dt><dd>6356752.314140356</dd><dt><span>inverse_flattening :</span></dt><dd>298.257222101004</dd><dt><span>reference_ellipsoid_name :</span></dt><dd>GRS 1980</dd><dt><span>longitude_of_prime_meridian :</span></dt><dd>0.0</dd><dt><span>prime_meridian_name :</span></dt><dd>Greenwich</dd><dt><span>geographic_crs_name :</span></dt><dd>ETRS89</dd><dt><span>horizontal_datum_name :</span></dt><dd>European Terrestrial Reference System 1989</dd><dt><span>projected_crs_name :</span></dt><dd>ETRS89-extended / LAEA Europe</dd><dt><span>grid_mapping_name :</span></dt><dd>lambert_azimuthal_equal_area</dd><dt><span>latitude_of_projection_origin :</span></dt><dd>52.0</dd><dt><span>longitude_of_projection_origin :</span></dt><dd>10.0</dd><dt><span>false_easting :</span></dt><dd>4321000.0</dd><dt><span>false_northing :</span></dt><dd>3210000.0</dd><dt><span>spatial_ref :</span></dt><dd>PROJCS["ETRS89-extended / LAEA Europe",GEOGCS["ETRS89",DATUM["European_Terrestrial_Reference_System_1989",SPHEROID["GRS 1980",6378137,298.257222101004,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6258"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4258"]],PROJECTION["Lambert_Azimuthal_Equal_Area"],PARAMETER["latitude_of_center",52],PARAMETER["longitude_of_center",10],PARAMETER["false_easting",4321000],PARAMETER["false_northing",3210000],UNIT["metre",1],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","3035"]]</dd><dt><span>GeoTransform :</span></dt><dd>900000.0 100.0 0.0 5500000.0 0.0 -100.0</dd></dl></div><div class="xr-var-data"><pre>array(0)</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-b8cbd90d-1cfc-41c8-8537-690a1918d72b" class="xr-section-summary-in" type="checkbox"><label for="section-b8cbd90d-1cfc-41c8-8537-690a1918d72b" class="xr-section-summary">Indexes: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>band</div></div><div class="xr-index-preview">PandasIndex</div><div></div><input id="index-a855e5d8-f519-4dde-a244-c8b885dde23b" class="xr-index-data-in" type="checkbox"><label for="index-a855e5d8-f519-4dde-a244-c8b885dde23b" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([1], dtype='int64', name='band'))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>x</div></div><div class="xr-index-preview">PandasIndex</div><div></div><input id="index-e22cc7bb-eb07-448a-9654-597971520794" class="xr-index-data-in" type="checkbox"><label for="index-e22cc7bb-eb07-448a-9654-597971520794" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 900050.0,  900150.0,  900250.0,  900350.0,  900450.0,  900550.0,
         900650.0,  900750.0,  900850.0,  900950.0,
        ...
        7399050.0, 7399150.0, 7399250.0, 7399350.0, 7399450.0, 7399550.0,
        7399650.0, 7399750.0, 7399850.0, 7399950.0],
-      dtype='float64', name='x', length=65000))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>y</div></div><div class="xr-index-preview">PandasIndex</div><div></div><input id="index-78bd652a-df3b-4d37-bd52-518f93574711" class="xr-index-data-in" type="checkbox"><label for="index-78bd652a-df3b-4d37-bd52-518f93574711" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([5499950.0, 5499850.0, 5499750.0, 5499650.0, 5499550.0, 5499450.0,
+      dtype='float64', name='x', length=65000))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>y</div></div><div class="xr-index-preview">PandasIndex</div><div></div><input id="index-78221110-8103-48ab-bf5c-d0711387439e" class="xr-index-data-in" type="checkbox"><label for="index-78221110-8103-48ab-bf5c-d0711387439e" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([5499950.0, 5499850.0, 5499750.0, 5499650.0, 5499550.0, 5499450.0,
        5499350.0, 5499250.0, 5499150.0, 5499050.0,
        ...
         900950.0,  900850.0,  900750.0,  900650.0,  900550.0,  900450.0,
         900350.0,  900250.0,  900150.0,  900050.0],
-      dtype='float64', name='y', length=46000))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-b684848e-b81e-4f16-9810-e7ec028409b5" class="xr-section-summary-in" type="checkbox"><label for="section-b684848e-b81e-4f16-9810-e7ec028409b5" class="xr-section-summary">Attributes: <span>(13)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>DataType :</span></dt><dd>Thematic</dd><dt><span>RepresentationType :</span></dt><dd>THEMATIC</dd><dt><span>STATISTICS_COVARIANCES :</span></dt><dd>136.429646247598</dd><dt><span>STATISTICS_MAXIMUM :</span></dt><dd>48</dd><dt><span>STATISTICS_MEAN :</span></dt><dd>25.753373398066</dd><dt><span>STATISTICS_MINIMUM :</span></dt><dd>1</dd><dt><span>STATISTICS_SKIPFACTORX :</span></dt><dd>1</dd><dt><span>STATISTICS_SKIPFACTORY :</span></dt><dd>1</dd><dt><span>STATISTICS_STDDEV :</span></dt><dd>11.680310194836</dd><dt><span>_FillValue :</span></dt><dd>-128</dd><dt><span>scale_factor :</span></dt><dd>1.0</dd><dt><span>add_offset :</span></dt><dd>0.0</dd></dl></div></li></ul></div></div>
+      dtype='float64', name='y', length=46000))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-59ea8111-8832-454b-b858-88f507488180" class="xr-section-summary-in" type="checkbox"><label for="section-59ea8111-8832-454b-b858-88f507488180" class="xr-section-summary">Attributes: <span>(13)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>AREA_OR_POINT :</span></dt><dd>Area</dd><dt><span>DataType :</span></dt><dd>Thematic</dd><dt><span>RepresentationType :</span></dt><dd>THEMATIC</dd><dt><span>STATISTICS_COVARIANCES :</span></dt><dd>136.429646247598</dd><dt><span>STATISTICS_MAXIMUM :</span></dt><dd>48</dd><dt><span>STATISTICS_MEAN :</span></dt><dd>25.753373398066</dd><dt><span>STATISTICS_MINIMUM :</span></dt><dd>1</dd><dt><span>STATISTICS_SKIPFACTORX :</span></dt><dd>1</dd><dt><span>STATISTICS_SKIPFACTORY :</span></dt><dd>1</dd><dt><span>STATISTICS_STDDEV :</span></dt><dd>11.680310194836</dd><dt><span>_FillValue :</span></dt><dd>-128</dd><dt><span>scale_factor :</span></dt><dd>1.0</dd><dt><span>add_offset :</span></dt><dd>0.0</dd></dl></div></li></ul></div></div>
 </div>
 </div>
 <p>Looking at the dataset, we see that the x and y coordinates represent the <em>centers</em> of the cells (you can easily tell this from: i) the shape of the data is the same as coordinates ii) the first <code>x</code> coordinate is actually 50 meters offset from the corner value we saw above ). Let’s convert the actual values to a 2D <code>numpy</code> array:</p>
@@ -904,7 +904,7 @@ dtype: object
 <p>Let’s now look more quantitatively at which countries have the largest amount of vineyards. To do so, we use the data from <a href="https://ec.europa.eu/eurostat">Eurostat</a>. This is a great resource for all statistical data within the EU.</p>
 <p>For this purpose, we will use Eurostat’s <a href="https://ec.europa.eu/eurostat/web/products-datasets/-/vit_t1">VIT_T1</a> dataset that lists the land usage by different wine types for every EU member state, as well as the <a href="https://ec.europa.eu/eurostat/web/products-datasets/-/ef_lus_main">EF_LUS_MAIN</a> dataset that gives a more general overview of all agricultural/farm land area use. For instructions on how to obtain this data, see <a href="#sec-eurostat">Section&nbsp;2.2.2</a>.</p>
 <p>The detailed code that loads the data, selects the appropriate subsets of both datasets, and merges it into something which is easier to plot is found <a href="">here</a>.</p>
-<p>Armed with the right data, we can finally visualize the land usage statistics. We will use the <code>matplotlib</code> package along with <code>squarify</code> to create two different ways of looking at the data.</p>
+<p>Armed with the right data, we can finally visualize the land usage statistics. We will use the <code>matplotlib</code> package along with <a href="https://github.com/laserson/squarify"><code>squarify</code></a> to create two different ways of looking at the data.</p>
 <div class="cell" data-execution_count="11">
 <details>
 <summary>Show the code</summary>
@@ -1007,7 +1007,7 @@ memory usage: 201.1+ KB</code></pre>
 <p>Taking a peek at the type of products being produced, we see:</p>
 <div class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>np.unique(df_production[[<span class="st">'Category'</span>,<span class="st">'Product Group'</span>]])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
+<div class="cell-output cell-output-display" data-execution_count="53">
 <pre><code>array(['-', 'Non-GI', 'Non-Vinified', 'Other wines', 'P.D.O. wines',
        'P.G.I. wines', 'Table wine', 'VQPRD wines', 'Varietal'],
       dtype=object)</code></pre>
@@ -1025,7 +1025,7 @@ memory usage: 201.1+ KB</code></pre>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Now sum over all the wine types. </span></span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> df_tmp[<span class="st">"Production"</span>].<span class="bu">sum</span>().reset_index() <span class="co"># reset_index turns this from a Series back into a DataFrame</span></span>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>res.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="14">
+<div class="cell-output cell-output-display" data-execution_count="54">
 <div>
 
 
@@ -1100,7 +1100,7 @@ memory usage: 201.1+ KB</code></pre>
 <span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>total_volume <span class="op">=</span> df_to_plot[<span class="st">"Production"</span>].<span class="bu">sum</span>()<span class="op">/</span><span class="dv">1000</span></span>
 <span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>df_to_plot.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="15">
+<div class="cell-output cell-output-display" data-execution_count="55">
 <div>
 
 
@@ -1304,7 +1304,7 @@ memory usage: 201.1+ KB</code></pre>
 <p>For the <code>Python</code> setup we use <code>mambaforge</code> as a drop-in replacement for the more widely known <code>conda</code>. You can download the latest version from the <a href="https://github.com/conda-forge/miniforge#mambaforge">website</a> or run:</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">wget</span> https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>and then execute the file.</p>
-<p>The <code>yaml</code> file with all the dependencies can be found <a href="">here</a>. To install everything, run the following command (if you prefer to use <code>conda</code>, you will need to first do <code>conda config --add channels conda-forge</code> and then replace <code>mamba</code> with <code>conda</code> everywhere below):</p>
+<p>The <code>yaml</code> file with all the dependencies can be found <a href="https://github.com/SergeiOssokine/SergeiOssokine.github.io/blob/main/analysis/setup/environment.yml">here</a>. To install everything, run the following command (if you prefer to use <code>conda</code>, you will need to first do <code>conda config --add channels conda-forge</code> and then replace <code>mamba</code> with <code>conda</code> everywhere below):</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> env create <span class="at">-f</span> environment.yml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Then activate the environment with</p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> activate wine-analysis</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1346,7 +1346,7 @@ memory usage: 201.1+ KB</code></pre>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>resp <span class="op">=</span> estat.data(<span class="st">"VIT_T1"</span>,key<span class="op">=</span>{<span class="st">'unit'</span>:<span class="st">'HA'</span>}) <span class="co"># Only take land area in units of hectares</span></span>
 <span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> sdmx.to_pandas(resp).reset_index() <span class="co"># reset_index() makes it a flat dataframe</span></span>
 <span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="20">
+<div class="cell-output cell-output-display" data-execution_count="60">
 <div>
 
 
@@ -1414,7 +1414,7 @@ memory usage: 201.1+ KB</code></pre>
 </div>
 </div>
 </div>
-<p>The script to retrieve all the datasets (and associated metadata) and dump it to convenient <code>json</code> files is <a href="">here</a>.</p>
+<p>The script to retrieve all the datasets (and associated metadata) and dump it to convenient <code>json</code> files is <a href="https://github.com/SergeiOssokine/SergeiOssokine.github.io/blob/main/analysis/scripts/get_data_eurostat_sdmx.py">here</a>.</p>
 </section>
 <section id="sec-dgard" class="level3" data-number="2.2.3">
 <h3 data-number="2.2.3" class="anchored" data-anchor-id="sec-dgard"><span class="header-section-number">2.2.3</span> Wine production data from Directorate-General for Agriculture and Rural Development</h3>
@@ -1805,13 +1805,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a><span class="fu">## Setting up the analysis environment</span></span>
 <span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>To perform this analysis, we will use <span class="in">`Python`</span> and many of the standard data science packages written for it. In particular we will rely heavily on <span class="co">[</span><span class="ot">pandas</span><span class="co">](https://pandas.pydata.org/matplo)</span> and <span class="co">[</span><span class="ot">matplotlib</span><span class="co">](https://matplotlib.org/)</span>. </span>
+<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>To perform this analysis, we will use <span class="in">`Python`</span> and many of the standard data science packages written for it. In particular we will rely heavily on <span class="co">[</span><span class="ot">pandas</span><span class="co">](https://pandas.pydata.org/)</span> and <span class="co">[</span><span class="ot">matplotlib</span><span class="co">](https://matplotlib.org/)</span>. </span>
 <span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a>If you have not encountered these before it is highly recommended to get familiar with them first.</span>
 <span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a>In order to ensure a reproducible analysis, we encourage people to use an isolated <span class="in">`Python`</span> environment (a virtual environment). While there are many different ways of doing this, we recommend using <span class="in">`conda/mamba`</span> since it also allows for convenient management of <span class="in">`C`</span> dependencies. A detailed description of how to set up the environment can be found in @sec-env.</span>
 <span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>Let's load all the packages we need and set up some defaults:</span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>Let's load all the packages we need and set up some defaults (the <span class="in">`matplotlib`</span> style file and additional analysis functions are <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/SergeiOssokine/SergeiOssokine.github.io/tree/main/analysis)</span>):</span>
 <span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
 <span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
@@ -1841,7 +1841,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb26-88"><a href="#cb26-88" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-89"><a href="#cb26-89" aria-hidden="true" tabindex="-1"></a>The <span class="co">[</span><span class="ot">Corine Land Cover (CLC) inventory</span><span class="co">](https://land.copernicus.eu/pan-european/corine-land-cover)</span> is the largest database of land cover and land use available for Europe. The first release was 1990 and since then it has been updated several times: 2000, 2006, 2012, and the latest release in 2018. What makes the CLC particularly useful for us is that it explicitly separates vineyards from other types of agricultural use. CLC data is and available freely for research use. We'll use the CLC 2018 dataset to create a map of wine production in Europe.</span>
 <span id="cb26-90"><a href="#cb26-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-91"><a href="#cb26-91" aria-hidden="true" tabindex="-1"></a>The data is available in three different formats: raster (<span class="co">[</span><span class="ot">GEOTiff</span><span class="co">](https://www.loc.gov/preservation/digital/formats/fdd/fdd000279.shtml)</span>), SQLite or <span class="co">[</span><span class="ot">ESRI database</span><span class="co">]()</span>. For simplicity we use the GEOTiff raster format, which represents the data as values on a regularly-spaced grid. It comes with extensive documentation, including how to load and examine the data using the <span class="co">[</span><span class="ot">QGIS</span><span class="co">](https://qgis.org/en/site/)</span> open-source application. See @sec-corine for details on obtaining the data.</span>
+<span id="cb26-91"><a href="#cb26-91" aria-hidden="true" tabindex="-1"></a>The data is available in three different formats: raster (<span class="co">[</span><span class="ot">GEOTiff</span><span class="co">](https://www.loc.gov/preservation/digital/formats/fdd/fdd000279.shtml)</span>), SQLite or <span class="co">[</span><span class="ot">ESRI database</span><span class="co">](https://docs.fileformat.com/database/gdb/)</span>. For simplicity we use the GEOTiff raster format, which represents the data as values on a regularly-spaced grid. It comes with extensive documentation, including how to load and examine the data using the <span class="co">[</span><span class="ot">QGIS</span><span class="co">](https://qgis.org/en/site/)</span> open-source application. See @sec-corine for details on obtaining the data.</span>
 <span id="cb26-92"><a href="#cb26-92" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-93"><a href="#cb26-93" aria-hidden="true" tabindex="-1"></a>Before diving into the details, it is worth taking a quick look at the data inside the file. This can be done with <span class="in">`gdalinfo`</span>, a command-line utility that comes as part of the <span class="co">[</span><span class="ot">GDAL library</span><span class="co">](https://gdal.org/index.html)</span> (it was installed as one of the dependencies in the <span class="in">`mamba`</span> environment above). Executing the following:</span>
 <span id="cb26-94"><a href="#cb26-94" aria-hidden="true" tabindex="-1"></a></span>
@@ -2018,462 +2018,461 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb26-279"><a href="#cb26-279" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-280"><a href="#cb26-280" aria-hidden="true" tabindex="-1"></a><span class="ex">For</span> this purpose, we will use Eurostat<span class="st">'s [VIT_T1](https://ec.europa.eu/eurostat/web/products-datasets/-/vit_t1) dataset that lists the land usage by different wine types for every EU member state, as well as the [EF_LUS_MAIN](https://ec.europa.eu/eurostat/web/products-datasets/-/ef_lus_main) dataset that gives a more general overview of all agricultural/farm land area use.  For instructions on how to obtain this data, see @sec-eurostat.</span></span>
 <span id="cb26-281"><a href="#cb26-281" aria-hidden="true" tabindex="-1"></a><span class="st"> </span></span>
-<span id="cb26-282"><a href="#cb26-282" aria-hidden="true" tabindex="-1"></a><span class="st">The detailed code that loads the data, selects the appropriate subsets of both datasets, and merges it into something which is easier to plot is found [here](). </span></span>
+<span id="cb26-282"><a href="#cb26-282" aria-hidden="true" tabindex="-1"></a><span class="st">The detailed code that loads the data, selects the appropriate subsets of both datasets, and merges it into something which is easier to plot below, albeit it'</span>s pretty long. </span>
 <span id="cb26-283"><a href="#cb26-283" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-286"><a href="#cb26-286" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-287"><a href="#cb26-287" aria-hidden="true" tabindex="-1"></a><span class="st">#|echo: false</span></span>
-<span id="cb26-288"><a href="#cb26-288" aria-hidden="true" tabindex="-1"></a><span class="st"># Setup dataframe to associate 2 letter country codes with country names</span></span>
-<span id="cb26-289"><a href="#cb26-289" aria-hidden="true" tabindex="-1"></a><span class="st"># Can be found here: https://www.google.com/url?sa=t&amp;source=web&amp;cd=&amp;ved=2ahUKEwiovcD2kr-BAxVMgv0HHRubDdsQFnoECBQQAQ&amp;url=https%3A%2F%2Fec.europa.eu%2Feurostat%2Fstatistics-explained%2Fimages%2F9%2F9f%2FCountry_Codes_and_Names.xlsx&amp;usg=AOvVaw3E1WY8Fd33SHLq3c0FM01U&amp;opi=89978449</span></span>
-<span id="cb26-290"><a href="#cb26-290" aria-hidden="true" tabindex="-1"></a><span class="st">eu_countries = pd.read_excel(f"{DATADIR}/misc/Country_Codes_and_Names.xlsx")</span></span>
-<span id="cb26-291"><a href="#cb26-291" aria-hidden="true" tabindex="-1"></a><span class="st">eu_countries["CODE"] = [x.strip() for x in eu_countries["CODE"].values]</span></span>
-<span id="cb26-292"><a href="#cb26-292" aria-hidden="true" tabindex="-1"></a><span class="st">eu_countries.loc[eu_countries["CODE"] == "DE", "COUNTRY NAME"] = "Germany"</span></span>
-<span id="cb26-293"><a href="#cb26-293" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
-<span id="cb26-294"><a href="#cb26-294" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-297"><a href="#cb26-297" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-298"><a href="#cb26-298" aria-hidden="true" tabindex="-1"></a><span class="st">#|echo: false</span></span>
-<span id="cb26-299"><a href="#cb26-299" aria-hidden="true" tabindex="-1"></a><span class="st"># Vineyard area</span></span>
-<span id="cb26-300"><a href="#cb26-300" aria-hidden="true" tabindex="-1"></a><span class="st">df_area = pd.read_json(f"{DATADIR}/wine_statistics/VIT_T1.json")</span></span>
-<span id="cb26-301"><a href="#cb26-301" aria-hidden="true" tabindex="-1"></a><span class="st"># Pick only data from 2020 for EU countries</span></span>
-<span id="cb26-302"><a href="#cb26-302" aria-hidden="true" tabindex="-1"></a><span class="st">df_area = df_area[</span></span>
-<span id="cb26-303"><a href="#cb26-303" aria-hidden="true" tabindex="-1"></a><span class="st">    (df_area["geo"].isin(eu_countries["CODE"])) &amp; (df_area["TIME_PERIOD"] == 2020)</span></span>
-<span id="cb26-304"><a href="#cb26-304" aria-hidden="true" tabindex="-1"></a><span class="st">]</span></span>
-<span id="cb26-305"><a href="#cb26-305" aria-hidden="true" tabindex="-1"></a><span class="st"># Pick only the data for all vineyard types and select the columns we care about</span></span>
-<span id="cb26-306"><a href="#cb26-306" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_2020 = df_area[df_area["vinetype"] == "TOTAL"][["geo", "value"]]</span></span>
-<span id="cb26-307"><a href="#cb26-307" aria-hidden="true" tabindex="-1"></a><span class="st"># Associate the 2 character ISO country codes with country names</span></span>
-<span id="cb26-308"><a href="#cb26-308" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_2020 = df_area_2020.rename(columns={"geo": "CODE"})</span></span>
-<span id="cb26-309"><a href="#cb26-309" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_2020 = pd.merge(df_area_2020, eu_countries, how="inner")</span></span>
-<span id="cb26-310"><a href="#cb26-310" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-311"><a href="#cb26-311" aria-hidden="true" tabindex="-1"></a><span class="st"># Permanent crops area</span></span>
-<span id="cb26-312"><a href="#cb26-312" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_gen = pd.read_json(f"{DATADIR}/wine_statistics/EF_LUS_MAIN.json")</span></span>
-<span id="cb26-313"><a href="#cb26-313" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_gen = df_area_gen[</span></span>
-<span id="cb26-314"><a href="#cb26-314" aria-hidden="true" tabindex="-1"></a><span class="st">    (df_area_gen["geo"].isin(eu_countries["CODE"]))</span></span>
-<span id="cb26-315"><a href="#cb26-315" aria-hidden="true" tabindex="-1"></a><span class="st">    &amp; (df_area_gen["TIME_PERIOD"] == 2020)</span></span>
-<span id="cb26-316"><a href="#cb26-316" aria-hidden="true" tabindex="-1"></a><span class="st">]</span></span>
-<span id="cb26-317"><a href="#cb26-317" aria-hidden="true" tabindex="-1"></a><span class="st"># Select permanent crops among all farm types</span></span>
-<span id="cb26-318"><a href="#cb26-318" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_gen_2020 = df_area_gen[</span></span>
-<span id="cb26-319"><a href="#cb26-319" aria-hidden="true" tabindex="-1"></a><span class="st">    (df_area_gen["crops"] == "PECR") &amp; (df_area_gen["farmtype"] == "TOTAL")</span></span>
-<span id="cb26-320"><a href="#cb26-320" aria-hidden="true" tabindex="-1"></a><span class="st">][["geo", "value"]]</span></span>
-<span id="cb26-321"><a href="#cb26-321" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_gen_2020 = df_area_gen_2020.rename(columns={"geo": "CODE"})</span></span>
-<span id="cb26-322"><a href="#cb26-322" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_gen_2020 = pd.merge(df_area_gen_2020, eu_countries, how="inner")</span></span>
-<span id="cb26-323"><a href="#cb26-323" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-324"><a href="#cb26-324" aria-hidden="true" tabindex="-1"></a><span class="st"># Find all countries that produce more than the given threshold than group the rest into "Others"</span></span>
-<span id="cb26-325"><a href="#cb26-325" aria-hidden="true" tabindex="-1"></a><span class="st">total_area = df_area_2020["value"].sum()</span></span>
-<span id="cb26-326"><a href="#cb26-326" aria-hidden="true" tabindex="-1"></a><span class="st">th_area = 0.05 * total_area</span></span>
-<span id="cb26-327"><a href="#cb26-327" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = df_area_2020[df_area_2020["value"] &gt;= th_area]</span></span>
-<span id="cb26-328"><a href="#cb26-328" aria-hidden="true" tabindex="-1"></a><span class="st">row = pd.DataFrame(</span></span>
-<span id="cb26-329"><a href="#cb26-329" aria-hidden="true" tabindex="-1"></a><span class="st">    {</span></span>
-<span id="cb26-330"><a href="#cb26-330" aria-hidden="true" tabindex="-1"></a><span class="st">        "CODE": "Others",</span></span>
-<span id="cb26-331"><a href="#cb26-331" aria-hidden="true" tabindex="-1"></a><span class="st">        "value": df_area_2020[df_area_2020["value"] &lt; th_area]["value"].sum(),</span></span>
-<span id="cb26-332"><a href="#cb26-332" aria-hidden="true" tabindex="-1"></a><span class="st">        "COUNTRY NAME": "Others",</span></span>
-<span id="cb26-333"><a href="#cb26-333" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
-<span id="cb26-334"><a href="#cb26-334" aria-hidden="true" tabindex="-1"></a><span class="st">    index=[0],</span></span>
-<span id="cb26-335"><a href="#cb26-335" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
-<span id="cb26-336"><a href="#cb26-336" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = pd.concat([df_to_plot, row], ignore_index=True)</span></span>
-<span id="cb26-337"><a href="#cb26-337" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-338"><a href="#cb26-338" aria-hidden="true" tabindex="-1"></a><span class="st"># Find the total permanent crop area for the same countries that have largest vineyards,</span></span>
-<span id="cb26-339"><a href="#cb26-339" aria-hidden="true" tabindex="-1"></a><span class="st"># and group the rest under "Others"</span></span>
-<span id="cb26-340"><a href="#cb26-340" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot_gen = df_area_gen_2020[df_area_gen_2020["CODE"].isin(df_to_plot["CODE"])]</span></span>
-<span id="cb26-341"><a href="#cb26-341" aria-hidden="true" tabindex="-1"></a><span class="st">row = pd.DataFrame(</span></span>
-<span id="cb26-342"><a href="#cb26-342" aria-hidden="true" tabindex="-1"></a><span class="st">    {</span></span>
-<span id="cb26-343"><a href="#cb26-343" aria-hidden="true" tabindex="-1"></a><span class="st">        "CODE": "Others",</span></span>
-<span id="cb26-344"><a href="#cb26-344" aria-hidden="true" tabindex="-1"></a><span class="st">        "value": df_area_gen_2020[~df_area_gen_2020["CODE"].isin(df_to_plot["CODE"])][</span></span>
-<span id="cb26-345"><a href="#cb26-345" aria-hidden="true" tabindex="-1"></a><span class="st">            "value"</span></span>
-<span id="cb26-346"><a href="#cb26-346" aria-hidden="true" tabindex="-1"></a><span class="st">        ].sum(),</span></span>
-<span id="cb26-347"><a href="#cb26-347" aria-hidden="true" tabindex="-1"></a><span class="st">        "COUNTRY NAME": "Others",</span></span>
-<span id="cb26-348"><a href="#cb26-348" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
-<span id="cb26-349"><a href="#cb26-349" aria-hidden="true" tabindex="-1"></a><span class="st">    index=[0],</span></span>
-<span id="cb26-350"><a href="#cb26-350" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
-<span id="cb26-351"><a href="#cb26-351" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot_gen = pd.concat([df_to_plot_gen, row], ignore_index=True)</span></span>
-<span id="cb26-352"><a href="#cb26-352" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-353"><a href="#cb26-353" aria-hidden="true" tabindex="-1"></a><span class="st"># Merge everything into 1 dataframe</span></span>
-<span id="cb26-354"><a href="#cb26-354" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot_gen = df_to_plot_gen.rename(columns={"value": "total_area"})</span></span>
-<span id="cb26-355"><a href="#cb26-355" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = pd.merge(df_to_plot, df_to_plot_gen, how="inner")</span></span>
-<span id="cb26-356"><a href="#cb26-356" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = df_to_plot.sort_values("value", ascending=False)</span></span>
-<span id="cb26-357"><a href="#cb26-357" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-358"><a href="#cb26-358" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-359"><a href="#cb26-359" aria-hidden="true" tabindex="-1"></a><span class="st"># Create labels for the square area graph</span></span>
-<span id="cb26-360"><a href="#cb26-360" aria-hidden="true" tabindex="-1"></a><span class="st">labels = []</span></span>
-<span id="cb26-361"><a href="#cb26-361" aria-hidden="true" tabindex="-1"></a><span class="st">for i in range(df_to_plot.shape[0]):</span></span>
-<span id="cb26-362"><a href="#cb26-362" aria-hidden="true" tabindex="-1"></a><span class="st">    wine_area = df_to_plot.iloc[i]["value"]</span></span>
-<span id="cb26-363"><a href="#cb26-363" aria-hidden="true" tabindex="-1"></a><span class="st">    gen_area = df_to_plot.iloc[i]["total_area"]</span></span>
-<span id="cb26-364"><a href="#cb26-364" aria-hidden="true" tabindex="-1"></a><span class="st">    country = df_to_plot.iloc[i]["COUNTRY NAME"]</span></span>
-<span id="cb26-365"><a href="#cb26-365" aria-hidden="true" tabindex="-1"></a><span class="st">    wine_in_kha = int(np.round(wine_area / 1000, 0))</span></span>
-<span id="cb26-366"><a href="#cb26-366" aria-hidden="true" tabindex="-1"></a><span class="st">    percent_usage = np.round(wine_area / gen_area * 100, 1)</span></span>
-<span id="cb26-367"><a href="#cb26-367" aria-hidden="true" tabindex="-1"></a><span class="st">    label = f"{country}\n{wine_in_kha} kha\n ({percent_usage}%)"</span></span>
-<span id="cb26-368"><a href="#cb26-368" aria-hidden="true" tabindex="-1"></a><span class="st">    labels.append(label)</span></span>
-<span id="cb26-369"><a href="#cb26-369" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb26-287"><a href="#cb26-287" aria-hidden="true" tabindex="-1"></a><span class="st">#| code-fold: true</span></span>
+<span id="cb26-288"><a href="#cb26-288" aria-hidden="true" tabindex="-1"></a><span class="st">#| code-summary: "</span>Show the code<span class="st">"</span></span>
+<span id="cb26-289"><a href="#cb26-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-290"><a href="#cb26-290" aria-hidden="true" tabindex="-1"></a><span class="st"># Setup dataframe to associate 2 letter country codes with country names</span></span>
+<span id="cb26-291"><a href="#cb26-291" aria-hidden="true" tabindex="-1"></a><span class="st"># Can be found here: https://www.google.com/url?sa=t&amp;source=web&amp;cd=&amp;ved=2ahUKEwiovcD2kr-BAxVMgv0HHRubDdsQFnoECBQQAQ&amp;url=https%3A%2F%2Fec.europa.eu%2Feurostat%2Fstatistics-explained%2Fimages%2F9%2F9f%2FCountry_Codes_and_Names.xlsx&amp;usg=AOvVaw3E1WY8Fd33SHLq3c0FM01U&amp;opi=89978449</span></span>
+<span id="cb26-292"><a href="#cb26-292" aria-hidden="true" tabindex="-1"></a><span class="st">eu_countries = pd.read_excel(f"</span>{DATADIR}/misc/Country_Codes_and_Names.xlsx<span class="st">")</span></span>
+<span id="cb26-293"><a href="#cb26-293" aria-hidden="true" tabindex="-1"></a><span class="st">eu_countries["</span>CODE<span class="st">"] = [x.strip() for x in eu_countries["</span>CODE<span class="st">"].values]</span></span>
+<span id="cb26-294"><a href="#cb26-294" aria-hidden="true" tabindex="-1"></a><span class="st">eu_countries.loc[eu_countries["</span>CODE<span class="st">"] == "</span>DE<span class="st">", "</span>COUNTRY NAME<span class="st">"] = "</span>Germany<span class="st">"</span></span>
+<span id="cb26-295"><a href="#cb26-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-296"><a href="#cb26-296" aria-hidden="true" tabindex="-1"></a><span class="st"># Vineyard area</span></span>
+<span id="cb26-297"><a href="#cb26-297" aria-hidden="true" tabindex="-1"></a><span class="st">df_area = pd.read_json(f"</span>{DATADIR}/wine_statistics/VIT_T1.json<span class="st">")</span></span>
+<span id="cb26-298"><a href="#cb26-298" aria-hidden="true" tabindex="-1"></a><span class="st"># Pick only data from 2020 for EU countries</span></span>
+<span id="cb26-299"><a href="#cb26-299" aria-hidden="true" tabindex="-1"></a><span class="st">df_area = df_area[</span></span>
+<span id="cb26-300"><a href="#cb26-300" aria-hidden="true" tabindex="-1"></a><span class="st">    (df_area["</span>geo<span class="st">"].isin(eu_countries["</span>CODE<span class="st">"])) &amp; (df_area["</span>TIME_PERIOD<span class="st">"] == 2020)</span></span>
+<span id="cb26-301"><a href="#cb26-301" aria-hidden="true" tabindex="-1"></a><span class="st">]</span></span>
+<span id="cb26-302"><a href="#cb26-302" aria-hidden="true" tabindex="-1"></a><span class="st"># Pick only the data for all vineyard types and select the columns we care about</span></span>
+<span id="cb26-303"><a href="#cb26-303" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_2020 = df_area[df_area["</span>vinetype<span class="st">"] == "</span>TOTAL<span class="st">"][["</span>geo<span class="st">", "</span>value<span class="st">"]]</span></span>
+<span id="cb26-304"><a href="#cb26-304" aria-hidden="true" tabindex="-1"></a><span class="st"># Associate the 2 character ISO country codes with country names</span></span>
+<span id="cb26-305"><a href="#cb26-305" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_2020 = df_area_2020.rename(columns={"</span>geo<span class="st">": "</span>CODE<span class="st">"})</span></span>
+<span id="cb26-306"><a href="#cb26-306" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_2020 = pd.merge(df_area_2020, eu_countries, how="</span>inner<span class="st">")</span></span>
+<span id="cb26-307"><a href="#cb26-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-308"><a href="#cb26-308" aria-hidden="true" tabindex="-1"></a><span class="st"># Permanent crops area</span></span>
+<span id="cb26-309"><a href="#cb26-309" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_gen = pd.read_json(f"</span>{DATADIR}/wine_statistics/EF_LUS_MAIN.json<span class="st">")</span></span>
+<span id="cb26-310"><a href="#cb26-310" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_gen = df_area_gen[</span></span>
+<span id="cb26-311"><a href="#cb26-311" aria-hidden="true" tabindex="-1"></a><span class="st">    (df_area_gen["</span>geo<span class="st">"].isin(eu_countries["</span>CODE<span class="st">"]))</span></span>
+<span id="cb26-312"><a href="#cb26-312" aria-hidden="true" tabindex="-1"></a><span class="st">    &amp; (df_area_gen["</span>TIME_PERIOD<span class="st">"] == 2020)</span></span>
+<span id="cb26-313"><a href="#cb26-313" aria-hidden="true" tabindex="-1"></a><span class="st">]</span></span>
+<span id="cb26-314"><a href="#cb26-314" aria-hidden="true" tabindex="-1"></a><span class="st"># Select permanent crops among all farm types</span></span>
+<span id="cb26-315"><a href="#cb26-315" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_gen_2020 = df_area_gen[</span></span>
+<span id="cb26-316"><a href="#cb26-316" aria-hidden="true" tabindex="-1"></a><span class="st">    (df_area_gen["</span>crops<span class="st">"] == "</span>PECR<span class="st">") &amp; (df_area_gen["</span>farmtype<span class="st">"] == "</span>TOTAL<span class="st">")</span></span>
+<span id="cb26-317"><a href="#cb26-317" aria-hidden="true" tabindex="-1"></a><span class="st">][["</span>geo<span class="st">", "</span>value<span class="st">"]]</span></span>
+<span id="cb26-318"><a href="#cb26-318" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_gen_2020 = df_area_gen_2020.rename(columns={"</span>geo<span class="st">": "</span>CODE<span class="st">"})</span></span>
+<span id="cb26-319"><a href="#cb26-319" aria-hidden="true" tabindex="-1"></a><span class="st">df_area_gen_2020 = pd.merge(df_area_gen_2020, eu_countries, how="</span>inner<span class="st">")</span></span>
+<span id="cb26-320"><a href="#cb26-320" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-321"><a href="#cb26-321" aria-hidden="true" tabindex="-1"></a><span class="st"># Find all countries that produce more than the given threshold than group the rest into "</span>Others<span class="st">"</span></span>
+<span id="cb26-322"><a href="#cb26-322" aria-hidden="true" tabindex="-1"></a><span class="st">total_area = df_area_2020["</span>value<span class="st">"].sum()</span></span>
+<span id="cb26-323"><a href="#cb26-323" aria-hidden="true" tabindex="-1"></a><span class="st">th_area = 0.05 * total_area</span></span>
+<span id="cb26-324"><a href="#cb26-324" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = df_area_2020[df_area_2020["</span>value<span class="st">"] &gt;= th_area]</span></span>
+<span id="cb26-325"><a href="#cb26-325" aria-hidden="true" tabindex="-1"></a><span class="st">row = pd.DataFrame(</span></span>
+<span id="cb26-326"><a href="#cb26-326" aria-hidden="true" tabindex="-1"></a><span class="st">    {</span></span>
+<span id="cb26-327"><a href="#cb26-327" aria-hidden="true" tabindex="-1"></a><span class="st">        "</span>CODE<span class="st">": "</span>Others<span class="st">",</span></span>
+<span id="cb26-328"><a href="#cb26-328" aria-hidden="true" tabindex="-1"></a><span class="st">        "</span>value<span class="st">": df_area_2020[df_area_2020["</span>value<span class="st">"] &lt; th_area]["</span>value<span class="st">"].sum(),</span></span>
+<span id="cb26-329"><a href="#cb26-329" aria-hidden="true" tabindex="-1"></a><span class="st">        "</span>COUNTRY NAME<span class="st">": "</span>Others<span class="st">",</span></span>
+<span id="cb26-330"><a href="#cb26-330" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
+<span id="cb26-331"><a href="#cb26-331" aria-hidden="true" tabindex="-1"></a><span class="st">    index=[0],</span></span>
+<span id="cb26-332"><a href="#cb26-332" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-333"><a href="#cb26-333" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = pd.concat([df_to_plot, row], ignore_index=True)</span></span>
+<span id="cb26-334"><a href="#cb26-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-335"><a href="#cb26-335" aria-hidden="true" tabindex="-1"></a><span class="st"># Find the total permanent crop area for the same countries that have largest vineyards,</span></span>
+<span id="cb26-336"><a href="#cb26-336" aria-hidden="true" tabindex="-1"></a><span class="st"># and group the rest under "</span>Others<span class="st">"</span></span>
+<span id="cb26-337"><a href="#cb26-337" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot_gen = df_area_gen_2020[df_area_gen_2020["</span>CODE<span class="st">"].isin(df_to_plot["</span>CODE<span class="st">"])]</span></span>
+<span id="cb26-338"><a href="#cb26-338" aria-hidden="true" tabindex="-1"></a><span class="st">row = pd.DataFrame(</span></span>
+<span id="cb26-339"><a href="#cb26-339" aria-hidden="true" tabindex="-1"></a><span class="st">    {</span></span>
+<span id="cb26-340"><a href="#cb26-340" aria-hidden="true" tabindex="-1"></a><span class="st">        "</span>CODE<span class="st">": "</span>Others<span class="st">",</span></span>
+<span id="cb26-341"><a href="#cb26-341" aria-hidden="true" tabindex="-1"></a><span class="st">        "</span>value<span class="st">": df_area_gen_2020[~df_area_gen_2020["</span>CODE<span class="st">"].isin(df_to_plot["</span>CODE<span class="st">"])][</span></span>
+<span id="cb26-342"><a href="#cb26-342" aria-hidden="true" tabindex="-1"></a><span class="st">            "</span>value<span class="st">"</span></span>
+<span id="cb26-343"><a href="#cb26-343" aria-hidden="true" tabindex="-1"></a><span class="st">        ].sum(),</span></span>
+<span id="cb26-344"><a href="#cb26-344" aria-hidden="true" tabindex="-1"></a><span class="st">        "</span>COUNTRY NAME<span class="st">": "</span>Others<span class="st">",</span></span>
+<span id="cb26-345"><a href="#cb26-345" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
+<span id="cb26-346"><a href="#cb26-346" aria-hidden="true" tabindex="-1"></a><span class="st">    index=[0],</span></span>
+<span id="cb26-347"><a href="#cb26-347" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-348"><a href="#cb26-348" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot_gen = pd.concat([df_to_plot_gen, row], ignore_index=True)</span></span>
+<span id="cb26-349"><a href="#cb26-349" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-350"><a href="#cb26-350" aria-hidden="true" tabindex="-1"></a><span class="st"># Merge everything into 1 dataframe</span></span>
+<span id="cb26-351"><a href="#cb26-351" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot_gen = df_to_plot_gen.rename(columns={"</span>value<span class="st">": "</span>total_area<span class="st">"})</span></span>
+<span id="cb26-352"><a href="#cb26-352" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = pd.merge(df_to_plot, df_to_plot_gen, how="</span>inner<span class="st">")</span></span>
+<span id="cb26-353"><a href="#cb26-353" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = df_to_plot.sort_values("</span>value<span class="st">", ascending=False)</span></span>
+<span id="cb26-354"><a href="#cb26-354" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-355"><a href="#cb26-355" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-356"><a href="#cb26-356" aria-hidden="true" tabindex="-1"></a><span class="st"># Create labels for the square area graph</span></span>
+<span id="cb26-357"><a href="#cb26-357" aria-hidden="true" tabindex="-1"></a><span class="st">labels = []</span></span>
+<span id="cb26-358"><a href="#cb26-358" aria-hidden="true" tabindex="-1"></a><span class="st">for i in range(df_to_plot.shape[0]):</span></span>
+<span id="cb26-359"><a href="#cb26-359" aria-hidden="true" tabindex="-1"></a><span class="st">    wine_area = df_to_plot.iloc[i]["</span>value<span class="st">"]</span></span>
+<span id="cb26-360"><a href="#cb26-360" aria-hidden="true" tabindex="-1"></a><span class="st">    gen_area = df_to_plot.iloc[i]["</span>total_area<span class="st">"]</span></span>
+<span id="cb26-361"><a href="#cb26-361" aria-hidden="true" tabindex="-1"></a><span class="st">    country = df_to_plot.iloc[i]["</span>COUNTRY NAME<span class="st">"]</span></span>
+<span id="cb26-362"><a href="#cb26-362" aria-hidden="true" tabindex="-1"></a><span class="st">    wine_in_kha = int(np.round(wine_area / 1000, 0))</span></span>
+<span id="cb26-363"><a href="#cb26-363" aria-hidden="true" tabindex="-1"></a><span class="st">    percent_usage = np.round(wine_area / gen_area * 100, 1)</span></span>
+<span id="cb26-364"><a href="#cb26-364" aria-hidden="true" tabindex="-1"></a><span class="st">    label = f"</span>{country}<span class="dt">\n</span>{wine_in_kha} kha<span class="dt">\n</span> <span class="er">(</span><span class="ex">{percent_usage}%</span><span class="kw">)</span><span class="st">"</span></span>
+<span id="cb26-365"><a href="#cb26-365" aria-hidden="true" tabindex="-1"></a><span class="st">    labels.append(label)</span></span>
+<span id="cb26-366"><a href="#cb26-366" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
+<span id="cb26-367"><a href="#cb26-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-368"><a href="#cb26-368" aria-hidden="true" tabindex="-1"></a><span class="ex">Armed</span> with the right data, we can finally visualize the land usage statistics. We will use the <span class="kw">`</span><span class="st">matplotlib</span><span class="kw">`</span> <span class="ex">package</span> along with <span class="pp">[</span><span class="ss">`squarify`</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://github.com/laserson/squarify</span><span class="kw">)</span> <span class="ex">to</span> create two</span>
+<span id="cb26-369"><a href="#cb26-369" aria-hidden="true" tabindex="-1"></a><span class="ex">different</span> ways of looking at the data.</span>
 <span id="cb26-370"><a href="#cb26-370" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-371"><a href="#cb26-371" aria-hidden="true" tabindex="-1"></a><span class="st">Armed with the right data, we can finally visualize the land usage statistics. We will use the `matplotlib` package along with `squarify` to create two</span></span>
-<span id="cb26-372"><a href="#cb26-372" aria-hidden="true" tabindex="-1"></a><span class="st">different ways of looking at the data.</span></span>
-<span id="cb26-373"><a href="#cb26-373" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-376"><a href="#cb26-376" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-377"><a href="#cb26-377" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-fold: true</span></span>
-<span id="cb26-378"><a href="#cb26-378" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-summary: "Show the code"</span></span>
+<span id="cb26-373"><a href="#cb26-373" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-374"><a href="#cb26-374" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-fold: true</span></span>
+<span id="cb26-375"><a href="#cb26-375" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-summary: "</span><span class="ex">Show</span> the code<span class="st">"</span></span>
+<span id="cb26-376"><a href="#cb26-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-377"><a href="#cb26-377" aria-hidden="true" tabindex="-1"></a><span class="st">import squarify</span></span>
+<span id="cb26-378"><a href="#cb26-378" aria-hidden="true" tabindex="-1"></a><span class="st">import seaborn as sns</span></span>
 <span id="cb26-379"><a href="#cb26-379" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-380"><a href="#cb26-380" aria-hidden="true" tabindex="-1"></a><span class="st">import squarify</span></span>
-<span id="cb26-381"><a href="#cb26-381" aria-hidden="true" tabindex="-1"></a><span class="st">import seaborn as sns</span></span>
-<span id="cb26-382"><a href="#cb26-382" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-383"><a href="#cb26-383" aria-hidden="true" tabindex="-1"></a><span class="st">axis_fontsize = 16</span></span>
-<span id="cb26-384"><a href="#cb26-384" aria-hidden="true" tabindex="-1"></a><span class="st">lbl_fontsize = 20</span></span>
-<span id="cb26-385"><a href="#cb26-385" aria-hidden="true" tabindex="-1"></a><span class="st">fig = plt.figure(figsize=(13, 6))</span></span>
-<span id="cb26-386"><a href="#cb26-386" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-387"><a href="#cb26-387" aria-hidden="true" tabindex="-1"></a><span class="st"># Left: donut plot</span></span>
-<span id="cb26-388"><a href="#cb26-388" aria-hidden="true" tabindex="-1"></a><span class="st">ax = plt.subplot(121)</span></span>
-<span id="cb26-389"><a href="#cb26-389" aria-hidden="true" tabindex="-1"></a><span class="st">ax = labelled_pie(</span></span>
-<span id="cb26-390"><a href="#cb26-390" aria-hidden="true" tabindex="-1"></a><span class="st">    df_to_plot["value"].values,</span></span>
-<span id="cb26-391"><a href="#cb26-391" aria-hidden="true" tabindex="-1"></a><span class="st">    df_to_plot["COUNTRY NAME"].values,</span></span>
-<span id="cb26-392"><a href="#cb26-392" aria-hidden="true" tabindex="-1"></a><span class="st">    "Area under vine in the EU for 2020",</span></span>
-<span id="cb26-393"><a href="#cb26-393" aria-hidden="true" tabindex="-1"></a><span class="st">    ax=ax,</span></span>
-<span id="cb26-394"><a href="#cb26-394" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
-<span id="cb26-395"><a href="#cb26-395" aria-hidden="true" tabindex="-1"></a><span class="st">ax.text(</span></span>
-<span id="cb26-396"><a href="#cb26-396" aria-hidden="true" tabindex="-1"></a><span class="st">    -0.25,</span></span>
-<span id="cb26-397"><a href="#cb26-397" aria-hidden="true" tabindex="-1"></a><span class="st">    -0.15,</span></span>
-<span id="cb26-398"><a href="#cb26-398" aria-hidden="true" tabindex="-1"></a><span class="st">    f"Total area\n{np.round(total_area/1e6,1)} mha",</span></span>
-<span id="cb26-399"><a href="#cb26-399" aria-hidden="true" tabindex="-1"></a><span class="st">    fontweight="light",</span></span>
-<span id="cb26-400"><a href="#cb26-400" aria-hidden="true" tabindex="-1"></a><span class="st">    fontsize=18,</span></span>
-<span id="cb26-401"><a href="#cb26-401" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-380"><a href="#cb26-380" aria-hidden="true" tabindex="-1"></a><span class="st">axis_fontsize = 16</span></span>
+<span id="cb26-381"><a href="#cb26-381" aria-hidden="true" tabindex="-1"></a><span class="st">lbl_fontsize = 20</span></span>
+<span id="cb26-382"><a href="#cb26-382" aria-hidden="true" tabindex="-1"></a><span class="st">fig = plt.figure(figsize=(13, 6))</span></span>
+<span id="cb26-383"><a href="#cb26-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-384"><a href="#cb26-384" aria-hidden="true" tabindex="-1"></a><span class="st"># Left: donut plot</span></span>
+<span id="cb26-385"><a href="#cb26-385" aria-hidden="true" tabindex="-1"></a><span class="st">ax = plt.subplot(121)</span></span>
+<span id="cb26-386"><a href="#cb26-386" aria-hidden="true" tabindex="-1"></a><span class="st">ax = labelled_pie(</span></span>
+<span id="cb26-387"><a href="#cb26-387" aria-hidden="true" tabindex="-1"></a><span class="st">    df_to_plot["</span>value<span class="st">"].values,</span></span>
+<span id="cb26-388"><a href="#cb26-388" aria-hidden="true" tabindex="-1"></a><span class="st">    df_to_plot["</span>COUNTRY NAME<span class="st">"].values,</span></span>
+<span id="cb26-389"><a href="#cb26-389" aria-hidden="true" tabindex="-1"></a><span class="st">    "</span>Area under vine in the EU for 2020<span class="st">",</span></span>
+<span id="cb26-390"><a href="#cb26-390" aria-hidden="true" tabindex="-1"></a><span class="st">    ax=ax,</span></span>
+<span id="cb26-391"><a href="#cb26-391" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-392"><a href="#cb26-392" aria-hidden="true" tabindex="-1"></a><span class="st">ax.text(</span></span>
+<span id="cb26-393"><a href="#cb26-393" aria-hidden="true" tabindex="-1"></a><span class="st">    -0.25,</span></span>
+<span id="cb26-394"><a href="#cb26-394" aria-hidden="true" tabindex="-1"></a><span class="st">    -0.15,</span></span>
+<span id="cb26-395"><a href="#cb26-395" aria-hidden="true" tabindex="-1"></a><span class="st">    f"</span>Total area<span class="dt">\n{np.round(total_area/1e6</span><span class="op">,</span><span class="dt">1)}</span> mha<span class="st">",</span></span>
+<span id="cb26-396"><a href="#cb26-396" aria-hidden="true" tabindex="-1"></a><span class="st">    fontweight="</span>light<span class="st">",</span></span>
+<span id="cb26-397"><a href="#cb26-397" aria-hidden="true" tabindex="-1"></a><span class="st">    fontsize=18,</span></span>
+<span id="cb26-398"><a href="#cb26-398" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-399"><a href="#cb26-399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-400"><a href="#cb26-400" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-401"><a href="#cb26-401" aria-hidden="true" tabindex="-1"></a><span class="st">plt.title("</span>Fraction of total vineyard area<span class="st">", pad=30, fontweight="</span>light<span class="st">", fontsize=22)</span></span>
 <span id="cb26-402"><a href="#cb26-402" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-403"><a href="#cb26-403" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-404"><a href="#cb26-404" aria-hidden="true" tabindex="-1"></a><span class="st">plt.title("Fraction of total vineyard area", pad=30, fontweight="light", fontsize=22)</span></span>
-<span id="cb26-405"><a href="#cb26-405" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-406"><a href="#cb26-406" aria-hidden="true" tabindex="-1"></a><span class="st"># Right: square area plot</span></span>
-<span id="cb26-407"><a href="#cb26-407" aria-hidden="true" tabindex="-1"></a><span class="st">plt.subplot(122)</span></span>
-<span id="cb26-408"><a href="#cb26-408" aria-hidden="true" tabindex="-1"></a><span class="st">ax2 = squarify.plot(</span></span>
-<span id="cb26-409"><a href="#cb26-409" aria-hidden="true" tabindex="-1"></a><span class="st">    sizes=df_to_plot["value"],</span></span>
-<span id="cb26-410"><a href="#cb26-410" aria-hidden="true" tabindex="-1"></a><span class="st">    color=plt.rcParams["axes.prop_cycle"].by_key()["color"],</span></span>
-<span id="cb26-411"><a href="#cb26-411" aria-hidden="true" tabindex="-1"></a><span class="st">    label=labels,</span></span>
-<span id="cb26-412"><a href="#cb26-412" aria-hidden="true" tabindex="-1"></a><span class="st">    text_kwargs={"fontsize": 16, "color": "white", "fontweight": "normal"},</span></span>
-<span id="cb26-413"><a href="#cb26-413" aria-hidden="true" tabindex="-1"></a><span class="st">    edgecolor="white",</span></span>
-<span id="cb26-414"><a href="#cb26-414" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
-<span id="cb26-415"><a href="#cb26-415" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.tick_params(axis="both", labelsize=axis_fontsize)</span></span>
-<span id="cb26-416"><a href="#cb26-416" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.xaxis.label.set_size(lbl_fontsize)</span></span>
-<span id="cb26-417"><a href="#cb26-417" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.yaxis.label.set_size(lbl_fontsize)</span></span>
-<span id="cb26-418"><a href="#cb26-418" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.xaxis.label.set_fontweight("light")</span></span>
-<span id="cb26-419"><a href="#cb26-419" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.yaxis.label.set_fontweight("light")</span></span>
-<span id="cb26-420"><a href="#cb26-420" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-421"><a href="#cb26-421" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.spines[["left", "bottom"]].set_visible(False)</span></span>
-<span id="cb26-422"><a href="#cb26-422" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.xaxis.set_visible(False)</span></span>
-<span id="cb26-423"><a href="#cb26-423" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.yaxis.set_visible(False)</span></span>
-<span id="cb26-424"><a href="#cb26-424" aria-hidden="true" tabindex="-1"></a><span class="st">plt.subplots_adjust(wspace=0.5)</span></span>
-<span id="cb26-425"><a href="#cb26-425" aria-hidden="true" tabindex="-1"></a><span class="st">plt.title(</span></span>
-<span id="cb26-426"><a href="#cb26-426" aria-hidden="true" tabindex="-1"></a><span class="st">    "Area (fraction of all permanent crops)", pad=20, fontweight="light", fontsize=22</span></span>
+<span id="cb26-403"><a href="#cb26-403" aria-hidden="true" tabindex="-1"></a><span class="st"># Right: square area plot</span></span>
+<span id="cb26-404"><a href="#cb26-404" aria-hidden="true" tabindex="-1"></a><span class="st">plt.subplot(122)</span></span>
+<span id="cb26-405"><a href="#cb26-405" aria-hidden="true" tabindex="-1"></a><span class="st">ax2 = squarify.plot(</span></span>
+<span id="cb26-406"><a href="#cb26-406" aria-hidden="true" tabindex="-1"></a><span class="st">    sizes=df_to_plot["</span>value<span class="st">"],</span></span>
+<span id="cb26-407"><a href="#cb26-407" aria-hidden="true" tabindex="-1"></a><span class="st">    color=plt.rcParams["</span>axes.prop_cycle<span class="st">"].by_key()["</span>color<span class="st">"],</span></span>
+<span id="cb26-408"><a href="#cb26-408" aria-hidden="true" tabindex="-1"></a><span class="st">    label=labels,</span></span>
+<span id="cb26-409"><a href="#cb26-409" aria-hidden="true" tabindex="-1"></a><span class="st">    text_kwargs={"</span>fontsize<span class="st">": 16, "</span>color<span class="st">": "</span>white<span class="st">", "</span>fontweight<span class="st">": "</span>normal<span class="st">"},</span></span>
+<span id="cb26-410"><a href="#cb26-410" aria-hidden="true" tabindex="-1"></a><span class="st">    edgecolor="</span>white<span class="st">",</span></span>
+<span id="cb26-411"><a href="#cb26-411" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-412"><a href="#cb26-412" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.tick_params(axis="</span>both<span class="st">", labelsize=axis_fontsize)</span></span>
+<span id="cb26-413"><a href="#cb26-413" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.xaxis.label.set_size(lbl_fontsize)</span></span>
+<span id="cb26-414"><a href="#cb26-414" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.yaxis.label.set_size(lbl_fontsize)</span></span>
+<span id="cb26-415"><a href="#cb26-415" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.xaxis.label.set_fontweight("</span>light<span class="st">")</span></span>
+<span id="cb26-416"><a href="#cb26-416" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.yaxis.label.set_fontweight("</span>light<span class="st">")</span></span>
+<span id="cb26-417"><a href="#cb26-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-418"><a href="#cb26-418" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.spines[["</span>left<span class="st">", "</span>bottom<span class="st">"]].set_visible(False)</span></span>
+<span id="cb26-419"><a href="#cb26-419" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.xaxis.set_visible(False)</span></span>
+<span id="cb26-420"><a href="#cb26-420" aria-hidden="true" tabindex="-1"></a><span class="st">ax2.yaxis.set_visible(False)</span></span>
+<span id="cb26-421"><a href="#cb26-421" aria-hidden="true" tabindex="-1"></a><span class="st">plt.subplots_adjust(wspace=0.5)</span></span>
+<span id="cb26-422"><a href="#cb26-422" aria-hidden="true" tabindex="-1"></a><span class="st">plt.title(</span></span>
+<span id="cb26-423"><a href="#cb26-423" aria-hidden="true" tabindex="-1"></a><span class="st">    "</span>Area <span class="er">(</span><span class="ex">fraction</span> of all permanent crops<span class="kw">)</span><span class="st">", pad=20, fontweight="</span><span class="ex">light</span><span class="st">", fontsize=22</span></span>
+<span id="cb26-424"><a href="#cb26-424" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-425"><a href="#cb26-425" aria-hidden="true" tabindex="-1"></a><span class="st">_ = plt.suptitle(</span></span>
+<span id="cb26-426"><a href="#cb26-426" aria-hidden="true" tabindex="-1"></a><span class="st">    f"</span><span class="ex">Area</span> under vine in the EU for 2020<span class="st">", fontsize=30, fontweight="</span>light<span class="st">", y=1.08</span></span>
 <span id="cb26-427"><a href="#cb26-427" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
-<span id="cb26-428"><a href="#cb26-428" aria-hidden="true" tabindex="-1"></a><span class="st">_ = plt.suptitle(</span></span>
-<span id="cb26-429"><a href="#cb26-429" aria-hidden="true" tabindex="-1"></a><span class="st">    f"Area under vine in the EU for 2020", fontsize=30, fontweight="light", y=1.08</span></span>
-<span id="cb26-430"><a href="#cb26-430" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
-<span id="cb26-431"><a href="#cb26-431" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb26-428"><a href="#cb26-428" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
+<span id="cb26-429"><a href="#cb26-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-430"><a href="#cb26-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-431"><a href="#cb26-431" aria-hidden="true" tabindex="-1"></a><span class="ex">We</span> can clearly see that:</span>
 <span id="cb26-432"><a href="#cb26-432" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-433"><a href="#cb26-433" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-434"><a href="#cb26-434" aria-hidden="true" tabindex="-1"></a><span class="st">We can clearly see that:</span></span>
+<span id="cb26-433"><a href="#cb26-433" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> Spain, France and Italy have the largest vineyards, together comprising almost 3/4 of all vineyard area in the EU,</span>
+<span id="cb26-434"><a href="#cb26-434" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> For all the top 5 countries, vineyards occupy a sizable fraction of all permanent crop lands, ranging from 20% for Spain to 77% for France.</span>
 <span id="cb26-435"><a href="#cb26-435" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-436"><a href="#cb26-436" aria-hidden="true" tabindex="-1"></a><span class="st">* Spain, France and Italy have the largest vineyards, together comprising almost 3/4 of all vineyard area in the EU,</span></span>
-<span id="cb26-437"><a href="#cb26-437" aria-hidden="true" tabindex="-1"></a><span class="st">* For all the top 5 countries, vineyards occupy a sizable fraction of all permanent crop lands, ranging from 20% for Spain to 77% for France.</span></span>
-<span id="cb26-438"><a href="#cb26-438" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-439"><a href="#cb26-439" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-440"><a href="#cb26-440" aria-hidden="true" tabindex="-1"></a><span class="st">### Production volume</span></span>
-<span id="cb26-441"><a href="#cb26-441" aria-hidden="true" tabindex="-1"></a><span class="st"> Next, let'</span>s take a look at the volume of wine produced within the EU. After all, just because there is a vineyard doesn<span class="st">'t mean it successfully produced wine. </span></span>
-<span id="cb26-442"><a href="#cb26-442" aria-hidden="true" tabindex="-1"></a><span class="st"> </span></span>
-<span id="cb26-443"><a href="#cb26-443" aria-hidden="true" tabindex="-1"></a><span class="st"> For this, we use a custom dataset which can be obtained from the "Wine Production and opening stocks" [dashboard](https://agridata.ec.europa.eu/extensions/DashboardWine/WineProduction.html) of the Directorate-General of Agriculture and Rural Development. See @sec-dgard for details on getting this data.</span></span>
-<span id="cb26-444"><a href="#cb26-444" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-445"><a href="#cb26-445" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-446"><a href="#cb26-446" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-449"><a href="#cb26-449" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-450"><a href="#cb26-450" aria-hidden="true" tabindex="-1"></a><span class="st">df_production = pd.read_excel(f"{DATADIR}/wine_statistics/production_data_dgard.xlsx")</span></span>
-<span id="cb26-451"><a href="#cb26-451" aria-hidden="true" tabindex="-1"></a><span class="st">df_production.info()</span></span>
-<span id="cb26-452"><a href="#cb26-452" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
-<span id="cb26-453"><a href="#cb26-453" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-454"><a href="#cb26-454" aria-hidden="true" tabindex="-1"></a><span class="st">The relevant columns to use are:</span></span>
-<span id="cb26-455"><a href="#cb26-455" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-456"><a href="#cb26-456" aria-hidden="true" tabindex="-1"></a><span class="st"> * `Member State` - country reporting</span></span>
-<span id="cb26-457"><a href="#cb26-457" aria-hidden="true" tabindex="-1"></a><span class="st"> * `Category` and `Product Group` - type of product being produced</span></span>
-<span id="cb26-458"><a href="#cb26-458" aria-hidden="true" tabindex="-1"></a><span class="st"> * `Year` - year reported</span></span>
-<span id="cb26-459"><a href="#cb26-459" aria-hidden="true" tabindex="-1"></a><span class="st"> * `Production`- the volume of wine produced in thousands of hectorliters (1 hl = 100 l).</span></span>
-<span id="cb26-460"><a href="#cb26-460" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-461"><a href="#cb26-461" aria-hidden="true" tabindex="-1"></a><span class="st"> Taking a peek at the type of products being produced, we see:</span></span>
-<span id="cb26-462"><a href="#cb26-462" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-465"><a href="#cb26-465" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-466"><a href="#cb26-466" aria-hidden="true" tabindex="-1"></a><span class="st">np.unique(df_production[['</span>Category<span class="st">','</span>Product Group<span class="st">']])</span></span>
-<span id="cb26-467"><a href="#cb26-467" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb26-436"><a href="#cb26-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-437"><a href="#cb26-437" aria-hidden="true" tabindex="-1"></a><span class="co">### Production volume</span></span>
+<span id="cb26-438"><a href="#cb26-438" aria-hidden="true" tabindex="-1"></a> <span class="ex">Next,</span> let<span class="st">'s take a look at the volume of wine produced within the EU. After all, just because there is a vineyard doesn'</span>t mean it successfully produced wine. </span>
+<span id="cb26-439"><a href="#cb26-439" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb26-440"><a href="#cb26-440" aria-hidden="true" tabindex="-1"></a> <span class="ex">For</span> this, we use a custom dataset which can be obtained from the <span class="st">"Wine Production and opening stocks"</span> <span class="pp">[</span><span class="ss">dashboard</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://agridata.ec.europa.eu/extensions/DashboardWine/WineProduction.html</span><span class="kw">)</span> <span class="ex">of</span> the Directorate-General of Agriculture and Rural Development. See @sec-dgard for details on getting this data.</span>
+<span id="cb26-441"><a href="#cb26-441" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-442"><a href="#cb26-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-443"><a href="#cb26-443" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-446"><a href="#cb26-446" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-447"><a href="#cb26-447" aria-hidden="true" tabindex="-1"></a><span class="st">df_production = pd.read_excel(f"</span>{DATADIR}/wine_statistics/production_data_dgard.xlsx<span class="st">")</span></span>
+<span id="cb26-448"><a href="#cb26-448" aria-hidden="true" tabindex="-1"></a><span class="st">df_production.info()</span></span>
+<span id="cb26-449"><a href="#cb26-449" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
+<span id="cb26-450"><a href="#cb26-450" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-451"><a href="#cb26-451" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> relevant columns to use are:</span>
+<span id="cb26-452"><a href="#cb26-452" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-453"><a href="#cb26-453" aria-hidden="true" tabindex="-1"></a> <span class="ex">*</span> <span class="kw">`</span><span class="st">Member State</span><span class="kw">`</span> <span class="ex">-</span> country reporting</span>
+<span id="cb26-454"><a href="#cb26-454" aria-hidden="true" tabindex="-1"></a> <span class="ex">*</span> <span class="kw">`</span><span class="st">Category</span><span class="kw">`</span> <span class="ex">and</span> <span class="kw">`</span><span class="st">Product Group</span><span class="kw">`</span> <span class="ex">-</span> type of product being produced</span>
+<span id="cb26-455"><a href="#cb26-455" aria-hidden="true" tabindex="-1"></a> <span class="ex">*</span> <span class="kw">`</span><span class="st">Year</span><span class="kw">`</span> <span class="ex">-</span> year reported</span>
+<span id="cb26-456"><a href="#cb26-456" aria-hidden="true" tabindex="-1"></a> <span class="ex">*</span> <span class="kw">`</span><span class="st">Production</span><span class="kw">`</span><span class="ex">-</span> the volume of wine produced in thousands of hectorliters <span class="er">(</span><span class="ex">1</span> hl = 100 l<span class="kw">)</span><span class="bu">.</span></span>
+<span id="cb26-457"><a href="#cb26-457" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-458"><a href="#cb26-458" aria-hidden="true" tabindex="-1"></a> <span class="ex">Taking</span> a peek at the type of products being produced, we see:</span>
+<span id="cb26-459"><a href="#cb26-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-462"><a href="#cb26-462" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-463"><a href="#cb26-463" aria-hidden="true" tabindex="-1"></a><span class="st">np.unique(df_production[['Category','Product Group']])</span></span>
+<span id="cb26-464"><a href="#cb26-464" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
+<span id="cb26-465"><a href="#cb26-465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-466"><a href="#cb26-466" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-467"><a href="#cb26-467" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> most salient difference is thus <span class="st">"Non-Vinified"</span> products <span class="er">(</span><span class="ex">i.e.,</span> not wine<span class="kw">)</span> <span class="ex">vs</span> everything else <span class="er">(</span><span class="ex">i.e.,</span> wine<span class="kw">)</span><span class="bu">.</span></span>
 <span id="cb26-468"><a href="#cb26-468" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-469"><a href="#cb26-469" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-470"><a href="#cb26-470" aria-hidden="true" tabindex="-1"></a><span class="st">The most salient difference is thus "Non-Vinified" products (i.e., not wine) vs everything else (i.e., wine).</span></span>
-<span id="cb26-471"><a href="#cb26-471" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-472"><a href="#cb26-472" aria-hidden="true" tabindex="-1"></a><span class="st">Let'</span>s narrow things down to only wines, group by country and year, and sum the production over everything else <span class="er">(</span><span class="ex">i.e.,</span> <span class="kw">`</span><span class="ex">Category</span><span class="kw">`</span> and <span class="kw">`</span><span class="ex">Product</span> Group<span class="kw">`)</span><span class="bu">:</span></span>
-<span id="cb26-473"><a href="#cb26-473" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-476"><a href="#cb26-476" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-477"><a href="#cb26-477" aria-hidden="true" tabindex="-1"></a><span class="st"># Group all wines by country and year</span></span>
-<span id="cb26-478"><a href="#cb26-478" aria-hidden="true" tabindex="-1"></a><span class="st">df_tmp = df_production[</span></span>
-<span id="cb26-479"><a href="#cb26-479" aria-hidden="true" tabindex="-1"></a><span class="st">    (df_production["</span>Category<span class="st">"] != "</span>Non-Vinified<span class="st">")</span></span>
-<span id="cb26-480"><a href="#cb26-480" aria-hidden="true" tabindex="-1"></a><span class="st">    &amp; (df_production["</span>Product Group<span class="st">"] != "</span>Non-Vinified<span class="st">")</span></span>
-<span id="cb26-481"><a href="#cb26-481" aria-hidden="true" tabindex="-1"></a><span class="st">].groupby(["</span>Member State<span class="st">", "</span>Year<span class="st">"])</span></span>
-<span id="cb26-482"><a href="#cb26-482" aria-hidden="true" tabindex="-1"></a><span class="st">df_tmp.head()</span></span>
-<span id="cb26-483"><a href="#cb26-483" aria-hidden="true" tabindex="-1"></a><span class="st"># Now sum over all the wine types. </span></span>
-<span id="cb26-484"><a href="#cb26-484" aria-hidden="true" tabindex="-1"></a><span class="st">res = df_tmp["</span>Production<span class="st">"].sum().reset_index() # reset_index turns this from a Series back into a DataFrame</span></span>
-<span id="cb26-485"><a href="#cb26-485" aria-hidden="true" tabindex="-1"></a><span class="st">res.head()</span></span>
-<span id="cb26-486"><a href="#cb26-486" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
-<span id="cb26-487"><a href="#cb26-487" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-488"><a href="#cb26-488" aria-hidden="true" tabindex="-1"></a><span class="ex">Let</span><span class="st">'s focus on 2022 and see which countries have the largest shares of the overall production.</span></span>
-<span id="cb26-489"><a href="#cb26-489" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-492"><a href="#cb26-492" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-493"><a href="#cb26-493" aria-hidden="true" tabindex="-1"></a><span class="st">year = 2022</span></span>
-<span id="cb26-494"><a href="#cb26-494" aria-hidden="true" tabindex="-1"></a><span class="st">df_year = res[res["Year"] == year]</span></span>
-<span id="cb26-495"><a href="#cb26-495" aria-hidden="true" tabindex="-1"></a><span class="st"># For plotting we will group together all countries which produce less than 5%</span></span>
-<span id="cb26-496"><a href="#cb26-496" aria-hidden="true" tabindex="-1"></a><span class="st"># of the total</span></span>
-<span id="cb26-497"><a href="#cb26-497" aria-hidden="true" tabindex="-1"></a><span class="st">total = df_year["Production"].sum()</span></span>
-<span id="cb26-498"><a href="#cb26-498" aria-hidden="true" tabindex="-1"></a><span class="st">th = 0.05 * total</span></span>
-<span id="cb26-499"><a href="#cb26-499" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-500"><a href="#cb26-500" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = df_year[df_year["Production"] &gt;= th]</span></span>
-<span id="cb26-501"><a href="#cb26-501" aria-hidden="true" tabindex="-1"></a><span class="st">row = pd.DataFrame(</span></span>
-<span id="cb26-502"><a href="#cb26-502" aria-hidden="true" tabindex="-1"></a><span class="st">    {</span></span>
-<span id="cb26-503"><a href="#cb26-503" aria-hidden="true" tabindex="-1"></a><span class="st">        "Member State": "Others",</span></span>
-<span id="cb26-504"><a href="#cb26-504" aria-hidden="true" tabindex="-1"></a><span class="st">        "Year": year,</span></span>
-<span id="cb26-505"><a href="#cb26-505" aria-hidden="true" tabindex="-1"></a><span class="st">        "Production": df_year[df_year["Production"] &lt; th]["Production"].sum(),</span></span>
-<span id="cb26-506"><a href="#cb26-506" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
-<span id="cb26-507"><a href="#cb26-507" aria-hidden="true" tabindex="-1"></a><span class="st">    index=[0],</span></span>
-<span id="cb26-508"><a href="#cb26-508" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
-<span id="cb26-509"><a href="#cb26-509" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = pd.concat([df_to_plot, row], ignore_index=True)</span></span>
-<span id="cb26-510"><a href="#cb26-510" aria-hidden="true" tabindex="-1"></a><span class="st"># Sort in descending order by volume  produced</span></span>
-<span id="cb26-511"><a href="#cb26-511" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = df_to_plot.sort_values("Production", ascending=False)</span></span>
-<span id="cb26-512"><a href="#cb26-512" aria-hidden="true" tabindex="-1"></a><span class="st"># Total production in mega- hectorliters (so 10^8 liters)</span></span>
-<span id="cb26-513"><a href="#cb26-513" aria-hidden="true" tabindex="-1"></a><span class="st">total_volume = df_to_plot["Production"].sum()/1000</span></span>
+<span id="cb26-469"><a href="#cb26-469" aria-hidden="true" tabindex="-1"></a><span class="ex">Let</span><span class="st">'s narrow things down to only wines, group by country and year, and sum the production over everything else (i.e., `Category` and `Product Group`):</span></span>
+<span id="cb26-470"><a href="#cb26-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-473"><a href="#cb26-473" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-474"><a href="#cb26-474" aria-hidden="true" tabindex="-1"></a><span class="st"># Group all wines by country and year</span></span>
+<span id="cb26-475"><a href="#cb26-475" aria-hidden="true" tabindex="-1"></a><span class="st">df_tmp = df_production[</span></span>
+<span id="cb26-476"><a href="#cb26-476" aria-hidden="true" tabindex="-1"></a><span class="st">    (df_production["Category"] != "Non-Vinified")</span></span>
+<span id="cb26-477"><a href="#cb26-477" aria-hidden="true" tabindex="-1"></a><span class="st">    &amp; (df_production["Product Group"] != "Non-Vinified")</span></span>
+<span id="cb26-478"><a href="#cb26-478" aria-hidden="true" tabindex="-1"></a><span class="st">].groupby(["Member State", "Year"])</span></span>
+<span id="cb26-479"><a href="#cb26-479" aria-hidden="true" tabindex="-1"></a><span class="st">df_tmp.head()</span></span>
+<span id="cb26-480"><a href="#cb26-480" aria-hidden="true" tabindex="-1"></a><span class="st"># Now sum over all the wine types. </span></span>
+<span id="cb26-481"><a href="#cb26-481" aria-hidden="true" tabindex="-1"></a><span class="st">res = df_tmp["Production"].sum().reset_index() # reset_index turns this from a Series back into a DataFrame</span></span>
+<span id="cb26-482"><a href="#cb26-482" aria-hidden="true" tabindex="-1"></a><span class="st">res.head()</span></span>
+<span id="cb26-483"><a href="#cb26-483" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb26-484"><a href="#cb26-484" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-485"><a href="#cb26-485" aria-hidden="true" tabindex="-1"></a><span class="st">Let'</span><span class="ex">s</span> focus on 2022 and see which countries have the largest shares of the overall production.</span>
+<span id="cb26-486"><a href="#cb26-486" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-489"><a href="#cb26-489" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-490"><a href="#cb26-490" aria-hidden="true" tabindex="-1"></a><span class="st">year = 2022</span></span>
+<span id="cb26-491"><a href="#cb26-491" aria-hidden="true" tabindex="-1"></a><span class="st">df_year = res[res["</span>Year<span class="st">"] == year]</span></span>
+<span id="cb26-492"><a href="#cb26-492" aria-hidden="true" tabindex="-1"></a><span class="st"># For plotting we will group together all countries which produce less than 5%</span></span>
+<span id="cb26-493"><a href="#cb26-493" aria-hidden="true" tabindex="-1"></a><span class="st"># of the total</span></span>
+<span id="cb26-494"><a href="#cb26-494" aria-hidden="true" tabindex="-1"></a><span class="st">total = df_year["</span>Production<span class="st">"].sum()</span></span>
+<span id="cb26-495"><a href="#cb26-495" aria-hidden="true" tabindex="-1"></a><span class="st">th = 0.05 * total</span></span>
+<span id="cb26-496"><a href="#cb26-496" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-497"><a href="#cb26-497" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = df_year[df_year["</span>Production<span class="st">"] &gt;= th]</span></span>
+<span id="cb26-498"><a href="#cb26-498" aria-hidden="true" tabindex="-1"></a><span class="st">row = pd.DataFrame(</span></span>
+<span id="cb26-499"><a href="#cb26-499" aria-hidden="true" tabindex="-1"></a><span class="st">    {</span></span>
+<span id="cb26-500"><a href="#cb26-500" aria-hidden="true" tabindex="-1"></a><span class="st">        "</span>Member State<span class="st">": "</span>Others<span class="st">",</span></span>
+<span id="cb26-501"><a href="#cb26-501" aria-hidden="true" tabindex="-1"></a><span class="st">        "</span>Year<span class="st">": year,</span></span>
+<span id="cb26-502"><a href="#cb26-502" aria-hidden="true" tabindex="-1"></a><span class="st">        "</span>Production<span class="st">": df_year[df_year["</span>Production<span class="st">"] &lt; th]["</span>Production<span class="st">"].sum(),</span></span>
+<span id="cb26-503"><a href="#cb26-503" aria-hidden="true" tabindex="-1"></a><span class="st">    },</span></span>
+<span id="cb26-504"><a href="#cb26-504" aria-hidden="true" tabindex="-1"></a><span class="st">    index=[0],</span></span>
+<span id="cb26-505"><a href="#cb26-505" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-506"><a href="#cb26-506" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = pd.concat([df_to_plot, row], ignore_index=True)</span></span>
+<span id="cb26-507"><a href="#cb26-507" aria-hidden="true" tabindex="-1"></a><span class="st"># Sort in descending order by volume  produced</span></span>
+<span id="cb26-508"><a href="#cb26-508" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot = df_to_plot.sort_values("</span>Production<span class="st">", ascending=False)</span></span>
+<span id="cb26-509"><a href="#cb26-509" aria-hidden="true" tabindex="-1"></a><span class="st"># Total production in mega- hectorliters (so 10^8 liters)</span></span>
+<span id="cb26-510"><a href="#cb26-510" aria-hidden="true" tabindex="-1"></a><span class="st">total_volume = df_to_plot["</span>Production<span class="st">"].sum()/1000</span></span>
+<span id="cb26-511"><a href="#cb26-511" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-512"><a href="#cb26-512" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot.head()</span></span>
+<span id="cb26-513"><a href="#cb26-513" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
 <span id="cb26-514"><a href="#cb26-514" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-515"><a href="#cb26-515" aria-hidden="true" tabindex="-1"></a><span class="st">df_to_plot.head()</span></span>
-<span id="cb26-516"><a href="#cb26-516" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
-<span id="cb26-517"><a href="#cb26-517" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-518"><a href="#cb26-518" aria-hidden="true" tabindex="-1"></a><span class="st">This data gives the following plot:</span></span>
-<span id="cb26-521"><a href="#cb26-521" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-522"><a href="#cb26-522" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-fold: true</span></span>
-<span id="cb26-523"><a href="#cb26-523" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-summary: "Show the code"</span></span>
-<span id="cb26-524"><a href="#cb26-524" aria-hidden="true" tabindex="-1"></a><span class="st">fig, ax = plt.subplots(figsize=(10, 6), subplot_kw=dict(aspect="equal"))</span></span>
-<span id="cb26-525"><a href="#cb26-525" aria-hidden="true" tabindex="-1"></a><span class="st">ax = labelled_pie(</span></span>
-<span id="cb26-526"><a href="#cb26-526" aria-hidden="true" tabindex="-1"></a><span class="st">    df_to_plot["Production"].values,</span></span>
-<span id="cb26-527"><a href="#cb26-527" aria-hidden="true" tabindex="-1"></a><span class="st">    df_to_plot["Member State"].values,</span></span>
-<span id="cb26-528"><a href="#cb26-528" aria-hidden="true" tabindex="-1"></a><span class="st">    f"EU wine production by volume in {year}",</span></span>
-<span id="cb26-529"><a href="#cb26-529" aria-hidden="true" tabindex="-1"></a><span class="st">    ax=ax,</span></span>
-<span id="cb26-530"><a href="#cb26-530" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
-<span id="cb26-531"><a href="#cb26-531" aria-hidden="true" tabindex="-1"></a><span class="st">_ = plt.text(</span></span>
-<span id="cb26-532"><a href="#cb26-532" aria-hidden="true" tabindex="-1"></a><span class="st">    -0.35,</span></span>
-<span id="cb26-533"><a href="#cb26-533" aria-hidden="true" tabindex="-1"></a><span class="st">    -0.15,</span></span>
-<span id="cb26-534"><a href="#cb26-534" aria-hidden="true" tabindex="-1"></a><span class="st">    f"Total volume\n{int(np.round(total_volume,0))} mhl",</span></span>
-<span id="cb26-535"><a href="#cb26-535" aria-hidden="true" tabindex="-1"></a><span class="st">    fontweight="light",</span></span>
-<span id="cb26-536"><a href="#cb26-536" aria-hidden="true" tabindex="-1"></a><span class="st">    fontsize=16,</span></span>
-<span id="cb26-537"><a href="#cb26-537" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
-<span id="cb26-538"><a href="#cb26-538" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-539"><a href="#cb26-539" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
-<span id="cb26-540"><a href="#cb26-540" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-541"><a href="#cb26-541" aria-hidden="true" tabindex="-1"></a><span class="st">Unsurprisingly we see that the three countries that domainated by area of vineyards also dominate the production: Italy, France and Spain. </span></span>
-<span id="cb26-542"><a href="#cb26-542" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-543"><a href="#cb26-543" aria-hidden="true" tabindex="-1"></a><span class="st">To put the total volume produced into context, it is</span></span>
-<span id="cb26-544"><a href="#cb26-544" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-545"><a href="#cb26-545" aria-hidden="true" tabindex="-1"></a><span class="st">* about 60% of the total world wine production[@oiv2022]</span></span>
-<span id="cb26-546"><a href="#cb26-546" aria-hidden="true" tabindex="-1"></a><span class="st">* approximately 33 L of wine for every person in the EU[^1]</span></span>
-<span id="cb26-547"><a href="#cb26-547" aria-hidden="true" tabindex="-1"></a><span class="st">* enough to fill about 6900 Olympic swimming pools[^2]</span></span>
-<span id="cb26-548"><a href="#cb26-548" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-549"><a href="#cb26-549" aria-hidden="true" tabindex="-1"></a><span class="st">Let'</span><span class="ex">s</span> now look at the historical trends, focusing on the top three wine producers. In order to make our findings more robust, we also include data from two additional sources:</span>
+<span id="cb26-515"><a href="#cb26-515" aria-hidden="true" tabindex="-1"></a><span class="ex">This</span> data gives the following plot:</span>
+<span id="cb26-518"><a href="#cb26-518" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-519"><a href="#cb26-519" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-fold: true</span></span>
+<span id="cb26-520"><a href="#cb26-520" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-summary: "</span>Show the code<span class="st">"</span></span>
+<span id="cb26-521"><a href="#cb26-521" aria-hidden="true" tabindex="-1"></a><span class="st">fig, ax = plt.subplots(figsize=(10, 6), subplot_kw=dict(aspect="</span>equal<span class="st">"))</span></span>
+<span id="cb26-522"><a href="#cb26-522" aria-hidden="true" tabindex="-1"></a><span class="st">ax = labelled_pie(</span></span>
+<span id="cb26-523"><a href="#cb26-523" aria-hidden="true" tabindex="-1"></a><span class="st">    df_to_plot["</span>Production<span class="st">"].values,</span></span>
+<span id="cb26-524"><a href="#cb26-524" aria-hidden="true" tabindex="-1"></a><span class="st">    df_to_plot["</span>Member State<span class="st">"].values,</span></span>
+<span id="cb26-525"><a href="#cb26-525" aria-hidden="true" tabindex="-1"></a><span class="st">    f"</span>EU wine production by volume in {year}<span class="st">",</span></span>
+<span id="cb26-526"><a href="#cb26-526" aria-hidden="true" tabindex="-1"></a><span class="st">    ax=ax,</span></span>
+<span id="cb26-527"><a href="#cb26-527" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-528"><a href="#cb26-528" aria-hidden="true" tabindex="-1"></a><span class="st">_ = plt.text(</span></span>
+<span id="cb26-529"><a href="#cb26-529" aria-hidden="true" tabindex="-1"></a><span class="st">    -0.35,</span></span>
+<span id="cb26-530"><a href="#cb26-530" aria-hidden="true" tabindex="-1"></a><span class="st">    -0.15,</span></span>
+<span id="cb26-531"><a href="#cb26-531" aria-hidden="true" tabindex="-1"></a><span class="st">    f"</span>Total volume<span class="dt">\n{int(np.round(total_volume</span><span class="op">,</span><span class="dt">0))}</span> mhl<span class="st">",</span></span>
+<span id="cb26-532"><a href="#cb26-532" aria-hidden="true" tabindex="-1"></a><span class="st">    fontweight="</span>light<span class="st">",</span></span>
+<span id="cb26-533"><a href="#cb26-533" aria-hidden="true" tabindex="-1"></a><span class="st">    fontsize=16,</span></span>
+<span id="cb26-534"><a href="#cb26-534" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-535"><a href="#cb26-535" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-536"><a href="#cb26-536" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
+<span id="cb26-537"><a href="#cb26-537" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-538"><a href="#cb26-538" aria-hidden="true" tabindex="-1"></a><span class="ex">Unsurprisingly</span> we see that the three countries that domainated by area of vineyards also dominate the production: Italy, France and Spain. </span>
+<span id="cb26-539"><a href="#cb26-539" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-540"><a href="#cb26-540" aria-hidden="true" tabindex="-1"></a><span class="ex">To</span> put the total volume produced into context, it is</span>
+<span id="cb26-541"><a href="#cb26-541" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-542"><a href="#cb26-542" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> about 60% of the total world wine production<span class="pp">[</span><span class="ss">@oiv2022</span><span class="pp">]</span></span>
+<span id="cb26-543"><a href="#cb26-543" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> approximately 33 L of wine for every person in the EU<span class="pp">[^</span><span class="ss">1</span><span class="pp">]</span></span>
+<span id="cb26-544"><a href="#cb26-544" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> enough to fill about 6900 Olympic swimming pools<span class="pp">[^</span><span class="ss">2</span><span class="pp">]</span></span>
+<span id="cb26-545"><a href="#cb26-545" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-546"><a href="#cb26-546" aria-hidden="true" tabindex="-1"></a><span class="ex">Let</span><span class="st">'s now look at the historical trends, focusing on the top three wine producers. In order to make our findings more robust, we also include data from two additional sources:</span></span>
+<span id="cb26-547"><a href="#cb26-547" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-548"><a href="#cb26-548" aria-hidden="true" tabindex="-1"></a><span class="st">* The [database](https://www.oiv.int/what-we-do/data-discovery-report?oiv) of the International Organisation of Vine and Wine (OIV). See @sec-oiv for more details.</span></span>
+<span id="cb26-549"><a href="#cb26-549" aria-hidden="true" tabindex="-1"></a><span class="st">* The [database](https://economics.adelaide.edu.au/wine-economics/databases#annual-database-of-global-wine-markets-1835-to-2019) [@WERI] from Wine Economics Reasearch Institute at University of Adelaide.  This database is a single `Excel` file with over 100 sheets and contains a wealth of historical information.  See @sec-weri for more details.</span></span>
 <span id="cb26-550"><a href="#cb26-550" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-551"><a href="#cb26-551" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> The <span class="pp">[</span><span class="ss">database</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://www.oiv.int/what-we-do/data-discovery-report?oiv</span><span class="kw">)</span> <span class="ex">of</span> the International Organisation of Vine and Wine <span class="er">(</span><span class="ex">OIV</span><span class="kw">)</span><span class="bu">.</span> See @sec-oiv for more details.</span>
-<span id="cb26-552"><a href="#cb26-552" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> The <span class="pp">[</span><span class="ss">database</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://economics.adelaide.edu.au/wine-economics/databases#annual-database-of-global-wine-markets-1835-to-2019</span><span class="kw">)</span> <span class="ex">[@WERI]</span> from Wine Economics Reasearch Institute at University of Adelaide.  This database is a single <span class="kw">`</span><span class="st">Excel</span><span class="kw">`</span> <span class="fu">file</span> with over 100 sheets and contains a wealth of historical information.  See @sec-weri for more details.</span>
-<span id="cb26-553"><a href="#cb26-553" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-554"><a href="#cb26-554" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-555"><a href="#cb26-555" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-558"><a href="#cb26-558" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-559"><a href="#cb26-559" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-fold: true</span></span>
-<span id="cb26-560"><a href="#cb26-560" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-summary: "</span>Show the code<span class="st">"</span></span>
+<span id="cb26-551"><a href="#cb26-551" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-552"><a href="#cb26-552" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-555"><a href="#cb26-555" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-556"><a href="#cb26-556" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-fold: true</span></span>
+<span id="cb26-557"><a href="#cb26-557" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-summary: "Show the code"</span></span>
+<span id="cb26-558"><a href="#cb26-558" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-559"><a href="#cb26-559" aria-hidden="true" tabindex="-1"></a><span class="st"># Extract the top 3 producers</span></span>
+<span id="cb26-560"><a href="#cb26-560" aria-hidden="true" tabindex="-1"></a><span class="st">dominant_producers = df_to_plot["Member State"].values[:3]</span></span>
 <span id="cb26-561"><a href="#cb26-561" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-562"><a href="#cb26-562" aria-hidden="true" tabindex="-1"></a><span class="st"># Extract the top 3 producers</span></span>
-<span id="cb26-563"><a href="#cb26-563" aria-hidden="true" tabindex="-1"></a><span class="st">dominant_producers = df_to_plot["</span>Member State<span class="st">"].values[:3]</span></span>
-<span id="cb26-564"><a href="#cb26-564" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-565"><a href="#cb26-565" aria-hidden="true" tabindex="-1"></a><span class="st"># Load the data from the Wine Economics Research Institute</span></span>
-<span id="cb26-566"><a href="#cb26-566" aria-hidden="true" tabindex="-1"></a><span class="st">df_WERI = pd.ExcelFile(</span></span>
-<span id="cb26-567"><a href="#cb26-567" aria-hidden="true" tabindex="-1"></a><span class="st">    f"</span>{DATADIR}/wine_statistics/Megafile_of_global_wine_data_1835_to_2016_1217.xlsx<span class="st">"</span></span>
-<span id="cb26-568"><a href="#cb26-568" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
-<span id="cb26-569"><a href="#cb26-569" aria-hidden="true" tabindex="-1"></a><span class="st"># Select the right sheet</span></span>
-<span id="cb26-570"><a href="#cb26-570" aria-hidden="true" tabindex="-1"></a><span class="st">df_production_WERI = df_WERI.parse("</span>T6 Wine production<span class="st">", header=1)</span></span>
-<span id="cb26-571"><a href="#cb26-571" aria-hidden="true" tabindex="-1"></a><span class="st"># Rename the no-name column with year</span></span>
-<span id="cb26-572"><a href="#cb26-572" aria-hidden="true" tabindex="-1"></a><span class="st">df_production_WERI = df_production_WERI.rename(columns={"</span>Unnamed: 0<span class="st">": "</span>Year<span class="st">"})</span></span>
-<span id="cb26-573"><a href="#cb26-573" aria-hidden="true" tabindex="-1"></a><span class="st">df_tcmp = df_production_WERI[df_production_WERI["</span>Year<span class="st">"].isin(res["</span>Year<span class="st">"].values)]</span></span>
-<span id="cb26-574"><a href="#cb26-574" aria-hidden="true" tabindex="-1"></a><span class="st"># Load data from the OIV</span></span>
-<span id="cb26-575"><a href="#cb26-575" aria-hidden="true" tabindex="-1"></a><span class="st">df_oiv = pd.read_excel(f"</span>{DATADIR}/wine_statistics/oiv_data.xlsx<span class="st">")</span></span>
-<span id="cb26-576"><a href="#cb26-576" aria-hidden="true" tabindex="-1"></a><span class="st"># We need to select the appropriate units of volume. Note the strange /xa0 character which shows</span></span>
-<span id="cb26-577"><a href="#cb26-577" aria-hidden="true" tabindex="-1"></a><span class="st"># up as a space!</span></span>
-<span id="cb26-578"><a href="#cb26-578" aria-hidden="true" tabindex="-1"></a><span class="st">df_production_OIV = df_oiv[(df_oiv["</span>Variable<span class="st">"] == "</span>Production<span class="st">") &amp; (df_oiv['Unit'] == "</span>1000\xa0hl<span class="st">")]</span></span>
-<span id="cb26-579"><a href="#cb26-579" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-580"><a href="#cb26-580" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-581"><a href="#cb26-581" aria-hidden="true" tabindex="-1"></a><span class="st"># Setup some defaults</span></span>
-<span id="cb26-582"><a href="#cb26-582" aria-hidden="true" tabindex="-1"></a><span class="st">golden = (1 + np.sqrt(5)) / 2</span></span>
-<span id="cb26-583"><a href="#cb26-583" aria-hidden="true" tabindex="-1"></a><span class="st">width = 10</span></span>
-<span id="cb26-584"><a href="#cb26-584" aria-hidden="true" tabindex="-1"></a><span class="st">height = width / golden</span></span>
-<span id="cb26-585"><a href="#cb26-585" aria-hidden="true" tabindex="-1"></a><span class="st">ax = setup_timeseries_plot(width=width, height=height)</span></span>
-<span id="cb26-586"><a href="#cb26-586" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-587"><a href="#cb26-587" aria-hidden="true" tabindex="-1"></a><span class="st"># Note the changes in the quantities being plotted: everything is converted to</span></span>
-<span id="cb26-588"><a href="#cb26-588" aria-hidden="true" tabindex="-1"></a><span class="st"># mega hectorliters (mha, 1e8 litres)</span></span>
-<span id="cb26-589"><a href="#cb26-589" aria-hidden="true" tabindex="-1"></a><span class="st">for country in dominant_producers:</span></span>
-<span id="cb26-590"><a href="#cb26-590" aria-hidden="true" tabindex="-1"></a><span class="st">    tmp = res[res["</span>Member State<span class="st">"] == country]</span></span>
-<span id="cb26-591"><a href="#cb26-591" aria-hidden="true" tabindex="-1"></a><span class="st">    (line,) = ax.plot(tmp["</span>Year<span class="st">"], tmp["</span>Production<span class="st">"] / 1000, label=country)</span></span>
-<span id="cb26-592"><a href="#cb26-592" aria-hidden="true" tabindex="-1"></a><span class="st">    tmp_oiv = df_production_OIV[df_production_OIV["</span>Region/Country<span class="st">"] == country]</span></span>
-<span id="cb26-593"><a href="#cb26-593" aria-hidden="true" tabindex="-1"></a><span class="st">    ax.plot(tmp_oiv["</span>Year<span class="st">"], tmp_oiv["</span>Quantity<span class="st">"] / 1e3, ls="</span>:<span class="st">", color=line.get_color())</span></span>
-<span id="cb26-594"><a href="#cb26-594" aria-hidden="true" tabindex="-1"></a><span class="st">    ax.plot(</span></span>
-<span id="cb26-595"><a href="#cb26-595" aria-hidden="true" tabindex="-1"></a><span class="st">        df_tcmp["</span>Year<span class="st">"], df_tcmp[country] * 10 / 1e6, ls="</span>--<span class="st">", color=line.get_color()</span></span>
-<span id="cb26-596"><a href="#cb26-596" aria-hidden="true" tabindex="-1"></a><span class="st">    )</span></span>
-<span id="cb26-597"><a href="#cb26-597" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
-<span id="cb26-598"><a href="#cb26-598" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-599"><a href="#cb26-599" aria-hidden="true" tabindex="-1"></a><span class="st"># Manually create the legend to distinguish the datasets</span></span>
-<span id="cb26-600"><a href="#cb26-600" aria-hidden="true" tabindex="-1"></a><span class="st">from matplotlib.lines import Line2D</span></span>
-<span id="cb26-601"><a href="#cb26-601" aria-hidden="true" tabindex="-1"></a><span class="st">line1 = Line2D([0], [0], label='Eurostat', color='k')</span></span>
-<span id="cb26-602"><a href="#cb26-602" aria-hidden="true" tabindex="-1"></a><span class="st">line2 = Line2D([0], [0], label='OIV', color='k',ls="</span>:<span class="st">")</span></span>
-<span id="cb26-603"><a href="#cb26-603" aria-hidden="true" tabindex="-1"></a><span class="st">line3 = Line2D([0], [0], label='WERI', color='k',ls="</span>--<span class="st">")</span></span>
-<span id="cb26-604"><a href="#cb26-604" aria-hidden="true" tabindex="-1"></a><span class="st">handles, labels = ax.get_legend_handles_labels()</span></span>
-<span id="cb26-605"><a href="#cb26-605" aria-hidden="true" tabindex="-1"></a><span class="st">handles.extend([line1,line2,line3])</span></span>
-<span id="cb26-606"><a href="#cb26-606" aria-hidden="true" tabindex="-1"></a><span class="st">ax.legend(handles=handles,ncol=2,loc=4, prop={"</span>size<span class="st">": 14, "</span>weight<span class="st">": "</span>light<span class="st">"})</span></span>
-<span id="cb26-607"><a href="#cb26-607" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_xlabel("</span>Year<span class="st">")</span></span>
-<span id="cb26-608"><a href="#cb26-608" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_ylabel("</span>Volume <span class="er">(</span><span class="ex">millions</span> of hectolitres<span class="kw">)</span><span class="st">")</span></span>
-<span id="cb26-609"><a href="#cb26-609" aria-hidden="true" tabindex="-1"></a><span class="st">_ = ax.set_title("</span><span class="ex">Top</span> wine producers in the EU<span class="st">", fontsize=30, fontweight="</span>light<span class="st">")</span></span>
-<span id="cb26-610"><a href="#cb26-610" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
-<span id="cb26-611"><a href="#cb26-611" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-612"><a href="#cb26-612" aria-hidden="true" tabindex="-1"></a><span class="ex">Interestingly</span> the three data sources agree very well for France and Spain but disagree substantially for Italy. If one takes the Eurostat dataset and add back the <span class="st">"Non-Vinified"</span> data, one gets the following:</span>
-<span id="cb26-613"><a href="#cb26-613" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-616"><a href="#cb26-616" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-617"><a href="#cb26-617" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-fold: true</span></span>
-<span id="cb26-618"><a href="#cb26-618" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-summary: "</span>Show the code<span class="st">"</span></span>
-<span id="cb26-619"><a href="#cb26-619" aria-hidden="true" tabindex="-1"></a><span class="st"># |</span></span>
+<span id="cb26-562"><a href="#cb26-562" aria-hidden="true" tabindex="-1"></a><span class="st"># Load the data from the Wine Economics Research Institute</span></span>
+<span id="cb26-563"><a href="#cb26-563" aria-hidden="true" tabindex="-1"></a><span class="st">df_WERI = pd.ExcelFile(</span></span>
+<span id="cb26-564"><a href="#cb26-564" aria-hidden="true" tabindex="-1"></a><span class="st">    f"{DATADIR}/wine_statistics/Megafile_of_global_wine_data_1835_to_2016_1217.xlsx"</span></span>
+<span id="cb26-565"><a href="#cb26-565" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb26-566"><a href="#cb26-566" aria-hidden="true" tabindex="-1"></a><span class="st"># Select the right sheet</span></span>
+<span id="cb26-567"><a href="#cb26-567" aria-hidden="true" tabindex="-1"></a><span class="st">df_production_WERI = df_WERI.parse("T6 Wine production", header=1)</span></span>
+<span id="cb26-568"><a href="#cb26-568" aria-hidden="true" tabindex="-1"></a><span class="st"># Rename the no-name column with year</span></span>
+<span id="cb26-569"><a href="#cb26-569" aria-hidden="true" tabindex="-1"></a><span class="st">df_production_WERI = df_production_WERI.rename(columns={"Unnamed: 0": "Year"})</span></span>
+<span id="cb26-570"><a href="#cb26-570" aria-hidden="true" tabindex="-1"></a><span class="st">df_tcmp = df_production_WERI[df_production_WERI["Year"].isin(res["Year"].values)]</span></span>
+<span id="cb26-571"><a href="#cb26-571" aria-hidden="true" tabindex="-1"></a><span class="st"># Load data from the OIV</span></span>
+<span id="cb26-572"><a href="#cb26-572" aria-hidden="true" tabindex="-1"></a><span class="st">df_oiv = pd.read_excel(f"{DATADIR}/wine_statistics/oiv_data.xlsx")</span></span>
+<span id="cb26-573"><a href="#cb26-573" aria-hidden="true" tabindex="-1"></a><span class="st"># We need to select the appropriate units of volume. Note the strange /xa0 character which shows</span></span>
+<span id="cb26-574"><a href="#cb26-574" aria-hidden="true" tabindex="-1"></a><span class="st"># up as a space!</span></span>
+<span id="cb26-575"><a href="#cb26-575" aria-hidden="true" tabindex="-1"></a><span class="st">df_production_OIV = df_oiv[(df_oiv["Variable"] == "Production") &amp; (df_oiv['</span><span class="ex">Unit</span><span class="st">'] == "1000\xa0hl")]</span></span>
+<span id="cb26-576"><a href="#cb26-576" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-577"><a href="#cb26-577" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-578"><a href="#cb26-578" aria-hidden="true" tabindex="-1"></a><span class="st"># Setup some defaults</span></span>
+<span id="cb26-579"><a href="#cb26-579" aria-hidden="true" tabindex="-1"></a><span class="st">golden = (1 + np.sqrt(5)) / 2</span></span>
+<span id="cb26-580"><a href="#cb26-580" aria-hidden="true" tabindex="-1"></a><span class="st">width = 10</span></span>
+<span id="cb26-581"><a href="#cb26-581" aria-hidden="true" tabindex="-1"></a><span class="st">height = width / golden</span></span>
+<span id="cb26-582"><a href="#cb26-582" aria-hidden="true" tabindex="-1"></a><span class="st">ax = setup_timeseries_plot(width=width, height=height)</span></span>
+<span id="cb26-583"><a href="#cb26-583" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-584"><a href="#cb26-584" aria-hidden="true" tabindex="-1"></a><span class="st"># Note the changes in the quantities being plotted: everything is converted to</span></span>
+<span id="cb26-585"><a href="#cb26-585" aria-hidden="true" tabindex="-1"></a><span class="st"># mega hectorliters (mha, 1e8 litres)</span></span>
+<span id="cb26-586"><a href="#cb26-586" aria-hidden="true" tabindex="-1"></a><span class="st">for country in dominant_producers:</span></span>
+<span id="cb26-587"><a href="#cb26-587" aria-hidden="true" tabindex="-1"></a><span class="st">    tmp = res[res["Member State"] == country]</span></span>
+<span id="cb26-588"><a href="#cb26-588" aria-hidden="true" tabindex="-1"></a><span class="st">    (line,) = ax.plot(tmp["Year"], tmp["Production"] / 1000, label=country)</span></span>
+<span id="cb26-589"><a href="#cb26-589" aria-hidden="true" tabindex="-1"></a><span class="st">    tmp_oiv = df_production_OIV[df_production_OIV["Region/Country"] == country]</span></span>
+<span id="cb26-590"><a href="#cb26-590" aria-hidden="true" tabindex="-1"></a><span class="st">    ax.plot(tmp_oiv["Year"], tmp_oiv["Quantity"] / 1e3, ls=":", color=line.get_color())</span></span>
+<span id="cb26-591"><a href="#cb26-591" aria-hidden="true" tabindex="-1"></a><span class="st">    ax.plot(</span></span>
+<span id="cb26-592"><a href="#cb26-592" aria-hidden="true" tabindex="-1"></a><span class="st">        df_tcmp["Year"], df_tcmp[country] * 10 / 1e6, ls="--", color=line.get_color()</span></span>
+<span id="cb26-593"><a href="#cb26-593" aria-hidden="true" tabindex="-1"></a><span class="st">    )</span></span>
+<span id="cb26-594"><a href="#cb26-594" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb26-595"><a href="#cb26-595" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-596"><a href="#cb26-596" aria-hidden="true" tabindex="-1"></a><span class="st"># Manually create the legend to distinguish the datasets</span></span>
+<span id="cb26-597"><a href="#cb26-597" aria-hidden="true" tabindex="-1"></a><span class="st">from matplotlib.lines import Line2D</span></span>
+<span id="cb26-598"><a href="#cb26-598" aria-hidden="true" tabindex="-1"></a><span class="st">line1 = Line2D([0], [0], label='</span><span class="ex">Eurostat</span><span class="st">', color='</span><span class="ex">k</span><span class="st">')</span></span>
+<span id="cb26-599"><a href="#cb26-599" aria-hidden="true" tabindex="-1"></a><span class="st">line2 = Line2D([0], [0], label='</span><span class="ex">OIV</span><span class="st">', color='</span><span class="ex">k</span><span class="st">',ls=":")</span></span>
+<span id="cb26-600"><a href="#cb26-600" aria-hidden="true" tabindex="-1"></a><span class="st">line3 = Line2D([0], [0], label='</span><span class="ex">WERI</span><span class="st">', color='</span><span class="ex">k</span><span class="st">',ls="--")</span></span>
+<span id="cb26-601"><a href="#cb26-601" aria-hidden="true" tabindex="-1"></a><span class="st">handles, labels = ax.get_legend_handles_labels()</span></span>
+<span id="cb26-602"><a href="#cb26-602" aria-hidden="true" tabindex="-1"></a><span class="st">handles.extend([line1,line2,line3])</span></span>
+<span id="cb26-603"><a href="#cb26-603" aria-hidden="true" tabindex="-1"></a><span class="st">ax.legend(handles=handles,ncol=2,loc=4, prop={"size": 14, "weight": "light"})</span></span>
+<span id="cb26-604"><a href="#cb26-604" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_xlabel("Year")</span></span>
+<span id="cb26-605"><a href="#cb26-605" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_ylabel("Volume (millions of hectolitres)")</span></span>
+<span id="cb26-606"><a href="#cb26-606" aria-hidden="true" tabindex="-1"></a><span class="st">_ = ax.set_title("Top wine producers in the EU", fontsize=30, fontweight="light")</span></span>
+<span id="cb26-607"><a href="#cb26-607" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb26-608"><a href="#cb26-608" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-609"><a href="#cb26-609" aria-hidden="true" tabindex="-1"></a><span class="st">Interestingly the three data sources agree very well for France and Spain but disagree substantially for Italy. If one takes the Eurostat dataset and add back the "Non-Vinified" data, one gets the following:</span></span>
+<span id="cb26-610"><a href="#cb26-610" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-613"><a href="#cb26-613" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-614"><a href="#cb26-614" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-fold: true</span></span>
+<span id="cb26-615"><a href="#cb26-615" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-summary: "Show the code"</span></span>
+<span id="cb26-616"><a href="#cb26-616" aria-hidden="true" tabindex="-1"></a><span class="st"># |</span></span>
+<span id="cb26-617"><a href="#cb26-617" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-618"><a href="#cb26-618" aria-hidden="true" tabindex="-1"></a><span class="st"># Data where _all_ grape production is included</span></span>
+<span id="cb26-619"><a href="#cb26-619" aria-hidden="true" tabindex="-1"></a><span class="st">res2 = df_production.groupby(["Member State", "Year"])["Production"].sum().reset_index()</span></span>
 <span id="cb26-620"><a href="#cb26-620" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-621"><a href="#cb26-621" aria-hidden="true" tabindex="-1"></a><span class="st"># Data where _all_ grape production is included</span></span>
-<span id="cb26-622"><a href="#cb26-622" aria-hidden="true" tabindex="-1"></a><span class="st">res2 = df_production.groupby(["</span>Member State<span class="st">", "</span>Year<span class="st">"])["</span>Production<span class="st">"].sum().reset_index()</span></span>
-<span id="cb26-623"><a href="#cb26-623" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-624"><a href="#cb26-624" aria-hidden="true" tabindex="-1"></a><span class="st">ax = setup_timeseries_plot(width=width, height=height)</span></span>
-<span id="cb26-625"><a href="#cb26-625" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-626"><a href="#cb26-626" aria-hidden="true" tabindex="-1"></a><span class="st"># Note the changes in the quantities being plotted: everything is converted to</span></span>
-<span id="cb26-627"><a href="#cb26-627" aria-hidden="true" tabindex="-1"></a><span class="st"># mega hectorliters (mha, 1e8 litres)</span></span>
-<span id="cb26-628"><a href="#cb26-628" aria-hidden="true" tabindex="-1"></a><span class="st">country = "</span>Italy<span class="st">"</span></span>
-<span id="cb26-629"><a href="#cb26-629" aria-hidden="true" tabindex="-1"></a><span class="st">tmp = res[res["</span>Member State<span class="st">"] == country]</span></span>
-<span id="cb26-630"><a href="#cb26-630" aria-hidden="true" tabindex="-1"></a><span class="st">tmp2 = res2[res2["</span>Member State<span class="st">"] == country]</span></span>
-<span id="cb26-631"><a href="#cb26-631" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-632"><a href="#cb26-632" aria-hidden="true" tabindex="-1"></a><span class="st">(line,) = ax.plot(tmp["</span>Year<span class="st">"], tmp["</span>Production<span class="st">"] / 1000, label="</span>Eurostat<span class="st">")</span></span>
-<span id="cb26-633"><a href="#cb26-633" aria-hidden="true" tabindex="-1"></a><span class="st">ax.plot(tmp2["</span>Year<span class="st">"], tmp2["</span>Production<span class="st">"] / 1000, label="</span>Eurostat, all<span class="st">", ls="</span>-<span class="st">")</span></span>
-<span id="cb26-634"><a href="#cb26-634" aria-hidden="true" tabindex="-1"></a><span class="st">tmp_oiv = df_production_OIV[df_production_OIV["</span>Region/Country<span class="st">"] == country]</span></span>
-<span id="cb26-635"><a href="#cb26-635" aria-hidden="true" tabindex="-1"></a><span class="st">ax.plot(tmp_oiv["</span>Year<span class="st">"], tmp_oiv["</span>Quantity<span class="st">"] / 1e3, ls="</span>--<span class="st">", label="</span>OIV<span class="st">")</span></span>
-<span id="cb26-636"><a href="#cb26-636" aria-hidden="true" tabindex="-1"></a><span class="st">ax.plot(df_tcmp["</span>Year<span class="st">"], df_tcmp[country] * 10 / 1e6, ls="</span>:<span class="st">", label="</span>WERI<span class="st">")</span></span>
-<span id="cb26-637"><a href="#cb26-637" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-638"><a href="#cb26-638" aria-hidden="true" tabindex="-1"></a><span class="st">ax.legend(loc=3, prop={"</span>size<span class="st">": 14, "</span>weight<span class="st">": "</span>light<span class="st">"})</span></span>
-<span id="cb26-639"><a href="#cb26-639" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-640"><a href="#cb26-640" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_xlabel("</span>Year<span class="st">")</span></span>
-<span id="cb26-641"><a href="#cb26-641" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_ylabel("</span>Volume <span class="er">(</span><span class="ex">millions</span> of hectolitres<span class="kw">)</span><span class="st">")</span></span>
-<span id="cb26-642"><a href="#cb26-642" aria-hidden="true" tabindex="-1"></a><span class="st">_ = ax.set_title("</span><span class="ex">Italy</span> wine production<span class="st">", fontsize=30, fontweight="</span>light<span class="st">")</span></span>
-<span id="cb26-643"><a href="#cb26-643" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
-<span id="cb26-644"><a href="#cb26-644" aria-hidden="true" tabindex="-1"></a><span class="ex">Thus</span> it appears that there is some sort of inconsistency in the reporting of the production volume, which affects Italy in particular.</span>
-<span id="cb26-645"><a href="#cb26-645" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-646"><a href="#cb26-646" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> WERI data set actually extends much further into the past for some countries, so it<span class="st">'s interesting to see even more long-term trends:</span></span>
-<span id="cb26-647"><a href="#cb26-647" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-650"><a href="#cb26-650" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-651"><a href="#cb26-651" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-fold: true</span></span>
-<span id="cb26-652"><a href="#cb26-652" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-summary: "Show the code"</span></span>
-<span id="cb26-653"><a href="#cb26-653" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-654"><a href="#cb26-654" aria-hidden="true" tabindex="-1"></a><span class="st">ax = setup_timeseries_plot(width=width,height=height)</span></span>
-<span id="cb26-655"><a href="#cb26-655" aria-hidden="true" tabindex="-1"></a><span class="st">for country in dominant_producers:</span></span>
-<span id="cb26-656"><a href="#cb26-656" aria-hidden="true" tabindex="-1"></a><span class="st">    ax.plot(</span></span>
-<span id="cb26-657"><a href="#cb26-657" aria-hidden="true" tabindex="-1"></a><span class="st">        df_production_WERI["Year"], df_production_WERI[country] * 10 / 1e6, ls="-",label=country</span></span>
-<span id="cb26-658"><a href="#cb26-658" aria-hidden="true" tabindex="-1"></a><span class="st">    )</span></span>
-<span id="cb26-659"><a href="#cb26-659" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_xlabel("Year")</span></span>
-<span id="cb26-660"><a href="#cb26-660" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_ylabel("Volume (millions of hectolitres)")</span></span>
-<span id="cb26-661"><a href="#cb26-661" aria-hidden="true" tabindex="-1"></a><span class="st">_ = ax.legend(loc=2, prop={"size": 14, "weight": "light"})</span></span>
-<span id="cb26-662"><a href="#cb26-662" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb26-621"><a href="#cb26-621" aria-hidden="true" tabindex="-1"></a><span class="st">ax = setup_timeseries_plot(width=width, height=height)</span></span>
+<span id="cb26-622"><a href="#cb26-622" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-623"><a href="#cb26-623" aria-hidden="true" tabindex="-1"></a><span class="st"># Note the changes in the quantities being plotted: everything is converted to</span></span>
+<span id="cb26-624"><a href="#cb26-624" aria-hidden="true" tabindex="-1"></a><span class="st"># mega hectorliters (mha, 1e8 litres)</span></span>
+<span id="cb26-625"><a href="#cb26-625" aria-hidden="true" tabindex="-1"></a><span class="st">country = "Italy"</span></span>
+<span id="cb26-626"><a href="#cb26-626" aria-hidden="true" tabindex="-1"></a><span class="st">tmp = res[res["Member State"] == country]</span></span>
+<span id="cb26-627"><a href="#cb26-627" aria-hidden="true" tabindex="-1"></a><span class="st">tmp2 = res2[res2["Member State"] == country]</span></span>
+<span id="cb26-628"><a href="#cb26-628" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-629"><a href="#cb26-629" aria-hidden="true" tabindex="-1"></a><span class="st">(line,) = ax.plot(tmp["Year"], tmp["Production"] / 1000, label="Eurostat")</span></span>
+<span id="cb26-630"><a href="#cb26-630" aria-hidden="true" tabindex="-1"></a><span class="st">ax.plot(tmp2["Year"], tmp2["Production"] / 1000, label="Eurostat, all", ls="-")</span></span>
+<span id="cb26-631"><a href="#cb26-631" aria-hidden="true" tabindex="-1"></a><span class="st">tmp_oiv = df_production_OIV[df_production_OIV["Region/Country"] == country]</span></span>
+<span id="cb26-632"><a href="#cb26-632" aria-hidden="true" tabindex="-1"></a><span class="st">ax.plot(tmp_oiv["Year"], tmp_oiv["Quantity"] / 1e3, ls="--", label="OIV")</span></span>
+<span id="cb26-633"><a href="#cb26-633" aria-hidden="true" tabindex="-1"></a><span class="st">ax.plot(df_tcmp["Year"], df_tcmp[country] * 10 / 1e6, ls=":", label="WERI")</span></span>
+<span id="cb26-634"><a href="#cb26-634" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-635"><a href="#cb26-635" aria-hidden="true" tabindex="-1"></a><span class="st">ax.legend(loc=3, prop={"size": 14, "weight": "light"})</span></span>
+<span id="cb26-636"><a href="#cb26-636" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-637"><a href="#cb26-637" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_xlabel("Year")</span></span>
+<span id="cb26-638"><a href="#cb26-638" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_ylabel("Volume (millions of hectolitres)")</span></span>
+<span id="cb26-639"><a href="#cb26-639" aria-hidden="true" tabindex="-1"></a><span class="st">_ = ax.set_title("Italy wine production", fontsize=30, fontweight="light")</span></span>
+<span id="cb26-640"><a href="#cb26-640" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb26-641"><a href="#cb26-641" aria-hidden="true" tabindex="-1"></a><span class="st">Thus it appears that there is some sort of inconsistency in the reporting of the production volume, which affects Italy in particular.</span></span>
+<span id="cb26-642"><a href="#cb26-642" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-643"><a href="#cb26-643" aria-hidden="true" tabindex="-1"></a><span class="st">The WERI data set actually extends much further into the past for some countries, so it'</span><span class="ex">s</span> interesting to see even more long-term trends:</span>
+<span id="cb26-644"><a href="#cb26-644" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-647"><a href="#cb26-647" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-648"><a href="#cb26-648" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-fold: true</span></span>
+<span id="cb26-649"><a href="#cb26-649" aria-hidden="true" tabindex="-1"></a><span class="st"># | code-summary: "</span>Show the code<span class="st">"</span></span>
+<span id="cb26-650"><a href="#cb26-650" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-651"><a href="#cb26-651" aria-hidden="true" tabindex="-1"></a><span class="st">ax = setup_timeseries_plot(width=width,height=height)</span></span>
+<span id="cb26-652"><a href="#cb26-652" aria-hidden="true" tabindex="-1"></a><span class="st">for country in dominant_producers:</span></span>
+<span id="cb26-653"><a href="#cb26-653" aria-hidden="true" tabindex="-1"></a><span class="st">    ax.plot(</span></span>
+<span id="cb26-654"><a href="#cb26-654" aria-hidden="true" tabindex="-1"></a><span class="st">        df_production_WERI["</span>Year<span class="st">"], df_production_WERI[country] * 10 / 1e6, ls="</span>-<span class="st">",label=country</span></span>
+<span id="cb26-655"><a href="#cb26-655" aria-hidden="true" tabindex="-1"></a><span class="st">    )</span></span>
+<span id="cb26-656"><a href="#cb26-656" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_xlabel("</span>Year<span class="st">")</span></span>
+<span id="cb26-657"><a href="#cb26-657" aria-hidden="true" tabindex="-1"></a><span class="st">ax.set_ylabel("</span>Volume <span class="er">(</span><span class="ex">millions</span> of hectolitres<span class="kw">)</span><span class="st">")</span></span>
+<span id="cb26-658"><a href="#cb26-658" aria-hidden="true" tabindex="-1"></a><span class="st">_ = ax.legend(loc=2, prop={"</span><span class="ex">size</span><span class="st">": 14, "</span><span class="ex">weight</span><span class="st">": "</span><span class="ex">light</span><span class="st">"})</span></span>
+<span id="cb26-659"><a href="#cb26-659" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
+<span id="cb26-660"><a href="#cb26-660" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-661"><a href="#cb26-661" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-662"><a href="#cb26-662" aria-hidden="true" tabindex="-1"></a><span class="ex">A</span> few interesting things to observe:</span>
 <span id="cb26-663"><a href="#cb26-663" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-664"><a href="#cb26-664" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-665"><a href="#cb26-665" aria-hidden="true" tabindex="-1"></a><span class="st">A few interesting things to observe:</span></span>
+<span id="cb26-664"><a href="#cb26-664" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> Historically, Italy and France produced far more wine than Spain</span>
+<span id="cb26-665"><a href="#cb26-665" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> The production of wine reached the highest recorded value around 1975 for Italy and France and has been declining ever since, with current levels at about 50% of the peak.</span>
 <span id="cb26-666"><a href="#cb26-666" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-667"><a href="#cb26-667" aria-hidden="true" tabindex="-1"></a><span class="st">* Historically, Italy and France produced far more wine than Spain</span></span>
-<span id="cb26-668"><a href="#cb26-668" aria-hidden="true" tabindex="-1"></a><span class="st">* The production of wine reached the highest recorded value around 1975 for Italy and France and has been declining ever since, with current levels at about 50% of the peak.</span></span>
-<span id="cb26-669"><a href="#cb26-669" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-667"><a href="#cb26-667" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-668"><a href="#cb26-668" aria-hidden="true" tabindex="-1"></a><span class="ex">[^1]:</span> See the demographics data <span class="pp">[</span><span class="ss">here</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://ec.europa.eu/eurostat/databrowser/view/DEMO_GIND__custom_7127262/default/table</span><span class="kw">)</span></span>
+<span id="cb26-669"><a href="#cb26-669" aria-hidden="true" tabindex="-1"></a><span class="ex">[^2]:</span> Assuming as standard swimming-pool capacity of <span class="va">$2</span>.5<span class="dt">\t</span>imes 10^{6}$ liters.</span>
 <span id="cb26-670"><a href="#cb26-670" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-671"><a href="#cb26-671" aria-hidden="true" tabindex="-1"></a><span class="st">[^1]: See the demographics data [here](https://ec.europa.eu/eurostat/databrowser/view/DEMO_GIND__custom_7127262/default/table)</span></span>
-<span id="cb26-672"><a href="#cb26-672" aria-hidden="true" tabindex="-1"></a><span class="st">[^2]: Assuming as standard swimming-pool capacity of $2.5\times 10^{6}$ liters.</span></span>
-<span id="cb26-673"><a href="#cb26-673" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-674"><a href="#cb26-674" aria-hidden="true" tabindex="-1"></a><span class="st"># Appendix</span></span>
-<span id="cb26-675"><a href="#cb26-675" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-676"><a href="#cb26-676" aria-hidden="true" tabindex="-1"></a><span class="st">## Analysis environment {#sec-env}</span></span>
-<span id="cb26-677"><a href="#cb26-677" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-678"><a href="#cb26-678" aria-hidden="true" tabindex="-1"></a><span class="st">For the `Python` setup we use `mambaforge` as a drop-in replacement for the more widely known `conda`. You can download the latest version from the [website](https://github.com/conda-forge/miniforge#mambaforge) or run:</span></span>
-<span id="cb26-679"><a href="#cb26-679" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-680"><a href="#cb26-680" aria-hidden="true" tabindex="-1"></a><span class="st">```bash</span></span>
-<span id="cb26-681"><a href="#cb26-681" aria-hidden="true" tabindex="-1"></a><span class="st">wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh</span></span>
-<span id="cb26-682"><a href="#cb26-682" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
-<span id="cb26-683"><a href="#cb26-683" aria-hidden="true" tabindex="-1"></a><span class="st">and then execute the file.</span></span>
-<span id="cb26-684"><a href="#cb26-684" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-685"><a href="#cb26-685" aria-hidden="true" tabindex="-1"></a><span class="st">The `yaml` file with all the dependencies can be found [here](). To install everything, run the following command (if you prefer to use `conda`, you will need to first do `conda config --add channels conda-forge` and then replace `mamba` with `conda` everywhere below):</span></span>
-<span id="cb26-686"><a href="#cb26-686" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-687"><a href="#cb26-687" aria-hidden="true" tabindex="-1"></a><span class="st">```bash</span></span>
-<span id="cb26-688"><a href="#cb26-688" aria-hidden="true" tabindex="-1"></a><span class="st">mamba env create -f environment.yml</span></span>
-<span id="cb26-689"><a href="#cb26-689" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
-<span id="cb26-690"><a href="#cb26-690" aria-hidden="true" tabindex="-1"></a><span class="st">Then activate the environment with </span></span>
-<span id="cb26-691"><a href="#cb26-691" aria-hidden="true" tabindex="-1"></a><span class="st">```bash</span></span>
-<span id="cb26-692"><a href="#cb26-692" aria-hidden="true" tabindex="-1"></a><span class="st">mamba activate wine-analysis</span></span>
-<span id="cb26-693"><a href="#cb26-693" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb26-671"><a href="#cb26-671" aria-hidden="true" tabindex="-1"></a><span class="co"># Appendix</span></span>
+<span id="cb26-672"><a href="#cb26-672" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-673"><a href="#cb26-673" aria-hidden="true" tabindex="-1"></a><span class="co">## Analysis environment {#sec-env}</span></span>
+<span id="cb26-674"><a href="#cb26-674" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-675"><a href="#cb26-675" aria-hidden="true" tabindex="-1"></a><span class="ex">For</span> the <span class="kw">`</span><span class="st">Python</span><span class="kw">`</span> <span class="ex">setup</span> we use <span class="kw">`</span><span class="st">mambaforge</span><span class="kw">`</span> <span class="fu">as</span> a drop-in replacement for the more widely known <span class="kw">`</span><span class="st">conda</span><span class="kw">`</span><span class="bu">.</span> You can download the latest version from the <span class="pp">[</span><span class="ss">website</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://github.com/conda-forge/miniforge#mambaforge</span><span class="kw">)</span> <span class="ex">or</span> run:</span>
+<span id="cb26-676"><a href="#cb26-676" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-677"><a href="#cb26-677" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span><span class="st">bash</span></span>
+<span id="cb26-678"><a href="#cb26-678" aria-hidden="true" tabindex="-1"></a><span class="st">wget https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh</span></span>
+<span id="cb26-679"><a href="#cb26-679" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
+<span id="cb26-680"><a href="#cb26-680" aria-hidden="true" tabindex="-1"></a><span class="ex">and</span> then execute the file.</span>
+<span id="cb26-681"><a href="#cb26-681" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-682"><a href="#cb26-682" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> <span class="kw">`</span><span class="st">yaml</span><span class="kw">`</span> <span class="fu">file</span> with all the dependencies can be found <span class="pp">[</span><span class="ss">here</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://github.com/SergeiOssokine/SergeiOssokine.github.io/blob/main/analysis/setup/environment.yml</span><span class="kw">)</span><span class="bu">.</span> To install everything, run the following command <span class="er">(</span><span class="cf">if</span> <span class="ex">you</span> prefer to use <span class="kw">`</span><span class="ex">conda</span><span class="kw">`</span>, you will need to first do <span class="kw">`</span><span class="ex">conda</span> config <span class="at">--add</span> channels conda-forge<span class="kw">`</span> and then replace <span class="kw">`</span><span class="ex">mamba</span><span class="kw">`</span> with <span class="kw">`</span><span class="ex">conda</span><span class="kw">`</span> everywhere below<span class="kw">)</span><span class="bu">:</span></span>
+<span id="cb26-683"><a href="#cb26-683" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-684"><a href="#cb26-684" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span><span class="st">bash</span></span>
+<span id="cb26-685"><a href="#cb26-685" aria-hidden="true" tabindex="-1"></a><span class="st">mamba env create -f environment.yml</span></span>
+<span id="cb26-686"><a href="#cb26-686" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
+<span id="cb26-687"><a href="#cb26-687" aria-hidden="true" tabindex="-1"></a><span class="ex">Then</span> activate the environment with </span>
+<span id="cb26-688"><a href="#cb26-688" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span><span class="st">bash</span></span>
+<span id="cb26-689"><a href="#cb26-689" aria-hidden="true" tabindex="-1"></a><span class="st">mamba activate wine-analysis</span></span>
+<span id="cb26-690"><a href="#cb26-690" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
+<span id="cb26-691"><a href="#cb26-691" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-692"><a href="#cb26-692" aria-hidden="true" tabindex="-1"></a><span class="co">## Datasets </span></span>
+<span id="cb26-693"><a href="#cb26-693" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> appendix describes in detail how to obtain the datasets used in this blog. </span>
 <span id="cb26-694"><a href="#cb26-694" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-695"><a href="#cb26-695" aria-hidden="true" tabindex="-1"></a><span class="st">## Datasets </span></span>
-<span id="cb26-696"><a href="#cb26-696" aria-hidden="true" tabindex="-1"></a><span class="st">The appendix describes in detail how to obtain the datasets used in this blog. </span></span>
-<span id="cb26-697"><a href="#cb26-697" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-698"><a href="#cb26-698" aria-hidden="true" tabindex="-1"></a><span class="st">### Corine Land Cover {#sec-corine}</span></span>
-<span id="cb26-699"><a href="#cb26-699" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-700"><a href="#cb26-700" aria-hidden="true" tabindex="-1"></a><span class="st">The Corine Land Cover dataset provides multi-year, land coverage data for Europe, with the latest release being CLC-2018. To obtain the data:</span></span>
-<span id="cb26-701"><a href="#cb26-701" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-702"><a href="#cb26-702" aria-hidden="true" tabindex="-1"></a><span class="st">1. Go to the [latest data release](https://land.copernicus.eu/en/products/corine-land-cover/clc2018). Click "Download" in the left side-bar.</span></span>
-<span id="cb26-703"><a href="#cb26-703" aria-hidden="true" tabindex="-1"></a><span class="st">2. Register  for the EU Login if you don'</span>t have one /Log in if you already do</span>
-<span id="cb26-704"><a href="#cb26-704" aria-hidden="true" tabindex="-1"></a><span class="ex">3.</span> Scroll down to <span class="st">"Download pre-packaged data collections"</span> and select <span class="st">"u2018_clc2018_v2020_20u1_raster100m"</span></span>
-<span id="cb26-705"><a href="#cb26-705" aria-hidden="true" tabindex="-1"></a><span class="ex">4.</span> Click <span class="st">"Add to cart"</span></span>
-<span id="cb26-706"><a href="#cb26-706" aria-hidden="true" tabindex="-1"></a><span class="ex">5.</span> Go to your cart, select this dataset and click <span class="st">"Start downloading"</span>. This will queue your task.</span>
-<span id="cb26-707"><a href="#cb26-707" aria-hidden="true" tabindex="-1"></a><span class="ex">6.</span> Navigate to <span class="st">"Downloads process page"</span>. There you will see your task go from <span class="st">"Queued"</span> first to <span class="st">"In progress"</span> and then finally to <span class="st">"Completed"</span> at which point you can click the <span class="st">"Download file"</span> link to actually download your data.</span>
-<span id="cb26-708"><a href="#cb26-708" aria-hidden="true" tabindex="-1"></a><span class="ex">7.</span> Unzip the data and it<span class="st">'s ready for use</span></span>
-<span id="cb26-709"><a href="#cb26-709" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-695"><a href="#cb26-695" aria-hidden="true" tabindex="-1"></a><span class="co">### Corine Land Cover {#sec-corine}</span></span>
+<span id="cb26-696"><a href="#cb26-696" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-697"><a href="#cb26-697" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> Corine Land Cover dataset provides multi-year, land coverage data for Europe, with the latest release being CLC-2018. To obtain the data:</span>
+<span id="cb26-698"><a href="#cb26-698" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-699"><a href="#cb26-699" aria-hidden="true" tabindex="-1"></a><span class="ex">1.</span> Go to the [latest data release]<span class="er">(</span><span class="ex">https://land.copernicus.eu/en/products/corine-land-cover/clc2018</span><span class="kw">)</span><span class="bu">.</span> Click <span class="st">"Download"</span> in the left side-bar.</span>
+<span id="cb26-700"><a href="#cb26-700" aria-hidden="true" tabindex="-1"></a><span class="ex">2.</span> Register  for the EU Login if you don<span class="st">'t have one /Log in if you already do</span></span>
+<span id="cb26-701"><a href="#cb26-701" aria-hidden="true" tabindex="-1"></a><span class="st">3. Scroll down to "Download pre-packaged data collections" and select "u2018_clc2018_v2020_20u1_raster100m"</span></span>
+<span id="cb26-702"><a href="#cb26-702" aria-hidden="true" tabindex="-1"></a><span class="st">4. Click "Add to cart"</span></span>
+<span id="cb26-703"><a href="#cb26-703" aria-hidden="true" tabindex="-1"></a><span class="st">5. Go to your cart, select this dataset and click "Start downloading". This will queue your task.</span></span>
+<span id="cb26-704"><a href="#cb26-704" aria-hidden="true" tabindex="-1"></a><span class="st">6. Navigate to "Downloads process page". There you will see your task go from "Queued" first to "In progress" and then finally to "Completed" at which point you can click the "Download file" link to actually download your data.</span></span>
+<span id="cb26-705"><a href="#cb26-705" aria-hidden="true" tabindex="-1"></a><span class="st">7. Unzip the data and it'</span>s ready for use</span>
+<span id="cb26-706"><a href="#cb26-706" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-707"><a href="#cb26-707" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-708"><a href="#cb26-708" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-709"><a href="#cb26-709" aria-hidden="true" tabindex="-1"></a><span class="co">### Eurostat data {#sec-eurostat}</span></span>
 <span id="cb26-710"><a href="#cb26-710" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-711"><a href="#cb26-711" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-712"><a href="#cb26-712" aria-hidden="true" tabindex="-1"></a><span class="st">### Eurostat data {#sec-eurostat}</span></span>
-<span id="cb26-713"><a href="#cb26-713" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-714"><a href="#cb26-714" aria-hidden="true" tabindex="-1"></a><span class="st">By far the easiest way to get the relevant data is through the [web interface](https://ec.europa.eu/eurostat/databrowser/view/vit_t1/default/table?lang=en). Alternatively one could either:</span></span>
-<span id="cb26-715"><a href="#cb26-715" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-716"><a href="#cb26-716" aria-hidden="true" tabindex="-1"></a><span class="st">a. Download directly with e.g. `curl -o wine_land_usage_area_vit_t1.csv.gz https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/vit_t1.tsv.gz`</span></span>
-<span id="cb26-717"><a href="#cb26-717" aria-hidden="true" tabindex="-1"></a><span class="st">b. Use the REST API, see e.g. [here](https://wikis.ec.europa.eu/display/EurostatHELP/API+Statistics+-+data+query) for more information. Note that the parsing of the resulting data can be a bit involved. </span></span>
-<span id="cb26-718"><a href="#cb26-718" aria-hidden="true" tabindex="-1"></a><span class="st">c. Use a language-specific third-party package for Eurostat data, for example for [Python](https://pypi.org/project/eurostat/) or for [R](https://ropengov.github.io/eurostat/articles/eurostat_tutorial.html)</span></span>
-<span id="cb26-719"><a href="#cb26-719" aria-hidden="true" tabindex="-1"></a><span class="st">d. Use a package for parsing SDMX data, for example [pandasdmx](https://pandasdmx.readthedocs.io/en/v1.0/). </span></span>
-<span id="cb26-720"><a href="#cb26-720" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-721"><a href="#cb26-721" aria-hidden="true" tabindex="-1"></a><span class="st">We use approach d. in order to ensure easy reproducibility and allow us to retrieve any number of datasets from Eurostat.  The 2 datasets we use in this analysis are</span></span>
+<span id="cb26-711"><a href="#cb26-711" aria-hidden="true" tabindex="-1"></a><span class="ex">By</span> far the easiest way to get the relevant data is through the [web interface]<span class="er">(</span><span class="ex">https://ec.europa.eu/eurostat/databrowser/view/vit_t1/default/table?lang=en</span><span class="kw">)</span><span class="bu">.</span> Alternatively one could either:</span>
+<span id="cb26-712"><a href="#cb26-712" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-713"><a href="#cb26-713" aria-hidden="true" tabindex="-1"></a><span class="ex">a.</span> Download directly with e.g. <span class="kw">`</span><span class="st">curl -o wine_land_usage_area_vit_t1.csv.gz https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/vit_t1.tsv.gz</span><span class="kw">`</span></span>
+<span id="cb26-714"><a href="#cb26-714" aria-hidden="true" tabindex="-1"></a><span class="ex">b.</span> Use the REST API, see e.g. <span class="pp">[</span><span class="ss">here</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://wikis.ec.europa.eu/display/EurostatHELP/API+Statistics+-+data+query</span><span class="kw">)</span> <span class="cf">for</span> more <span class="ex">information.</span> Note that the parsing of the resulting data can be a bit involved. </span>
+<span id="cb26-715"><a href="#cb26-715" aria-hidden="true" tabindex="-1"></a><span class="ex">c.</span> Use a language-specific third-party package for Eurostat data, for example for <span class="pp">[</span><span class="ss">Python</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://pypi.org/project/eurostat/</span><span class="kw">)</span> <span class="ex">or</span> for <span class="pp">[</span><span class="ss">R</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://ropengov.github.io/eurostat/articles/eurostat_tutorial.html</span><span class="kw">)</span></span>
+<span id="cb26-716"><a href="#cb26-716" aria-hidden="true" tabindex="-1"></a><span class="ex">d.</span> Use a package for parsing SDMX data, for example <span class="pp">[</span><span class="ss">pandasdmx</span><span class="pp">]</span><span class="er">(</span><span class="ex">https://pandasdmx.readthedocs.io/en/v1.0/</span><span class="kw">)</span><span class="bu">.</span> </span>
+<span id="cb26-717"><a href="#cb26-717" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-718"><a href="#cb26-718" aria-hidden="true" tabindex="-1"></a><span class="ex">We</span> use approach d. in order to ensure easy reproducibility and allow us to retrieve any number of datasets from Eurostat.  The 2 datasets we use in this analysis are</span>
+<span id="cb26-719"><a href="#cb26-719" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-720"><a href="#cb26-720" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> <span class="kw">`</span><span class="st">VIT_T1</span><span class="kw">`</span> <span class="cf">for</span> detailed <span class="ex">overview</span> of vineyard area in the EU</span>
+<span id="cb26-721"><a href="#cb26-721" aria-hidden="true" tabindex="-1"></a><span class="ex">*</span> <span class="kw">`</span><span class="st">EF_LUS_MAIN</span><span class="kw">`</span> <span class="cf">for</span> overall <span class="ex">land</span> use by the agriculture sector in the EU</span>
 <span id="cb26-722"><a href="#cb26-722" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-723"><a href="#cb26-723" aria-hidden="true" tabindex="-1"></a><span class="st">* `VIT_T1` for detailed overview of vineyard area in the EU</span></span>
-<span id="cb26-724"><a href="#cb26-724" aria-hidden="true" tabindex="-1"></a><span class="st">* `EF_LUS_MAIN` for overall land use by the agriculture sector in the EU</span></span>
-<span id="cb26-725"><a href="#cb26-725" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-726"><a href="#cb26-726" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-727"><a href="#cb26-727" aria-hidden="true" tabindex="-1"></a><span class="st">As an example let'</span>s get the data from <span class="kw">`</span><span class="st">VIT_T1</span><span class="kw">`</span><span class="bu">.</span> Conveniently, the <span class="kw">`</span><span class="st">pandasdmx</span><span class="kw">`</span> <span class="ex">package</span> already has a client for retriving data from <span class="kw">`</span><span class="st">Eurostat</span><span class="kw">`</span><span class="bu">.</span> For example:</span>
-<span id="cb26-730"><a href="#cb26-730" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
-<span id="cb26-731"><a href="#cb26-731" aria-hidden="true" tabindex="-1"></a><span class="st">import pandasdmx as sdmx</span></span>
-<span id="cb26-732"><a href="#cb26-732" aria-hidden="true" tabindex="-1"></a><span class="st">estat = sdmx.Request("</span>ESTAT<span class="st">")</span></span>
-<span id="cb26-733"><a href="#cb26-733" aria-hidden="true" tabindex="-1"></a><span class="st">resp = estat.data("</span>VIT_T1<span class="st">",key={'unit':'HA'}) # Only take land area in units of hectares</span></span>
-<span id="cb26-734"><a href="#cb26-734" aria-hidden="true" tabindex="-1"></a><span class="st">df = sdmx.to_pandas(resp).reset_index() # reset_index() makes it a flat dataframe</span></span>
-<span id="cb26-735"><a href="#cb26-735" aria-hidden="true" tabindex="-1"></a><span class="st">df.head()</span></span>
-<span id="cb26-736"><a href="#cb26-736" aria-hidden="true" tabindex="-1"></a><span class="kw">```</span></span>
+<span id="cb26-723"><a href="#cb26-723" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-724"><a href="#cb26-724" aria-hidden="true" tabindex="-1"></a><span class="ex">As</span> an example let<span class="st">'s get the data from `VIT_T1`. Conveniently, the `pandasdmx` package already has a client for retriving data from `Eurostat`. For example:</span></span>
+<span id="cb26-727"><a href="#cb26-727" aria-hidden="true" tabindex="-1"></a><span class="in">```{python}</span></span>
+<span id="cb26-728"><a href="#cb26-728" aria-hidden="true" tabindex="-1"></a><span class="st">import pandasdmx as sdmx</span></span>
+<span id="cb26-729"><a href="#cb26-729" aria-hidden="true" tabindex="-1"></a><span class="st">estat = sdmx.Request("ESTAT")</span></span>
+<span id="cb26-730"><a href="#cb26-730" aria-hidden="true" tabindex="-1"></a><span class="st">resp = estat.data("VIT_T1",key={'</span>unit<span class="st">':'</span>HA<span class="st">'}) # Only take land area in units of hectares</span></span>
+<span id="cb26-731"><a href="#cb26-731" aria-hidden="true" tabindex="-1"></a><span class="st">df = sdmx.to_pandas(resp).reset_index() # reset_index() makes it a flat dataframe</span></span>
+<span id="cb26-732"><a href="#cb26-732" aria-hidden="true" tabindex="-1"></a><span class="st">df.head()</span></span>
+<span id="cb26-733"><a href="#cb26-733" aria-hidden="true" tabindex="-1"></a><span class="st">```</span></span>
+<span id="cb26-734"><a href="#cb26-734" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-735"><a href="#cb26-735" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-736"><a href="#cb26-736" aria-hidden="true" tabindex="-1"></a><span class="st">The script to retrieve all the datasets (and associated metadata) and dump it to  convenient `json` files is [here](https://github.com/SergeiOssokine/SergeiOssokine.github.io/blob/main/analysis/scripts/get_data_eurostat_sdmx.py).</span></span>
 <span id="cb26-737"><a href="#cb26-737" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-738"><a href="#cb26-738" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-739"><a href="#cb26-739" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> script to retrieve all the datasets <span class="er">(</span><span class="ex">and</span> associated metadata<span class="kw">)</span> <span class="ex">and</span> dump it to  convenient <span class="kw">`</span><span class="st">json</span><span class="kw">`</span> <span class="ex">files</span> is <span class="pp">[</span><span class="ss">here</span><span class="pp">]</span><span class="er">(</span><span class="kw">)</span><span class="bu">.</span></span>
-<span id="cb26-740"><a href="#cb26-740" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-741"><a href="#cb26-741" aria-hidden="true" tabindex="-1"></a><span class="co">### Wine production data from Directorate-General for Agriculture and Rural Development {#sec-dgard}</span></span>
-<span id="cb26-742"><a href="#cb26-742" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-743"><a href="#cb26-743" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> DGARD maintains a dashboard that pulls together various statistics on wine production in the EU. To get the data:</span>
-<span id="cb26-744"><a href="#cb26-744" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-745"><a href="#cb26-745" aria-hidden="true" tabindex="-1"></a><span class="ex">1.</span> Navigate to [the dashboard]<span class="er">(</span><span class="ex">https://agridata.ec.europa.eu/extensions/DashboardWine/WineProduction.html</span><span class="kw">)</span></span>
-<span id="cb26-746"><a href="#cb26-746" aria-hidden="true" tabindex="-1"></a><span class="ex">2.</span> Click the <span class="st">"triangle"</span> at the top right corner and select <span class="st">"Data explorer"</span></span>
-<span id="cb26-747"><a href="#cb26-747" aria-hidden="true" tabindex="-1"></a><span class="ex">3.</span> Click the  <span class="st">"Export data"</span> icon on the right of the header row. This will download the <span class="kw">`</span><span class="st">Excel</span><span class="kw">`</span> <span class="fu">file</span> with the data.</span>
+<span id="cb26-738"><a href="#cb26-738" aria-hidden="true" tabindex="-1"></a><span class="st">### Wine production data from Directorate-General for Agriculture and Rural Development {#sec-dgard}</span></span>
+<span id="cb26-739"><a href="#cb26-739" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-740"><a href="#cb26-740" aria-hidden="true" tabindex="-1"></a><span class="st">The DGARD maintains a dashboard that pulls together various statistics on wine production in the EU. To get the data:</span></span>
+<span id="cb26-741"><a href="#cb26-741" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-742"><a href="#cb26-742" aria-hidden="true" tabindex="-1"></a><span class="st">1. Navigate to [the dashboard](https://agridata.ec.europa.eu/extensions/DashboardWine/WineProduction.html)</span></span>
+<span id="cb26-743"><a href="#cb26-743" aria-hidden="true" tabindex="-1"></a><span class="st">2. Click the "triangle" at the top right corner and select "Data explorer"</span></span>
+<span id="cb26-744"><a href="#cb26-744" aria-hidden="true" tabindex="-1"></a><span class="st">3. Click the  "Export data" icon on the right of the header row. This will download the `Excel` file with the data.</span></span>
+<span id="cb26-745"><a href="#cb26-745" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-746"><a href="#cb26-746" aria-hidden="true" tabindex="-1"></a><span class="st">### OIV statistics database {#sec-oiv}</span></span>
+<span id="cb26-747"><a href="#cb26-747" aria-hidden="true" tabindex="-1"></a><span class="st">The International Organization of Vine and Wine (OIV) maintains a database of statistical data about many aspects of wine making. One can download the data used in this analysis as follows:</span></span>
 <span id="cb26-748"><a href="#cb26-748" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-749"><a href="#cb26-749" aria-hidden="true" tabindex="-1"></a><span class="co">### OIV statistics database {#sec-oiv}</span></span>
-<span id="cb26-750"><a href="#cb26-750" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> International Organization of Vine and Wine <span class="er">(</span><span class="ex">OIV</span><span class="kw">)</span> <span class="ex">maintains</span> a database of statistical data about many aspects of wine making. One can download the data used in this analysis as follows:</span>
-<span id="cb26-751"><a href="#cb26-751" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-752"><a href="#cb26-752" aria-hidden="true" tabindex="-1"></a><span class="ex">1.</span> Go to the [database section]<span class="er">(</span><span class="ex">https://www.oiv.int/what-we-do/data-discovery-report?oiv</span><span class="kw">)</span> <span class="ex">of</span> the OIV website</span>
-<span id="cb26-753"><a href="#cb26-753" aria-hidden="true" tabindex="-1"></a><span class="ex">2.</span> Select <span class="st">"Europe"</span> from the <span class="st">"Continent"</span> drop-down</span>
-<span id="cb26-754"><a href="#cb26-754" aria-hidden="true" tabindex="-1"></a><span class="ex">2.</span> Click on the <span class="st">"..."</span> at the upper right corner of the table <span class="er">(</span><span class="st">"More options"</span><span class="kw">)</span> <span class="ex">and</span> select <span class="st">"Export data"</span></span>
-<span id="cb26-755"><a href="#cb26-755" aria-hidden="true" tabindex="-1"></a><span class="ex">3.</span> Leave the selection on <span class="st">"Data with current layout"</span> and click <span class="st">"Export"</span></span>
+<span id="cb26-749"><a href="#cb26-749" aria-hidden="true" tabindex="-1"></a><span class="st">1. Go to the [database section](https://www.oiv.int/what-we-do/data-discovery-report?oiv) of the OIV website</span></span>
+<span id="cb26-750"><a href="#cb26-750" aria-hidden="true" tabindex="-1"></a><span class="st">2. Select "Europe" from the "Continent" drop-down</span></span>
+<span id="cb26-751"><a href="#cb26-751" aria-hidden="true" tabindex="-1"></a><span class="st">2. Click on the "..." at the upper right corner of the table ("More options") and select "Export data"</span></span>
+<span id="cb26-752"><a href="#cb26-752" aria-hidden="true" tabindex="-1"></a><span class="st">3. Leave the selection on "Data with current layout" and click "Export"</span></span>
+<span id="cb26-753"><a href="#cb26-753" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-754"><a href="#cb26-754" aria-hidden="true" tabindex="-1"></a><span class="st">### WERI wine database {#sec-weri}</span></span>
+<span id="cb26-755"><a href="#cb26-755" aria-hidden="true" tabindex="-1"></a><span class="st">The Wine Economics Reasearch Institute at University of Adelaide maintains an extensive database of historical data related to wine. To obtain this data:</span></span>
 <span id="cb26-756"><a href="#cb26-756" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-757"><a href="#cb26-757" aria-hidden="true" tabindex="-1"></a><span class="co">### WERI wine database {#sec-weri}</span></span>
-<span id="cb26-758"><a href="#cb26-758" aria-hidden="true" tabindex="-1"></a><span class="ex">The</span> Wine Economics Reasearch Institute at University of Adelaide maintains an extensive database of historical data related to wine. To obtain this data:</span>
-<span id="cb26-759"><a href="#cb26-759" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-760"><a href="#cb26-760" aria-hidden="true" tabindex="-1"></a><span class="ex">1.</span> Go to [the database website]<span class="er">(</span><span class="ex">https://economics.adelaide.edu.au/wine-economics/databases#annual-database-of-global-wine-markets-1835-to-20190</span><span class="kw">)</span></span>
-<span id="cb26-761"><a href="#cb26-761" aria-hidden="true" tabindex="-1"></a><span class="ex">2.</span> Click <span class="st">"Download megafile of global wine data"</span></span>
+<span id="cb26-757"><a href="#cb26-757" aria-hidden="true" tabindex="-1"></a><span class="st">1. Go to [the database website](https://economics.adelaide.edu.au/wine-economics/databases#annual-database-of-global-wine-markets-1835-to-20190)</span></span>
+<span id="cb26-758"><a href="#cb26-758" aria-hidden="true" tabindex="-1"></a><span class="st">2. Click "Download megafile of global wine data"</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
