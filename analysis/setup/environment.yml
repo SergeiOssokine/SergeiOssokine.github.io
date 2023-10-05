@@ -1,0 +1,20 @@
+name: wine-analysis
+
+dependencies:
+  - cartopy
+  - ipython
+  - jupyter
+  - matplotlib
+  - numpy
+  - openpyxl
+  - pandas
+  - pandasdmx
+  - python=3.10
+  - rasterio
+  - rich
+  - rioxarray
+  - scikit-learn
+  - scipy
+  - seaborn
+  - squarify
+  - xarray

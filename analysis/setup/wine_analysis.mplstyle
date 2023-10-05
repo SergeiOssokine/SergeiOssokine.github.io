@@ -1,0 +1,37 @@
+### FIGURE
+figure.facecolor: white
+figure.titleweight: light
+
+### LINES
+lines.linewidth: 1.5
+#axes.prop_cycle: cycler('color',["35618f","c5df72","d9764c","2fd192","753131","a2e0dd","cc224d"])
+axes.prop_cycle: cycler('color',["3588d1","bf3854","2f937a","bc9495","1b404a","dc8b43"])
+
+### PATCHES
+patch.facecolor: 0072B2
+
+### LEGEND
+legend.fontsize: 20
+
+### TICKS
+xtick.direction: out
+ytick.direction: out
+
+### FONTS
+font.family: sans-serif
+font.sans-serif: Roboto
+font.weight: light
+font.size: 14
+
+### AXES
+axes.grid: False
+axes.facecolor: white
+axes.linewidth: 1.0
+axes.titlesize: 12
+axes.titleweight: light
+axes.labelsize: 12
+axes.labelweight: light
+axes.spines.bottom: True
+axes.spines.left: True
+axes.spines.right: False
+axes.spines.top: False

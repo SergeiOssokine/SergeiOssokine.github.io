@@ -1,0 +1,11 @@
+{
+    "VIT_T1": {
+        "unit": "HA"
+    },
+    "EF_LUS_MAIN": {
+        "farmtype": "TOTAL",
+        "agrarea": "TOTAL",
+        "so_eur": "TOTAL",
+        "unit": "HA"
+    }
+}
