@@ -1,0 +1,5 @@
+.output {
+    max-height: 400px; /* can change this */
+    max-width: 1200px; /* doesn't seem to have any effect */
+    overflow: auto;
+  }
