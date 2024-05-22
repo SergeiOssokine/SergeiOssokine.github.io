@@ -262,7 +262,7 @@ import plotly.express as px
 fig = px.line(
     df, x="Year", y="Freshwater use", color="Entity", title=title,
     labels={
-        "Freshwater use":r"Freshwater use (trillions of $m^{3}$)"
+        "Freshwater use":"Freshwater use (trillions of m³)"
     },
     width=width, height=height
 )
