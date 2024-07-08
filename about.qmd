@@ -6,11 +6,11 @@ about:
   links:
     - icon: linkedin
       text: LinkedIn
-      href: https://linkedin.com
+      href: www.linkedin.com/in/serguei-ossokine
     - icon: github
       text: Github
-      href: https://github.com
+      href:https://github.com/SergeiOssokine
 
 ---
 
-About this blog
+Here I blog on all things technical, from data analaysis and machine learning to visualization tools.
