@@ -1,0 +1,227 @@
+---
+title: "Simple streaming models in the cloud, but with Python via Pulumi"
+author: "Serguei Ossokine"
+
+format:
+    html:
+        theme: cosmo
+        code-tools: true
+        page-layout: full
+        number-offset: 1
+        code-summary: "Show the code"
+        number-sections: true
+
+
+from: markdown+emoji
+
+filters:
+  - d2
+d2:
+  layout: "dagre"
+  theme: "NeutralDefault"
+---
+# Introduction
+
+In  previous posts ([1](https://sergeiossokine.github.io/posts/streaming_deployment/streaming_example.html),[2](https://sergeiossokine.github.io/posts/streaming_deployment_part2/stream_example_contd.html)) I discussed deploying a simple streaming model to AWS, using AWS cli, CloudFormation and Terraform. In this blog, I re-deploy the same model, but this time using another fairly different approach to IaC by using [`Pulumi`](https://www.pulumi.com/). `Pulumi` is an open source IaC tool that allows one to use one of several programming languages (TypeScript, Python, Go, C#, Java) as well as YAML. Being very fond of Python, I of course will use that.
+
+# Using Pulumi for IaC
+
+::: {.callout-note}
+The configuration files are in [this repo](https://github.com/SergeiOssokine/mlops-zoomcamp-misc/tree/main/streaming-deployment/model_deployment_pulumi).
+If you have not done the deployments in the [previous post](https://sergeiossokine.github.io/posts/streaming_deployment/streaming_example.html), you will need to build the docker image and push it to the ECR before you can proceed - see [this part](https://sergeiossokine.github.io/posts/streaming_deployment/streaming_example.html#put-everything-together).
+:::
+
+## Preliminaries
+As usual, before getting to the actual IaC we need to train the model and store it in a S3 bucket.
+As before we do:
+```bash
+uuid=$(uuidgen)
+export BUCKET_NAME=nyc-taxi-example-${uuid}
+export REGION=us-east-1
+export INPUT_STREAM="ride_events"
+export OUTPUT_STREAM="ride_predictions"
+```
+
+```bash
+aws s3api create-bucket --bucket ${BUCKET_NAME} --region ${REGION}
+```
+
+Now start the `mlflow` server (no changes here from the last post):
+```bash
+cd model-training
+mlflow server --default-artifact-root s3://${BUCKET_NAME} --backend-store-uri sqlite:///mlflow.db --port 5012
+```
+
+Finally train the model:
+```bash
+python train_model.py
+```
+
+
+We also need to store the run ID of the model. You can find it through the `MLFlow` UI or API. Then do
+
+```bash
+export RUN_ID=RUNIDHERE
+```
+
+Finally we need the uri of the Docker image we pushed to the ECR repo:
+```bash
+export REMOTE_IMAGE=URIHERE
+```
+
+
+## Using Pulumi for IaC
+::: {.callout-important}
+Some/all services used in this section cost money. Always ensure you are aware of the associated costs.
+:::
+
+First things first, we need to set a passphrase to protect any secrets. By default this is done with a passphrase you can do this with
+
+```bash
+export  PULUMI_CONFIG_PASSPHRASE="YOURPASSPHRASE"
+```
+Now we initialize a new stack. Change to the `model_deployment_pulumi` directory and run
+
+```bash
+pulumi stack init dev
+```
+
+This will create a file `Pulumi.dev.yaml` that will be essentially empty. It will also initialize a lot of internal details (such as the stack state) in the default directory, which on linux is `~/.pulumi/`. In principle, one should never interact with that directory directly.
+
+Now we update this file with all the necessary config settings:
+
+```bash
+pulumi config set-all --plaintext aws-native:region=${REGION} --plaintext model_bucket=${BUCKET_NAME} --plaintext run_id=${RUN_ID} --plaintext image_uri=${REMOTE_IMAGE} --plaintext input_stream_name=${INPUT_STREAM} --plaintext output_stream_name=${OUTPUT_STREAM}
+```
+
+That should be it for congiruation.
+
+The code that actually provisions the resources is (appropriately) inside `__main__.py`. Note that at the time of writing:
+
+- There are 2 different ways to use AWS resources with `pulumi`: `aws` and `aws_native`. The former is stable and supported but the latter is planned to be the replacement, so we use that instead.
+- There is an error in the `aws_native` documentation about the way that inline policies should be defined. See [here](https://github.com/pulumi/pulumi-aws-native/issues/1616)
+
+The code is pretty self-explanatory and mimics quite closely the way we have seen resouces provisioned with `terraform` and `CloudFormation`.
+
+
+You can now preview the resources that will be deployed by running
+
+```bash
+pulumi preview
+```
+You should see somthing like
+
+```
+Previewing update (dev):
+@ previewing update....
+
+ +  pulumi:pulumi:Stack streaming_model-dev create
+@ previewing update.....
+ +  aws-native:kinesis:Stream ride_predictions create
+ +  aws-native:kinesis:Stream ride_events create
+ +  aws-native:iam:Role LambdaKinesisIAMRole create
+ +  aws-native:lambda:Function predict create
+ +  aws-native:lambda:EventSourceMapping output_mapping create
+ +  pulumi:pulumi:Stack streaming_model-dev create
+Outputs:
+    input_stream_arn : output<string>
+    output_stream_arn: output<string>
+
+Resources:
+    + 6 to create
+```
+
+
+
+Now we are ready to deploy the infrastructure. Run
+
+```bash
+pulumi up
+```
+then choose, "yes" and hit enter. You should see something like:
+
+```
+Previewing update (dev):
+     Type                                     Name                  Plan
+ +   pulumi:pulumi:Stack                      streaming_model-dev   create
+ +   ├─ aws-native:kinesis:Stream             ride_predictions      create
+ +   ├─ aws-native:kinesis:Stream             ride_events           create
+ +   ├─ aws-native:iam:Role                   LambdaKinesisIAMRole  create
+ +   ├─ aws-native:lambda:Function            predict               create
+ +   └─ aws-native:lambda:EventSourceMapping  output_mapping        create
+
+Outputs:
+    input_stream_arn : output<string>
+    output_stream_arn: output<string>
+
+Resources:
+    + 6 to create
+
+Do you want to perform this update? yes
+Updating (dev):
+     Type                                     Name                  Status
+ +   pulumi:pulumi:Stack                      streaming_model-dev   created (74s)
+ +   ├─ aws-native:kinesis:Stream             ride_predictions      created (7s)
+ +   ├─ aws-native:kinesis:Stream             ride_events           created (8s)
+ +   ├─ aws-native:iam:Role                   LambdaKinesisIAMRole  created (24s)
+ +   ├─ aws-native:lambda:Function            predict               created (37s)
+ +   └─ aws-native:lambda:EventSourceMapping  output_mapping        created (2s)
+
+Outputs:
+    input_stream_arn : "arn:aws:kinesis:us-east-1:XXXXXXXXXXXX:stream/ride_events"
+    output_stream_arn: "arn:aws:kinesis:us-east-1:XXXXXXXXXXXX:stream/ride_predictions"
+
+Resources:
+    + 6 created
+
+Duration: 1m15s
+```
+
+::: {.callout-note}
+If you get an error like this:
+
+```bash
+error: --yes or --skip-preview must be passed in to proceed when running in non-interactive mode
+```
+then instead execute `PULUMI_DISABLE_CI_DETECTION=true`. See the discussion [here](https://github.com/pulumi/pulumi/issues/4503)
+:::
+
+
+As always we can test everything is working right by putting an event into the input stream as follows:
+
+```bash
+aws kinesis put-record     --cli-binary-format raw-in-base64-out --stream-name ${INPUT_STREAM}     --partition-key 999     --data '{
+        "ride": {
+            "PULocationID": 30,
+            "DOLocationID": 105,
+            "trip_distance": 1.66
+        },
+        "ride_id": 999
+    }'
+```
+
+You can either then look in the AWS management console or wait a couple of minutes and run
+
+
+which should result in:
+
+```json
+{
+  "model": "ride_duration_prediction_model",
+  "version": "123",
+  "prediction": {
+    "ride_duration": 10.830198691258547,
+    "ride_id": 999
+  }
+}
+```
+
+To clean up, simply run
+
+```bash
+pulumi down
+```
+
+## Local testing with `localstack`
+Just as one can use `localstack` to test `terraform` code, one can do the same with `pulumi` as well. All one has to do is to install the handy `pulumilocal` [script](https://docs.localstack.cloud/user-guide/integrations/pulumi/) and proceed as before.
+

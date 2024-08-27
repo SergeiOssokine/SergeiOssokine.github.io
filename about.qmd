@@ -6,10 +6,10 @@ about:
   links:
     - icon: linkedin
       text: LinkedIn
-      href: www.linkedin.com/in/serguei-ossokine
+      href: https://www.linkedin.com/in/serguei-ossokine
     - icon: github
       text: Github
-      href:https://github.com/SergeiOssokine
+      href: https://github.com/SergeiOssokine
 
 ---
 
