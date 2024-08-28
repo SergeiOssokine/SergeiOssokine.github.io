@@ -78,9 +78,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-title","listing-author","listing-image","listing-description","listing-categories"],
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -204,32 +204,7 @@ window.Quarto = {
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-file-modified-sort="1724747877927" data-listing-reading-time-sort="7" data-listing-word-count-sort="1237">
-<div class="thumbnail">
-<p><a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external"></a></p><a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external">
-<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
-</a><p><a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external"></a></p>
-</div>
-<div class="body">
-<h3 class="no-anchor listing-title">
-<a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external">Simple streaming models in the cloud, but with Python via Pulumi</a>
-</h3>
-<div class="listing-subtitle">
-<a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external"></a>
-</div>
-<div class="listing-description">
-<a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external">In previous posts (1,2) I discussed deploying a simple streaming model to AWS, using AWS cli, CloudFormation and Terraform. In this blog, I re-deploy the same model, but…<code></code><code></code></a>
-</div>
-</div>
-<div class="metadata">
-<p><a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external"></a></p><a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external">
-<div class="listing-author">
-Serguei Ossokine
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-listing-file-modified-sort="1724749238426" data-listing-reading-time-sort="9" data-listing-word-count-sort="1655">
+<div class="quarto-post image-right" data-index="0" data-listing-file-modified-sort="1724749238426" data-listing-reading-time-sort="9" data-listing-word-count-sort="1655">
 <div class="thumbnail">
 <p><a href="./posts/streaming_deployment_part2/stream_example_contd.html" class="no-external"></a></p><a href="./posts/streaming_deployment_part2/stream_example_contd.html" class="no-external">
 <p class="card-img-top"><img src="posts/streaming_deployment_part2/tf_default.png"  class="thumbnail-image card-img"/></p>
@@ -254,7 +229,7 @@ Serguei Ossokine
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-listing-file-modified-sort="1724759316288" data-listing-reading-time-sort="16" data-listing-word-count-sort="3021">
+<div class="quarto-post image-right" data-index="1" data-listing-file-modified-sort="1724759316288" data-listing-reading-time-sort="16" data-listing-word-count-sort="3021">
 <div class="thumbnail">
 <p><a href="./posts/streaming_deployment/streaming_example.html" class="no-external"></a></p><a href="./posts/streaming_deployment/streaming_example.html" class="no-external">
 <p class="card-img-top"><img src="posts/streaming_deployment/streaming_example_files/mediabag/architecture.svg"  class="thumbnail-image card-img"/></p>
@@ -279,7 +254,7 @@ Serguei Ossokine
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-listing-file-modified-sort="1716417431969" data-listing-reading-time-sort="10" data-listing-word-count-sort="1922">
+<div class="quarto-post image-right" data-index="2" data-listing-file-modified-sort="1716417431969" data-listing-reading-time-sort="10" data-listing-word-count-sort="1922">
 <div class="thumbnail">
 <p><a href="./posts/altair_comp/altair_example.html" class="no-external"></a></p><a href="./posts/altair_comp/altair_example.html" class="no-external">
 <p class="card-img-top"><img src="posts/altair_comp/altair_example_files/figure-html/cell-9-output-2.png"  class="thumbnail-image card-img"/></p>
@@ -304,7 +279,7 @@ Serguei Ossokine
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-listing-file-modified-sort="1715067420607" data-listing-reading-time-sort="22" data-listing-word-count-sort="4318">
+<div class="quarto-post image-right" data-index="3" data-listing-file-modified-sort="1715067420607" data-listing-reading-time-sort="22" data-listing-word-count-sort="4318">
 <div class="thumbnail">
 <p><a href="./posts/wine_production/wine_production.html" class="no-external"></a></p><a href="./posts/wine_production/wine_production.html" class="no-external">
 <p class="card-img-top"><img src="posts/wine_production/wine_production_files/figure-html/cell-9-output-1.png"  class="thumbnail-image card-img"/></p>
@@ -323,6 +298,34 @@ Serguei Ossokine
 </div>
 <div class="metadata">
 <p><a href="./posts/wine_production/wine_production.html" class="no-external"></a></p><a href="./posts/wine_production/wine_production.html" class="no-external">
+<div class="listing-author">
+Serguei Ossokine
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="4" data-listing-date-sort="1724859299000" data-listing-file-modified-sort="1724859299504" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="9" data-listing-word-count-sort="1778">
+<div class="thumbnail">
+<p><a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external"></a></p><a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external">
+<div class="listing-item-img-placeholder card-img-top" >&nbsp;</div>
+</a><p><a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external">Simple streaming models in the cloud, but with Python via Pulumi</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external">In previous posts (1,2) I discussed deploying a simple streaming model to AWS, using AWS cli, CloudFormation and Terraform. In this blog, I re-deploy the same model, but…<code></code><code></code></a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/streaming_deployment_part3/streaming_example_pulumi.html" class="no-external">
+<div class="listing-date">
+Aug 28, 2024
+</div>
 <div class="listing-author">
 Serguei Ossokine
 </div>

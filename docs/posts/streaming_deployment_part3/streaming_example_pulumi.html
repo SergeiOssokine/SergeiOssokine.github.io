@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Serguei Ossokine">
+<meta name="dcterms.date" content="2024-08-28">
 
 <title>Simple streaming models in the cloud, but with Python via Pulumi – The elephant of surprise</title>
 <style>
@@ -127,6 +128,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="nav-link" href="../../about.html"> 
 <span class="menu-text">About</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/SergeiOssokine"> <i class="bi bi-github" role="img">
 </i> 
@@ -157,6 +162,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
             </div>
     </div>
       
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">August 28, 2024</p>
+      </div>
+    </div>
     
       
     </div>
@@ -309,10 +320,10 @@ Note
 <div class="callout-body-container callout-body">
 <p>If you get an error like this:</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">error:</span> <span class="at">--yes</span> or <span class="at">--skip-preview</span> must be passed in to proceed when running in non-interactive mode</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>then instead execute <code>PULUMI_DISABLE_CI_DETECTION=true</code>. See the discussion <a href="https://github.com/pulumi/pulumi/issues/4503">here</a></p>
+<p>then instead execute <code>PULUMI_DISABLE_CI_DETECTION=true pulumi up</code>. See the discussion <a href="https://github.com/pulumi/pulumi/issues/4503">here</a></p>
 </div>
 </div>
-<p>As always we can test everything is working right by putting an event into the input stream as follows:</p>
+<p>As always we can test everything is working right by putting an event into the input stream as follows</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> kinesis put-record     <span class="at">--cli-binary-format</span> raw-in-base64-out <span class="at">--stream-name</span> <span class="va">${INPUT_STREAM}</span>     <span class="at">--partition-key</span> 999     <span class="at">--data</span> <span class="st">'{</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="st">        "ride": {</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="st">            "PULocationID": 30,</span></span>
@@ -334,8 +345,48 @@ Note
 <p>To clean up, simply run</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> down</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="local-testing-with-localstack" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="local-testing-with-localstack"><span class="header-section-number">3.3</span> Local testing with <code>localstack</code></h2>
+<section id="automatic-conversion-from-terraform" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="automatic-conversion-from-terraform"><span class="header-section-number">3.3</span> Automatic conversion from <code>terraform</code></h2>
+<p><code>pulumi</code> supports migration from several different other IaC tools, including <code>terraform</code>, as described <a href="https://www.pulumi.com/docs/using-pulumi/adopting-pulumi/migrating-to-pulumi/#conversion">here</a>. For <code>terraform</code> there is a built-in tool to generate <code>pulumi</code> code. Since we already have a <code>terraform</code> implementation, it’s interesting to see what kind of code would be generated. To do so, navigate to <code>model_deployment_tf</code> and run <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> convert <span class="at">--from</span> terraform <span class="at">--language</span> python</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You will also need to initialize the stack with</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> stack init dev</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The tool is clever enough to recognize that the <code>terraform</code> implementation used modules for AWS Kinesis and AWS Lambda and creates 2 files <code>kinesis.py</code> and <code>lambda.py</code> which implement corresponding Python classes. It also preserves the correct comments from terraform and even adds trhe descriptions of the <code>terraform</code> variables as comments prior to getting them from the config, e.g.&nbsp;<a href="">here</a>.</p>
+<p>In my conversion, the code produced was not syntactically correct, but fortunately the errors were mostly trivial, for example, running <code>pulumi preview</code> on the raw generated code gave errors like:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex">File</span> <span class="st">"mlops-zoomcamp-misc/streaming-deployment/model_deployment_tf/__main__.py"</span>, line 3</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="ex">from</span> lambda import Lambda</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>            <span class="ex">^^^^^^</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="ex">SyntaxError:</span> invalid syntax</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>or (which happens several times)</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">File</span> <span class="st">"mlops-zoomcamp-misc/streaming-deployment/model_deployment_tf/__main__.py"</span>, line 3, in <span class="op">&lt;</span>module<span class="op">&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="ex">from</span> lambda_ import Lambda</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="ex">File</span> <span class="st">"mlops-zoomcamp-misc/streaming-deployment/model_deployment_tf/lambda_.py"</span>, line 21</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="va">name</span><span class="op">=</span>f<span class="st">"iam_{args["</span>lambdaFunctionName<span class="st">"]}"</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>                    <span class="ex">^^^^^^^^^^^^^^^^^^</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="ex">SyntaxError:</span> f-string: unmatched <span class="st">'['</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Fortunately, in this particular case they are all trivial to fix: in the first case, simply rename <code>lambda.py</code> to <code>lambda_.py</code> and change the import statement, in the latter, correct the quotes so that the ones used inside the {} are different from the outside<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. The other issue arises with default values of variables set inside a module, in particular in the <code>kinesis</code> module we had a variable like this:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode terraform code-with-copy"><code class="sourceCode terraform"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="kw">variable</span> <span class="st">"shard_level_metrics"</span> {</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  type        <span class="op">=</span> <span class="dt">list</span>(<span class="dt">string</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  description <span class="op">=</span> <span class="st">"shard_level_metrics"</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  default <span class="op">=</span> [</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IncomingBytes"</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"OutgoingBytes"</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"OutgoingRecords"</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ReadProvisionedThroughputExceeded"</span>,</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"WriteProvisionedThroughputExceeded"</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IncomingRecords"</span>,</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IteratorAgeMilliseconds"</span>,</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>While the script correctly recognizes that <code>shardLeveMetrics</code> should be set in <code>kinesis.py</code>, it doesn’t either set the default in the <code>Kinesis</code> class inside <code>kinesis.py</code> nor pass <code>shardLevelMetrics</code> to the class constructor inside <code>__main__.py</code>. To fix this, we simply pass this argument inside <code>__main__.py</code>,as shown <a href="https://github.com/SergeiOssokine/mlops-zoomcamp-misc/blob/main/streaming-deployment/model_deployment_pulumi_autogen/__main__.py#L34">here</a>. I also had to fix a whole bunch of things and in the process encountered the concepts out <a href="https://www.pulumi.com/docs/concepts/inputs-outputs/apply/#accessing-single-output-values"><code>Outputs</code></a> in <code>pulumi</code> which were a bit awkward. The final version of the code is <a href="https://github.com/SergeiOssokine/mlops-zoomcamp-misc/tree/main/streaming-deployment/model_deployment_pulumi_autogen">here</a></p>
+<p>Finally, we still need to add all the correct config variables. You can do this by running:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> config set-all <span class="at">--path</span> <span class="at">--plaintext</span> aws-native:region=<span class="va">${REGION}</span> <span class="at">--plaintext</span> modelBucket=<span class="va">${BUCKET_NAME}</span> <span class="at">--plaintext</span> runId=<span class="va">${RUN_ID}</span> <span class="at">--plaintext</span> image_uri=<span class="va">${REMOTE_IMAGE}</span> <span class="at">--plaintext</span> sourceStreamName=<span class="va">${INPUT_STREAM}</span> <span class="at">--plaintext</span> outputStreamName=<span class="va">${OUTPUT_STREAM}</span> <span class="at">--plaintext</span> lambdaFunctionName=<span class="st">"predict-lambda"</span> <span class="at">--plaintext</span>  <span class="st">"shardLevelMetrics[0]"</span>=IncomingBytes  <span class="at">--plaintext</span> <span class="st">"shardLevelMetrics[1]"</span>=OutgoingBytes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Doing <code>pulumi preview</code> should now show that all the resources we want will be deployed which you can do with <code>pulumi up</code>.</p>
+<p>For our simple stack here this certainly wasn’t too painful, but I was happy to learn more about <code>pulumi</code> by doing it from scratch.</p>
+</section>
+<section id="local-testing-with-localstack" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="local-testing-with-localstack"><span class="header-section-number">3.4</span> Local testing with <code>localstack</code></h2>
 <p>Just as one can use <code>localstack</code> to test <code>terraform</code> code, one can do the same with <code>pulumi</code> as well. All one has to do is to install the handy <code>pulumilocal</code> <a href="https://docs.localstack.cloud/user-guide/integrations/pulumi/">script</a> and proceed as before.</p>
 
 
@@ -344,7 +395,14 @@ Note
 </section>
 </section>
 
-</main> <!-- /main -->
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Note that at the time of writing, this will generate python code using the <code>aws</code> module, not <code>aws_native</code><a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>I think this particular bug can be avoided simply by always using triple quotes, f”“” for the generated f-string expression<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -816,232 +874,301 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb18" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Simple streaming models in the cloud, but with Python via Pulumi"</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Serguei Ossokine"</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co">    html:</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co">        theme: cosmo</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co">        code-tools: true</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co">        page-layout: full</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co">        number-offset: 1</span></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co">        code-summary: "Show the code"</span></span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="co">        number-sections: true</span></span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="an">from:</span><span class="co"> markdown+emoji</span></span>
-<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a><span class="an">filters:</span></span>
-<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="co">  - d2</span></span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="an">d2:</span></span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a><span class="co">  layout: "dagre"</span></span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co">  theme: "NeutralDefault"</span></span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="fu"># Introduction</span></span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>In  previous posts (<span class="co">[</span><span class="ot">1</span><span class="co">](https://sergeiossokine.github.io/posts/streaming_deployment/streaming_example.html)</span>,<span class="co">[</span><span class="ot">2</span><span class="co">](https://sergeiossokine.github.io/posts/streaming_deployment_part2/stream_example_contd.html)</span>) I discussed deploying a simple streaming model to AWS, using AWS cli, CloudFormation and Terraform. In this blog, I re-deploy the same model, but this time using another fairly different approach to IaC by using <span class="co">[</span><span class="ot">`Pulumi`</span><span class="co">](https://www.pulumi.com/)</span>. <span class="in">`Pulumi`</span> is an open source IaC tool that allows one to use one of several programming languages (TypeScript, Python, Go, C#, Java) as well as YAML. Being very fond of Python, I of course will use that.</span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="fu"># Using Pulumi for IaC</span></span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
-<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>The configuration files are in <span class="co">[</span><span class="ot">this repo</span><span class="co">](https://github.com/SergeiOssokine/mlops-zoomcamp-misc/tree/main/streaming-deployment/model_deployment_pulumi)</span>.</span>
-<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>If you have not done the deployments in the <span class="co">[</span><span class="ot">previous post</span><span class="co">](https://sergeiossokine.github.io/posts/streaming_deployment/streaming_example.html)</span>, you will need to build the docker image and push it to the ECR before you can proceed - see <span class="co">[</span><span class="ot">this part</span><span class="co">](https://sergeiossokine.github.io/posts/streaming_deployment/streaming_example.html#put-everything-together)</span>.</span>
-<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="fu">## Preliminaries</span></span>
-<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>As usual, before getting to the actual IaC we need to train the model and store it in a S3 bucket.</span>
-<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>As before we do:</span>
-<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a><span class="va">uuid</span><span class="op">=</span><span class="va">$(</span><span class="fu">uuidgen</span><span class="va">)</span></span>
-<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">BUCKET_NAME</span><span class="op">=</span>nyc-taxi-example-<span class="va">${uuid}</span></span>
-<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">REGION</span><span class="op">=</span>us-east-1</span>
-<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">INPUT_STREAM</span><span class="op">=</span><span class="st">"ride_events"</span></span>
-<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OUTPUT_STREAM</span><span class="op">=</span><span class="st">"ride_predictions"</span></span>
-<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3api create-bucket <span class="at">--bucket</span> <span class="va">${BUCKET_NAME}</span> <span class="at">--region</span> <span class="va">${REGION}</span></span>
-<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>Now start the <span class="in">`mlflow`</span> server (no changes here from the last post):</span>
-<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> model-training</span>
-<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a><span class="ex">mlflow</span> server <span class="at">--default-artifact-root</span> s3://<span class="va">${BUCKET_NAME}</span> <span class="at">--backend-store-uri</span> sqlite:///mlflow.db <span class="at">--port</span> 5012</span>
-<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a>Finally train the model:</span>
-<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> train_model.py</span>
-<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a>We also need to store the run ID of the model. You can find it through the <span class="in">`MLFlow`</span> UI or API. Then do</span>
-<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">RUN_ID</span><span class="op">=</span>RUNIDHERE</span>
-<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-66"><a href="#cb18-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a>Finally we need the uri of the Docker image we pushed to the ECR repo:</span>
-<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">REMOTE_IMAGE</span><span class="op">=</span>URIHERE</span>
-<span id="cb18-70"><a href="#cb18-70" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-71"><a href="#cb18-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-72"><a href="#cb18-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-73"><a href="#cb18-73" aria-hidden="true" tabindex="-1"></a><span class="fu">## Using Pulumi for IaC</span></span>
-<span id="cb18-74"><a href="#cb18-74" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
-<span id="cb18-75"><a href="#cb18-75" aria-hidden="true" tabindex="-1"></a>Some/all services used in this section cost money. Always ensure you are aware of the associated costs.</span>
-<span id="cb18-76"><a href="#cb18-76" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb18-77"><a href="#cb18-77" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a>First things first, we need to set a passphrase to protect any secrets. By default this is done with a passphrase you can do this with</span>
-<span id="cb18-79"><a href="#cb18-79" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-80"><a href="#cb18-80" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-81"><a href="#cb18-81" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span>  <span class="va">PULUMI_CONFIG_PASSPHRASE</span><span class="op">=</span><span class="st">"YOURPASSPHRASE"</span></span>
-<span id="cb18-82"><a href="#cb18-82" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-83"><a href="#cb18-83" aria-hidden="true" tabindex="-1"></a>Now we initialize a new stack. Change to the <span class="in">`model_deployment_pulumi`</span> directory and run</span>
-<span id="cb18-84"><a href="#cb18-84" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-85"><a href="#cb18-85" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-86"><a href="#cb18-86" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> stack init dev</span>
-<span id="cb18-87"><a href="#cb18-87" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-88"><a href="#cb18-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-89"><a href="#cb18-89" aria-hidden="true" tabindex="-1"></a>This will create a file <span class="in">`Pulumi.dev.yaml`</span> that will be essentially empty. It will also initialize a lot of internal details (such as the stack state) in the default directory, which on linux is <span class="in">`~/.pulumi/`</span>. In principle, one should never interact with that directory directly.</span>
-<span id="cb18-90"><a href="#cb18-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-91"><a href="#cb18-91" aria-hidden="true" tabindex="-1"></a>Now we update this file with all the necessary config settings:</span>
-<span id="cb18-92"><a href="#cb18-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-93"><a href="#cb18-93" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-94"><a href="#cb18-94" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> config set-all <span class="at">--plaintext</span> aws-native:region=<span class="va">${REGION}</span> <span class="at">--plaintext</span> model_bucket=<span class="va">${BUCKET_NAME}</span> <span class="at">--plaintext</span> run_id=<span class="va">${RUN_ID}</span> <span class="at">--plaintext</span> image_uri=<span class="va">${REMOTE_IMAGE}</span> <span class="at">--plaintext</span> input_stream_name=<span class="va">${INPUT_STREAM}</span> <span class="at">--plaintext</span> output_stream_name=<span class="va">${OUTPUT_STREAM}</span></span>
-<span id="cb18-95"><a href="#cb18-95" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-96"><a href="#cb18-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-97"><a href="#cb18-97" aria-hidden="true" tabindex="-1"></a>That should be it for congiruation.</span>
-<span id="cb18-98"><a href="#cb18-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-99"><a href="#cb18-99" aria-hidden="true" tabindex="-1"></a>The code that actually provisions the resources is (appropriately) inside <span class="in">`__main__.py`</span>. Note that at the time of writing:</span>
-<span id="cb18-100"><a href="#cb18-100" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-101"><a href="#cb18-101" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>There are 2 different ways to use AWS resources with <span class="in">`pulumi`</span>: <span class="in">`aws`</span> and <span class="in">`aws_native`</span>. The former is stable and supported but the latter is planned to be the replacement, so we use that instead.</span>
-<span id="cb18-102"><a href="#cb18-102" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>There is an error in the <span class="in">`aws_native`</span> documentation about the way that inline policies should be defined. See <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/pulumi/pulumi-aws-native/issues/1616)</span></span>
-<span id="cb18-103"><a href="#cb18-103" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-104"><a href="#cb18-104" aria-hidden="true" tabindex="-1"></a>The code is pretty self-explanatory and mimics quite closely the way we have seen resouces provisioned with <span class="in">`terraform`</span> and <span class="in">`CloudFormation`</span>.</span>
-<span id="cb18-105"><a href="#cb18-105" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-106"><a href="#cb18-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-107"><a href="#cb18-107" aria-hidden="true" tabindex="-1"></a>You can now preview the resources that will be deployed by running</span>
-<span id="cb18-108"><a href="#cb18-108" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-109"><a href="#cb18-109" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-110"><a href="#cb18-110" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> preview</span>
-<span id="cb18-111"><a href="#cb18-111" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-112"><a href="#cb18-112" aria-hidden="true" tabindex="-1"></a>You should see somthing like</span>
-<span id="cb18-113"><a href="#cb18-113" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-114"><a href="#cb18-114" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-115"><a href="#cb18-115" aria-hidden="true" tabindex="-1"></a><span class="in">Previewing update (dev):</span></span>
-<span id="cb18-116"><a href="#cb18-116" aria-hidden="true" tabindex="-1"></a><span class="in">@ previewing update....</span></span>
-<span id="cb18-117"><a href="#cb18-117" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-118"><a href="#cb18-118" aria-hidden="true" tabindex="-1"></a><span class="in"> +  pulumi:pulumi:Stack streaming_model-dev create</span></span>
-<span id="cb18-119"><a href="#cb18-119" aria-hidden="true" tabindex="-1"></a><span class="in">@ previewing update.....</span></span>
-<span id="cb18-120"><a href="#cb18-120" aria-hidden="true" tabindex="-1"></a><span class="in"> +  aws-native:kinesis:Stream ride_predictions create</span></span>
-<span id="cb18-121"><a href="#cb18-121" aria-hidden="true" tabindex="-1"></a><span class="in"> +  aws-native:kinesis:Stream ride_events create</span></span>
-<span id="cb18-122"><a href="#cb18-122" aria-hidden="true" tabindex="-1"></a><span class="in"> +  aws-native:iam:Role LambdaKinesisIAMRole create</span></span>
-<span id="cb18-123"><a href="#cb18-123" aria-hidden="true" tabindex="-1"></a><span class="in"> +  aws-native:lambda:Function predict create</span></span>
-<span id="cb18-124"><a href="#cb18-124" aria-hidden="true" tabindex="-1"></a><span class="in"> +  aws-native:lambda:EventSourceMapping output_mapping create</span></span>
-<span id="cb18-125"><a href="#cb18-125" aria-hidden="true" tabindex="-1"></a><span class="in"> +  pulumi:pulumi:Stack streaming_model-dev create</span></span>
-<span id="cb18-126"><a href="#cb18-126" aria-hidden="true" tabindex="-1"></a><span class="in">Outputs:</span></span>
-<span id="cb18-127"><a href="#cb18-127" aria-hidden="true" tabindex="-1"></a><span class="in">    input_stream_arn : output&lt;string&gt;</span></span>
-<span id="cb18-128"><a href="#cb18-128" aria-hidden="true" tabindex="-1"></a><span class="in">    output_stream_arn: output&lt;string&gt;</span></span>
-<span id="cb18-129"><a href="#cb18-129" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-130"><a href="#cb18-130" aria-hidden="true" tabindex="-1"></a><span class="in">Resources:</span></span>
-<span id="cb18-131"><a href="#cb18-131" aria-hidden="true" tabindex="-1"></a><span class="in">    + 6 to create</span></span>
-<span id="cb18-132"><a href="#cb18-132" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-133"><a href="#cb18-133" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-134"><a href="#cb18-134" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-135"><a href="#cb18-135" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-136"><a href="#cb18-136" aria-hidden="true" tabindex="-1"></a>Now we are ready to deploy the infrastructure. Run</span>
-<span id="cb18-137"><a href="#cb18-137" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-138"><a href="#cb18-138" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-139"><a href="#cb18-139" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> up</span>
-<span id="cb18-140"><a href="#cb18-140" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-141"><a href="#cb18-141" aria-hidden="true" tabindex="-1"></a>then choose, "yes" and hit enter. You should see something like:</span>
-<span id="cb18-142"><a href="#cb18-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-143"><a href="#cb18-143" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-144"><a href="#cb18-144" aria-hidden="true" tabindex="-1"></a><span class="in">Previewing update (dev):</span></span>
-<span id="cb18-145"><a href="#cb18-145" aria-hidden="true" tabindex="-1"></a><span class="in">     Type                                     Name                  Plan</span></span>
-<span id="cb18-146"><a href="#cb18-146" aria-hidden="true" tabindex="-1"></a><span class="in"> +   pulumi:pulumi:Stack                      streaming_model-dev   create</span></span>
-<span id="cb18-147"><a href="#cb18-147" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:kinesis:Stream             ride_predictions      create</span></span>
-<span id="cb18-148"><a href="#cb18-148" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:kinesis:Stream             ride_events           create</span></span>
-<span id="cb18-149"><a href="#cb18-149" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:iam:Role                   LambdaKinesisIAMRole  create</span></span>
-<span id="cb18-150"><a href="#cb18-150" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:lambda:Function            predict               create</span></span>
-<span id="cb18-151"><a href="#cb18-151" aria-hidden="true" tabindex="-1"></a><span class="in"> +   └─ aws-native:lambda:EventSourceMapping  output_mapping        create</span></span>
-<span id="cb18-152"><a href="#cb18-152" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-153"><a href="#cb18-153" aria-hidden="true" tabindex="-1"></a><span class="in">Outputs:</span></span>
-<span id="cb18-154"><a href="#cb18-154" aria-hidden="true" tabindex="-1"></a><span class="in">    input_stream_arn : output&lt;string&gt;</span></span>
-<span id="cb18-155"><a href="#cb18-155" aria-hidden="true" tabindex="-1"></a><span class="in">    output_stream_arn: output&lt;string&gt;</span></span>
-<span id="cb18-156"><a href="#cb18-156" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-157"><a href="#cb18-157" aria-hidden="true" tabindex="-1"></a><span class="in">Resources:</span></span>
-<span id="cb18-158"><a href="#cb18-158" aria-hidden="true" tabindex="-1"></a><span class="in">    + 6 to create</span></span>
-<span id="cb18-159"><a href="#cb18-159" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-160"><a href="#cb18-160" aria-hidden="true" tabindex="-1"></a><span class="in">Do you want to perform this update? yes</span></span>
-<span id="cb18-161"><a href="#cb18-161" aria-hidden="true" tabindex="-1"></a><span class="in">Updating (dev):</span></span>
-<span id="cb18-162"><a href="#cb18-162" aria-hidden="true" tabindex="-1"></a><span class="in">     Type                                     Name                  Status</span></span>
-<span id="cb18-163"><a href="#cb18-163" aria-hidden="true" tabindex="-1"></a><span class="in"> +   pulumi:pulumi:Stack                      streaming_model-dev   created (74s)</span></span>
-<span id="cb18-164"><a href="#cb18-164" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:kinesis:Stream             ride_predictions      created (7s)</span></span>
-<span id="cb18-165"><a href="#cb18-165" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:kinesis:Stream             ride_events           created (8s)</span></span>
-<span id="cb18-166"><a href="#cb18-166" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:iam:Role                   LambdaKinesisIAMRole  created (24s)</span></span>
-<span id="cb18-167"><a href="#cb18-167" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:lambda:Function            predict               created (37s)</span></span>
-<span id="cb18-168"><a href="#cb18-168" aria-hidden="true" tabindex="-1"></a><span class="in"> +   └─ aws-native:lambda:EventSourceMapping  output_mapping        created (2s)</span></span>
-<span id="cb18-169"><a href="#cb18-169" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-170"><a href="#cb18-170" aria-hidden="true" tabindex="-1"></a><span class="in">Outputs:</span></span>
-<span id="cb18-171"><a href="#cb18-171" aria-hidden="true" tabindex="-1"></a><span class="in">    input_stream_arn : "arn:aws:kinesis:us-east-1:XXXXXXXXXXXX:stream/ride_events"</span></span>
-<span id="cb18-172"><a href="#cb18-172" aria-hidden="true" tabindex="-1"></a><span class="in">    output_stream_arn: "arn:aws:kinesis:us-east-1:XXXXXXXXXXXX:stream/ride_predictions"</span></span>
-<span id="cb18-173"><a href="#cb18-173" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-174"><a href="#cb18-174" aria-hidden="true" tabindex="-1"></a><span class="in">Resources:</span></span>
-<span id="cb18-175"><a href="#cb18-175" aria-hidden="true" tabindex="-1"></a><span class="in">    + 6 created</span></span>
-<span id="cb18-176"><a href="#cb18-176" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-177"><a href="#cb18-177" aria-hidden="true" tabindex="-1"></a><span class="in">Duration: 1m15s</span></span>
-<span id="cb18-178"><a href="#cb18-178" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-179"><a href="#cb18-179" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-180"><a href="#cb18-180" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
-<span id="cb18-181"><a href="#cb18-181" aria-hidden="true" tabindex="-1"></a>If you get an error like this:</span>
-<span id="cb18-182"><a href="#cb18-182" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-183"><a href="#cb18-183" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-184"><a href="#cb18-184" aria-hidden="true" tabindex="-1"></a><span class="ex">error:</span> <span class="at">--yes</span> or <span class="at">--skip-preview</span> must be passed in to proceed when running in non-interactive mode</span>
-<span id="cb18-185"><a href="#cb18-185" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-186"><a href="#cb18-186" aria-hidden="true" tabindex="-1"></a>then instead execute <span class="in">`PULUMI_DISABLE_CI_DETECTION=true`</span>. See the discussion <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/pulumi/pulumi/issues/4503)</span></span>
-<span id="cb18-187"><a href="#cb18-187" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb18-188"><a href="#cb18-188" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-189"><a href="#cb18-189" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-190"><a href="#cb18-190" aria-hidden="true" tabindex="-1"></a>As always we can test everything is working right by putting an event into the input stream as follows:</span>
-<span id="cb18-191"><a href="#cb18-191" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-192"><a href="#cb18-192" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-193"><a href="#cb18-193" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> kinesis put-record     <span class="at">--cli-binary-format</span> raw-in-base64-out <span class="at">--stream-name</span> <span class="va">${INPUT_STREAM}</span>     <span class="at">--partition-key</span> 999     <span class="at">--data</span> <span class="st">'{</span></span>
-<span id="cb18-194"><a href="#cb18-194" aria-hidden="true" tabindex="-1"></a><span class="st">        "ride": {</span></span>
-<span id="cb18-195"><a href="#cb18-195" aria-hidden="true" tabindex="-1"></a><span class="st">            "PULocationID": 30,</span></span>
-<span id="cb18-196"><a href="#cb18-196" aria-hidden="true" tabindex="-1"></a><span class="st">            "DOLocationID": 105,</span></span>
-<span id="cb18-197"><a href="#cb18-197" aria-hidden="true" tabindex="-1"></a><span class="st">            "trip_distance": 1.66</span></span>
-<span id="cb18-198"><a href="#cb18-198" aria-hidden="true" tabindex="-1"></a><span class="st">        },</span></span>
-<span id="cb18-199"><a href="#cb18-199" aria-hidden="true" tabindex="-1"></a><span class="st">        "ride_id": 999</span></span>
-<span id="cb18-200"><a href="#cb18-200" aria-hidden="true" tabindex="-1"></a><span class="st">    }'</span></span>
-<span id="cb18-201"><a href="#cb18-201" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-202"><a href="#cb18-202" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-203"><a href="#cb18-203" aria-hidden="true" tabindex="-1"></a>You can either then look in the AWS management console or wait a couple of minutes and run</span>
-<span id="cb18-204"><a href="#cb18-204" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-205"><a href="#cb18-205" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-206"><a href="#cb18-206" aria-hidden="true" tabindex="-1"></a>which should result in:</span>
-<span id="cb18-207"><a href="#cb18-207" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-208"><a href="#cb18-208" aria-hidden="true" tabindex="-1"></a><span class="in">```json</span></span>
-<span id="cb18-209"><a href="#cb18-209" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb18-210"><a href="#cb18-210" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"model"</span><span class="fu">:</span> <span class="st">"ride_duration_prediction_model"</span><span class="fu">,</span></span>
-<span id="cb18-211"><a href="#cb18-211" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"version"</span><span class="fu">:</span> <span class="st">"123"</span><span class="fu">,</span></span>
-<span id="cb18-212"><a href="#cb18-212" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"prediction"</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb18-213"><a href="#cb18-213" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"ride_duration"</span><span class="fu">:</span> <span class="fl">10.830198691258547</span><span class="fu">,</span></span>
-<span id="cb18-214"><a href="#cb18-214" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"ride_id"</span><span class="fu">:</span> <span class="dv">999</span></span>
-<span id="cb18-215"><a href="#cb18-215" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb18-216"><a href="#cb18-216" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span>
-<span id="cb18-217"><a href="#cb18-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-218"><a href="#cb18-218" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-219"><a href="#cb18-219" aria-hidden="true" tabindex="-1"></a>To clean up, simply run</span>
-<span id="cb18-220"><a href="#cb18-220" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-221"><a href="#cb18-221" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
-<span id="cb18-222"><a href="#cb18-222" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> down</span>
-<span id="cb18-223"><a href="#cb18-223" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb18-224"><a href="#cb18-224" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-225"><a href="#cb18-225" aria-hidden="true" tabindex="-1"></a><span class="fu">## Local testing with `localstack`</span></span>
-<span id="cb18-226"><a href="#cb18-226" aria-hidden="true" tabindex="-1"></a>Just as one can use <span class="in">`localstack`</span> to test <span class="in">`terraform`</span> code, one can do the same with <span class="in">`pulumi`</span> as well. All one has to do is to install the handy <span class="in">`pulumilocal`</span> <span class="co">[</span><span class="ot">script</span><span class="co">](https://docs.localstack.cloud/user-guide/integrations/pulumi/)</span> and proceed as before.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb24" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Simple streaming models in the cloud, but with Python via Pulumi"</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Serguei Ossokine"</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="co">    html:</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co">        theme: cosmo</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="co">        code-tools: true</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="co">        page-layout: full</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co">        number-offset: 1</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="co">        code-summary: "Show the code"</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="co">        number-sections: true</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> last-modified</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="an">from:</span><span class="co"> markdown+emoji</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="an">filters:</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="co">  - d2</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="an">d2:</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="co">  layout: "dagre"</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="co">  theme: "NeutralDefault"</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="fu"># Introduction</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>In  previous posts (<span class="co">[</span><span class="ot">1</span><span class="co">](https://sergeiossokine.github.io/posts/streaming_deployment/streaming_example.html)</span>,<span class="co">[</span><span class="ot">2</span><span class="co">](https://sergeiossokine.github.io/posts/streaming_deployment_part2/stream_example_contd.html)</span>) I discussed deploying a simple streaming model to AWS, using AWS cli, CloudFormation and Terraform. In this blog, I re-deploy the same model, but this time using another fairly different approach to IaC by using <span class="co">[</span><span class="ot">`Pulumi`</span><span class="co">](https://www.pulumi.com/)</span>. <span class="in">`Pulumi`</span> is an open source IaC tool that allows one to use one of several programming languages (TypeScript, Python, Go, C#, Java) as well as YAML. Being very fond of Python, I of course will use that.</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="fu"># Using Pulumi for IaC</span></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>The configuration files are in <span class="co">[</span><span class="ot">this repo</span><span class="co">](https://github.com/SergeiOssokine/mlops-zoomcamp-misc/tree/main/streaming-deployment/model_deployment_pulumi)</span>.</span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>If you have not done the deployments in the <span class="co">[</span><span class="ot">previous post</span><span class="co">](https://sergeiossokine.github.io/posts/streaming_deployment/streaming_example.html)</span>, you will need to build the docker image and push it to the ECR before you can proceed - see <span class="co">[</span><span class="ot">this part</span><span class="co">](https://sergeiossokine.github.io/posts/streaming_deployment/streaming_example.html#put-everything-together)</span>.</span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a><span class="fu">## Preliminaries</span></span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a>As usual, before getting to the actual IaC we need to train the model and store it in a S3 bucket.</span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a>As before we do:</span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a><span class="va">uuid</span><span class="op">=</span><span class="va">$(</span><span class="fu">uuidgen</span><span class="va">)</span></span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">BUCKET_NAME</span><span class="op">=</span>nyc-taxi-example-<span class="va">${uuid}</span></span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">REGION</span><span class="op">=</span>us-east-1</span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">INPUT_STREAM</span><span class="op">=</span><span class="st">"ride_events"</span></span>
+<span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">OUTPUT_STREAM</span><span class="op">=</span><span class="st">"ride_predictions"</span></span>
+<span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-44"><a href="#cb24-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-45"><a href="#cb24-45" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-46"><a href="#cb24-46" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> s3api create-bucket <span class="at">--bucket</span> <span class="va">${BUCKET_NAME}</span> <span class="at">--region</span> <span class="va">${REGION}</span></span>
+<span id="cb24-47"><a href="#cb24-47" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-48"><a href="#cb24-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-49"><a href="#cb24-49" aria-hidden="true" tabindex="-1"></a>Now start the <span class="in">`mlflow`</span> server (no changes here from the last post):</span>
+<span id="cb24-50"><a href="#cb24-50" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-51"><a href="#cb24-51" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> model-training</span>
+<span id="cb24-52"><a href="#cb24-52" aria-hidden="true" tabindex="-1"></a><span class="ex">mlflow</span> server <span class="at">--default-artifact-root</span> s3://<span class="va">${BUCKET_NAME}</span> <span class="at">--backend-store-uri</span> sqlite:///mlflow.db <span class="at">--port</span> 5012</span>
+<span id="cb24-53"><a href="#cb24-53" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-54"><a href="#cb24-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-55"><a href="#cb24-55" aria-hidden="true" tabindex="-1"></a>Finally train the model:</span>
+<span id="cb24-56"><a href="#cb24-56" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-57"><a href="#cb24-57" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> train_model.py</span>
+<span id="cb24-58"><a href="#cb24-58" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-59"><a href="#cb24-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-60"><a href="#cb24-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-61"><a href="#cb24-61" aria-hidden="true" tabindex="-1"></a>We also need to store the run ID of the model. You can find it through the <span class="in">`MLFlow`</span> UI or API. Then do</span>
+<span id="cb24-62"><a href="#cb24-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-63"><a href="#cb24-63" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-64"><a href="#cb24-64" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">RUN_ID</span><span class="op">=</span>RUNIDHERE</span>
+<span id="cb24-65"><a href="#cb24-65" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-66"><a href="#cb24-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-67"><a href="#cb24-67" aria-hidden="true" tabindex="-1"></a>Finally we need the uri of the Docker image we pushed to the ECR repo:</span>
+<span id="cb24-68"><a href="#cb24-68" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-69"><a href="#cb24-69" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">REMOTE_IMAGE</span><span class="op">=</span>URIHERE</span>
+<span id="cb24-70"><a href="#cb24-70" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-71"><a href="#cb24-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-72"><a href="#cb24-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-73"><a href="#cb24-73" aria-hidden="true" tabindex="-1"></a><span class="fu">## Using Pulumi for IaC</span></span>
+<span id="cb24-74"><a href="#cb24-74" aria-hidden="true" tabindex="-1"></a>::: {.callout-important}</span>
+<span id="cb24-75"><a href="#cb24-75" aria-hidden="true" tabindex="-1"></a>Some/all services used in this section cost money. Always ensure you are aware of the associated costs.</span>
+<span id="cb24-76"><a href="#cb24-76" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb24-77"><a href="#cb24-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-78"><a href="#cb24-78" aria-hidden="true" tabindex="-1"></a>First things first, we need to set a passphrase to protect any secrets. By default this is done with a passphrase you can do this with</span>
+<span id="cb24-79"><a href="#cb24-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-80"><a href="#cb24-80" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-81"><a href="#cb24-81" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span>  <span class="va">PULUMI_CONFIG_PASSPHRASE</span><span class="op">=</span><span class="st">"YOURPASSPHRASE"</span></span>
+<span id="cb24-82"><a href="#cb24-82" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-83"><a href="#cb24-83" aria-hidden="true" tabindex="-1"></a>Now we initialize a new stack. Change to the <span class="in">`model_deployment_pulumi`</span> directory and run</span>
+<span id="cb24-84"><a href="#cb24-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-85"><a href="#cb24-85" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-86"><a href="#cb24-86" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> stack init dev</span>
+<span id="cb24-87"><a href="#cb24-87" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-88"><a href="#cb24-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-89"><a href="#cb24-89" aria-hidden="true" tabindex="-1"></a>This will create a file <span class="in">`Pulumi.dev.yaml`</span> that will be essentially empty. It will also initialize a lot of internal details (such as the stack state) in the default directory, which on linux is <span class="in">`~/.pulumi/`</span>. In principle, one should never interact with that directory directly.</span>
+<span id="cb24-90"><a href="#cb24-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-91"><a href="#cb24-91" aria-hidden="true" tabindex="-1"></a>Now we update this file with all the necessary config settings:</span>
+<span id="cb24-92"><a href="#cb24-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-93"><a href="#cb24-93" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-94"><a href="#cb24-94" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> config set-all <span class="at">--plaintext</span> aws-native:region=<span class="va">${REGION}</span> <span class="at">--plaintext</span> model_bucket=<span class="va">${BUCKET_NAME}</span> <span class="at">--plaintext</span> run_id=<span class="va">${RUN_ID}</span> <span class="at">--plaintext</span> image_uri=<span class="va">${REMOTE_IMAGE}</span> <span class="at">--plaintext</span> input_stream_name=<span class="va">${INPUT_STREAM}</span> <span class="at">--plaintext</span> output_stream_name=<span class="va">${OUTPUT_STREAM}</span></span>
+<span id="cb24-95"><a href="#cb24-95" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-96"><a href="#cb24-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-97"><a href="#cb24-97" aria-hidden="true" tabindex="-1"></a>That should be it for congiruation.</span>
+<span id="cb24-98"><a href="#cb24-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-99"><a href="#cb24-99" aria-hidden="true" tabindex="-1"></a>The code that actually provisions the resources is (appropriately) inside <span class="in">`__main__.py`</span>. Note that at the time of writing:</span>
+<span id="cb24-100"><a href="#cb24-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-101"><a href="#cb24-101" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>There are 2 different ways to use AWS resources with <span class="in">`pulumi`</span>: <span class="in">`aws`</span> and <span class="in">`aws_native`</span>. The former is stable and supported but the latter is planned to be the replacement, so we use that instead.</span>
+<span id="cb24-102"><a href="#cb24-102" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>There is an error in the <span class="in">`aws_native`</span> documentation about the way that inline policies should be defined. See <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/pulumi/pulumi-aws-native/issues/1616)</span></span>
+<span id="cb24-103"><a href="#cb24-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-104"><a href="#cb24-104" aria-hidden="true" tabindex="-1"></a>The code is pretty self-explanatory and mimics quite closely the way we have seen resouces provisioned with <span class="in">`terraform`</span> and <span class="in">`CloudFormation`</span>.</span>
+<span id="cb24-105"><a href="#cb24-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-106"><a href="#cb24-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-107"><a href="#cb24-107" aria-hidden="true" tabindex="-1"></a>You can now preview the resources that will be deployed by running</span>
+<span id="cb24-108"><a href="#cb24-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-109"><a href="#cb24-109" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-110"><a href="#cb24-110" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> preview</span>
+<span id="cb24-111"><a href="#cb24-111" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-112"><a href="#cb24-112" aria-hidden="true" tabindex="-1"></a>You should see somthing like</span>
+<span id="cb24-113"><a href="#cb24-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-114"><a href="#cb24-114" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-115"><a href="#cb24-115" aria-hidden="true" tabindex="-1"></a><span class="in">Previewing update (dev):</span></span>
+<span id="cb24-116"><a href="#cb24-116" aria-hidden="true" tabindex="-1"></a><span class="in">@ previewing update....</span></span>
+<span id="cb24-117"><a href="#cb24-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-118"><a href="#cb24-118" aria-hidden="true" tabindex="-1"></a><span class="in"> +  pulumi:pulumi:Stack streaming_model-dev create</span></span>
+<span id="cb24-119"><a href="#cb24-119" aria-hidden="true" tabindex="-1"></a><span class="in">@ previewing update.....</span></span>
+<span id="cb24-120"><a href="#cb24-120" aria-hidden="true" tabindex="-1"></a><span class="in"> +  aws-native:kinesis:Stream ride_predictions create</span></span>
+<span id="cb24-121"><a href="#cb24-121" aria-hidden="true" tabindex="-1"></a><span class="in"> +  aws-native:kinesis:Stream ride_events create</span></span>
+<span id="cb24-122"><a href="#cb24-122" aria-hidden="true" tabindex="-1"></a><span class="in"> +  aws-native:iam:Role LambdaKinesisIAMRole create</span></span>
+<span id="cb24-123"><a href="#cb24-123" aria-hidden="true" tabindex="-1"></a><span class="in"> +  aws-native:lambda:Function predict create</span></span>
+<span id="cb24-124"><a href="#cb24-124" aria-hidden="true" tabindex="-1"></a><span class="in"> +  aws-native:lambda:EventSourceMapping output_mapping create</span></span>
+<span id="cb24-125"><a href="#cb24-125" aria-hidden="true" tabindex="-1"></a><span class="in"> +  pulumi:pulumi:Stack streaming_model-dev create</span></span>
+<span id="cb24-126"><a href="#cb24-126" aria-hidden="true" tabindex="-1"></a><span class="in">Outputs:</span></span>
+<span id="cb24-127"><a href="#cb24-127" aria-hidden="true" tabindex="-1"></a><span class="in">    input_stream_arn : output&lt;string&gt;</span></span>
+<span id="cb24-128"><a href="#cb24-128" aria-hidden="true" tabindex="-1"></a><span class="in">    output_stream_arn: output&lt;string&gt;</span></span>
+<span id="cb24-129"><a href="#cb24-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-130"><a href="#cb24-130" aria-hidden="true" tabindex="-1"></a><span class="in">Resources:</span></span>
+<span id="cb24-131"><a href="#cb24-131" aria-hidden="true" tabindex="-1"></a><span class="in">    + 6 to create</span></span>
+<span id="cb24-132"><a href="#cb24-132" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-133"><a href="#cb24-133" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-134"><a href="#cb24-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-135"><a href="#cb24-135" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-136"><a href="#cb24-136" aria-hidden="true" tabindex="-1"></a>Now we are ready to deploy the infrastructure. Run</span>
+<span id="cb24-137"><a href="#cb24-137" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-138"><a href="#cb24-138" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-139"><a href="#cb24-139" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> up</span>
+<span id="cb24-140"><a href="#cb24-140" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-141"><a href="#cb24-141" aria-hidden="true" tabindex="-1"></a>then choose, "yes" and hit enter. You should see something like:</span>
+<span id="cb24-142"><a href="#cb24-142" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-143"><a href="#cb24-143" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-144"><a href="#cb24-144" aria-hidden="true" tabindex="-1"></a><span class="in">Previewing update (dev):</span></span>
+<span id="cb24-145"><a href="#cb24-145" aria-hidden="true" tabindex="-1"></a><span class="in">     Type                                     Name                  Plan</span></span>
+<span id="cb24-146"><a href="#cb24-146" aria-hidden="true" tabindex="-1"></a><span class="in"> +   pulumi:pulumi:Stack                      streaming_model-dev   create</span></span>
+<span id="cb24-147"><a href="#cb24-147" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:kinesis:Stream             ride_predictions      create</span></span>
+<span id="cb24-148"><a href="#cb24-148" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:kinesis:Stream             ride_events           create</span></span>
+<span id="cb24-149"><a href="#cb24-149" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:iam:Role                   LambdaKinesisIAMRole  create</span></span>
+<span id="cb24-150"><a href="#cb24-150" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:lambda:Function            predict               create</span></span>
+<span id="cb24-151"><a href="#cb24-151" aria-hidden="true" tabindex="-1"></a><span class="in"> +   └─ aws-native:lambda:EventSourceMapping  output_mapping        create</span></span>
+<span id="cb24-152"><a href="#cb24-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-153"><a href="#cb24-153" aria-hidden="true" tabindex="-1"></a><span class="in">Outputs:</span></span>
+<span id="cb24-154"><a href="#cb24-154" aria-hidden="true" tabindex="-1"></a><span class="in">    input_stream_arn : output&lt;string&gt;</span></span>
+<span id="cb24-155"><a href="#cb24-155" aria-hidden="true" tabindex="-1"></a><span class="in">    output_stream_arn: output&lt;string&gt;</span></span>
+<span id="cb24-156"><a href="#cb24-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-157"><a href="#cb24-157" aria-hidden="true" tabindex="-1"></a><span class="in">Resources:</span></span>
+<span id="cb24-158"><a href="#cb24-158" aria-hidden="true" tabindex="-1"></a><span class="in">    + 6 to create</span></span>
+<span id="cb24-159"><a href="#cb24-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-160"><a href="#cb24-160" aria-hidden="true" tabindex="-1"></a><span class="in">Do you want to perform this update? yes</span></span>
+<span id="cb24-161"><a href="#cb24-161" aria-hidden="true" tabindex="-1"></a><span class="in">Updating (dev):</span></span>
+<span id="cb24-162"><a href="#cb24-162" aria-hidden="true" tabindex="-1"></a><span class="in">     Type                                     Name                  Status</span></span>
+<span id="cb24-163"><a href="#cb24-163" aria-hidden="true" tabindex="-1"></a><span class="in"> +   pulumi:pulumi:Stack                      streaming_model-dev   created (74s)</span></span>
+<span id="cb24-164"><a href="#cb24-164" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:kinesis:Stream             ride_predictions      created (7s)</span></span>
+<span id="cb24-165"><a href="#cb24-165" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:kinesis:Stream             ride_events           created (8s)</span></span>
+<span id="cb24-166"><a href="#cb24-166" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:iam:Role                   LambdaKinesisIAMRole  created (24s)</span></span>
+<span id="cb24-167"><a href="#cb24-167" aria-hidden="true" tabindex="-1"></a><span class="in"> +   ├─ aws-native:lambda:Function            predict               created (37s)</span></span>
+<span id="cb24-168"><a href="#cb24-168" aria-hidden="true" tabindex="-1"></a><span class="in"> +   └─ aws-native:lambda:EventSourceMapping  output_mapping        created (2s)</span></span>
+<span id="cb24-169"><a href="#cb24-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-170"><a href="#cb24-170" aria-hidden="true" tabindex="-1"></a><span class="in">Outputs:</span></span>
+<span id="cb24-171"><a href="#cb24-171" aria-hidden="true" tabindex="-1"></a><span class="in">    input_stream_arn : "arn:aws:kinesis:us-east-1:XXXXXXXXXXXX:stream/ride_events"</span></span>
+<span id="cb24-172"><a href="#cb24-172" aria-hidden="true" tabindex="-1"></a><span class="in">    output_stream_arn: "arn:aws:kinesis:us-east-1:XXXXXXXXXXXX:stream/ride_predictions"</span></span>
+<span id="cb24-173"><a href="#cb24-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-174"><a href="#cb24-174" aria-hidden="true" tabindex="-1"></a><span class="in">Resources:</span></span>
+<span id="cb24-175"><a href="#cb24-175" aria-hidden="true" tabindex="-1"></a><span class="in">    + 6 created</span></span>
+<span id="cb24-176"><a href="#cb24-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-177"><a href="#cb24-177" aria-hidden="true" tabindex="-1"></a><span class="in">Duration: 1m15s</span></span>
+<span id="cb24-178"><a href="#cb24-178" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-179"><a href="#cb24-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-180"><a href="#cb24-180" aria-hidden="true" tabindex="-1"></a>::: {.callout-note}</span>
+<span id="cb24-181"><a href="#cb24-181" aria-hidden="true" tabindex="-1"></a>If you get an error like this:</span>
+<span id="cb24-182"><a href="#cb24-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-183"><a href="#cb24-183" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-184"><a href="#cb24-184" aria-hidden="true" tabindex="-1"></a><span class="ex">error:</span> <span class="at">--yes</span> or <span class="at">--skip-preview</span> must be passed in to proceed when running in non-interactive mode</span>
+<span id="cb24-185"><a href="#cb24-185" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-186"><a href="#cb24-186" aria-hidden="true" tabindex="-1"></a>then instead execute <span class="in">`PULUMI_DISABLE_CI_DETECTION=true pulumi up`</span>. See the discussion <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/pulumi/pulumi/issues/4503)</span></span>
+<span id="cb24-187"><a href="#cb24-187" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb24-188"><a href="#cb24-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-189"><a href="#cb24-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-190"><a href="#cb24-190" aria-hidden="true" tabindex="-1"></a>As always we can test everything is working right by putting an event into the input stream as follows</span>
+<span id="cb24-191"><a href="#cb24-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-192"><a href="#cb24-192" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-193"><a href="#cb24-193" aria-hidden="true" tabindex="-1"></a><span class="ex">aws</span> kinesis put-record     <span class="at">--cli-binary-format</span> raw-in-base64-out <span class="at">--stream-name</span> <span class="va">${INPUT_STREAM}</span>     <span class="at">--partition-key</span> 999     <span class="at">--data</span> <span class="st">'{</span></span>
+<span id="cb24-194"><a href="#cb24-194" aria-hidden="true" tabindex="-1"></a><span class="st">        "ride": {</span></span>
+<span id="cb24-195"><a href="#cb24-195" aria-hidden="true" tabindex="-1"></a><span class="st">            "PULocationID": 30,</span></span>
+<span id="cb24-196"><a href="#cb24-196" aria-hidden="true" tabindex="-1"></a><span class="st">            "DOLocationID": 105,</span></span>
+<span id="cb24-197"><a href="#cb24-197" aria-hidden="true" tabindex="-1"></a><span class="st">            "trip_distance": 1.66</span></span>
+<span id="cb24-198"><a href="#cb24-198" aria-hidden="true" tabindex="-1"></a><span class="st">        },</span></span>
+<span id="cb24-199"><a href="#cb24-199" aria-hidden="true" tabindex="-1"></a><span class="st">        "ride_id": 999</span></span>
+<span id="cb24-200"><a href="#cb24-200" aria-hidden="true" tabindex="-1"></a><span class="st">    }'</span></span>
+<span id="cb24-201"><a href="#cb24-201" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-202"><a href="#cb24-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-203"><a href="#cb24-203" aria-hidden="true" tabindex="-1"></a>You can either then look in the AWS management console or wait a couple of minutes and run</span>
+<span id="cb24-204"><a href="#cb24-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-205"><a href="#cb24-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-206"><a href="#cb24-206" aria-hidden="true" tabindex="-1"></a>which should result in:</span>
+<span id="cb24-207"><a href="#cb24-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-208"><a href="#cb24-208" aria-hidden="true" tabindex="-1"></a><span class="in">```json</span></span>
+<span id="cb24-209"><a href="#cb24-209" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb24-210"><a href="#cb24-210" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"model"</span><span class="fu">:</span> <span class="st">"ride_duration_prediction_model"</span><span class="fu">,</span></span>
+<span id="cb24-211"><a href="#cb24-211" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"version"</span><span class="fu">:</span> <span class="st">"123"</span><span class="fu">,</span></span>
+<span id="cb24-212"><a href="#cb24-212" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"prediction"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb24-213"><a href="#cb24-213" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"ride_duration"</span><span class="fu">:</span> <span class="fl">10.830198691258547</span><span class="fu">,</span></span>
+<span id="cb24-214"><a href="#cb24-214" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"ride_id"</span><span class="fu">:</span> <span class="dv">999</span></span>
+<span id="cb24-215"><a href="#cb24-215" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb24-216"><a href="#cb24-216" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span>
+<span id="cb24-217"><a href="#cb24-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-218"><a href="#cb24-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-219"><a href="#cb24-219" aria-hidden="true" tabindex="-1"></a>To clean up, simply run</span>
+<span id="cb24-220"><a href="#cb24-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-221"><a href="#cb24-221" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-222"><a href="#cb24-222" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> down</span>
+<span id="cb24-223"><a href="#cb24-223" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-224"><a href="#cb24-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-225"><a href="#cb24-225" aria-hidden="true" tabindex="-1"></a><span class="fu">## Automatic conversion from `terraform`</span></span>
+<span id="cb24-226"><a href="#cb24-226" aria-hidden="true" tabindex="-1"></a><span class="in">`pulumi`</span> supports migration from several different other IaC tools, including <span class="in">`terraform`</span>, as described <span class="co">[</span><span class="ot">here</span><span class="co">](https://www.pulumi.com/docs/using-pulumi/adopting-pulumi/migrating-to-pulumi/#conversion)</span>. For <span class="in">`terraform`</span> there is a built-in tool to generate <span class="in">`pulumi`</span> code. Since we already have a <span class="in">`terraform`</span> implementation, it's interesting to see what kind of code would be generated. To do so, navigate to <span class="in">`model_deployment_tf`</span> and run <span class="ot">[^1]</span></span>
+<span id="cb24-227"><a href="#cb24-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-228"><a href="#cb24-228" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-229"><a href="#cb24-229" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> convert <span class="at">--from</span> terraform <span class="at">--language</span> python</span>
+<span id="cb24-230"><a href="#cb24-230" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-231"><a href="#cb24-231" aria-hidden="true" tabindex="-1"></a>You will also need to initialize the stack with</span>
+<span id="cb24-232"><a href="#cb24-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-233"><a href="#cb24-233" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-234"><a href="#cb24-234" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> stack init dev</span>
+<span id="cb24-235"><a href="#cb24-235" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-236"><a href="#cb24-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-237"><a href="#cb24-237" aria-hidden="true" tabindex="-1"></a>The tool is clever enough to recognize that the <span class="in">`terraform`</span> implementation used modules for AWS Kinesis and AWS Lambda and creates 2 files <span class="in">`kinesis.py`</span> and <span class="in">`lambda.py`</span> which implement corresponding Python classes. It also preserves the correct comments from terraform and even adds trhe descriptions of the <span class="in">`terraform`</span> variables as comments prior to getting them from the config, e.g. <span class="co">[</span><span class="ot">here</span><span class="co">]()</span>.</span>
+<span id="cb24-238"><a href="#cb24-238" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-239"><a href="#cb24-239" aria-hidden="true" tabindex="-1"></a>In my conversion, the code produced was not syntactically correct, but fortunately the errors were mostly trivial, for example, running <span class="in">`pulumi preview`</span> on the raw generated code gave errors like:</span>
+<span id="cb24-240"><a href="#cb24-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-241"><a href="#cb24-241" aria-hidden="true" tabindex="-1"></a><span class="in">``` bash</span></span>
+<span id="cb24-242"><a href="#cb24-242" aria-hidden="true" tabindex="-1"></a><span class="ex">File</span> <span class="st">"mlops-zoomcamp-misc/streaming-deployment/model_deployment_tf/__main__.py"</span>, line 3</span>
+<span id="cb24-243"><a href="#cb24-243" aria-hidden="true" tabindex="-1"></a>    <span class="ex">from</span> lambda import Lambda</span>
+<span id="cb24-244"><a href="#cb24-244" aria-hidden="true" tabindex="-1"></a>            <span class="ex">^^^^^^</span></span>
+<span id="cb24-245"><a href="#cb24-245" aria-hidden="true" tabindex="-1"></a><span class="ex">SyntaxError:</span> invalid syntax</span>
+<span id="cb24-246"><a href="#cb24-246" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-247"><a href="#cb24-247" aria-hidden="true" tabindex="-1"></a>or (which happens several times)</span>
+<span id="cb24-248"><a href="#cb24-248" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-249"><a href="#cb24-249" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-250"><a href="#cb24-250" aria-hidden="true" tabindex="-1"></a><span class="ex">File</span> <span class="st">"mlops-zoomcamp-misc/streaming-deployment/model_deployment_tf/__main__.py"</span>, line 3, in <span class="op">&lt;</span>module<span class="op">&gt;</span></span>
+<span id="cb24-251"><a href="#cb24-251" aria-hidden="true" tabindex="-1"></a><span class="ex">from</span> lambda_ import Lambda</span>
+<span id="cb24-252"><a href="#cb24-252" aria-hidden="true" tabindex="-1"></a><span class="ex">File</span> <span class="st">"mlops-zoomcamp-misc/streaming-deployment/model_deployment_tf/lambda_.py"</span>, line 21</span>
+<span id="cb24-253"><a href="#cb24-253" aria-hidden="true" tabindex="-1"></a><span class="va">name</span><span class="op">=</span>f<span class="st">"iam_{args["</span>lambdaFunctionName<span class="st">"]}"</span>,</span>
+<span id="cb24-254"><a href="#cb24-254" aria-hidden="true" tabindex="-1"></a>                    <span class="ex">^^^^^^^^^^^^^^^^^^</span></span>
+<span id="cb24-255"><a href="#cb24-255" aria-hidden="true" tabindex="-1"></a><span class="ex">SyntaxError:</span> f-string: unmatched <span class="st">'['</span></span>
+<span id="cb24-256"><a href="#cb24-256" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-257"><a href="#cb24-257" aria-hidden="true" tabindex="-1"></a>Fortunately, in this particular case they are all trivial to fix: in the first case, simply rename <span class="in">`lambda.py`</span> to <span class="in">`lambda_.py`</span> and change the import statement, in the latter, correct the quotes so that the ones used inside the {} are different from the outside<span class="ot">[^2]</span>.</span>
+<span id="cb24-258"><a href="#cb24-258" aria-hidden="true" tabindex="-1"></a>The other issue arises with default values of variables set inside a module, in particular in the <span class="in">`kinesis`</span> module we had a variable like this:</span>
+<span id="cb24-259"><a href="#cb24-259" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-260"><a href="#cb24-260" aria-hidden="true" tabindex="-1"></a><span class="in">```terraform</span></span>
+<span id="cb24-261"><a href="#cb24-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-262"><a href="#cb24-262" aria-hidden="true" tabindex="-1"></a><span class="in">variable "shard_level_metrics" {</span></span>
+<span id="cb24-263"><a href="#cb24-263" aria-hidden="true" tabindex="-1"></a><span class="in">  type        = list(string)</span></span>
+<span id="cb24-264"><a href="#cb24-264" aria-hidden="true" tabindex="-1"></a><span class="in">  description = "shard_level_metrics"</span></span>
+<span id="cb24-265"><a href="#cb24-265" aria-hidden="true" tabindex="-1"></a><span class="in">  default = [</span></span>
+<span id="cb24-266"><a href="#cb24-266" aria-hidden="true" tabindex="-1"></a><span class="in">    "IncomingBytes",</span></span>
+<span id="cb24-267"><a href="#cb24-267" aria-hidden="true" tabindex="-1"></a><span class="in">    "OutgoingBytes",</span></span>
+<span id="cb24-268"><a href="#cb24-268" aria-hidden="true" tabindex="-1"></a><span class="in">    "OutgoingRecords",</span></span>
+<span id="cb24-269"><a href="#cb24-269" aria-hidden="true" tabindex="-1"></a><span class="in">    "ReadProvisionedThroughputExceeded",</span></span>
+<span id="cb24-270"><a href="#cb24-270" aria-hidden="true" tabindex="-1"></a><span class="in">    "WriteProvisionedThroughputExceeded",</span></span>
+<span id="cb24-271"><a href="#cb24-271" aria-hidden="true" tabindex="-1"></a><span class="in">    "IncomingRecords",</span></span>
+<span id="cb24-272"><a href="#cb24-272" aria-hidden="true" tabindex="-1"></a><span class="in">    "IteratorAgeMilliseconds",</span></span>
+<span id="cb24-273"><a href="#cb24-273" aria-hidden="true" tabindex="-1"></a><span class="in">  ]</span></span>
+<span id="cb24-274"><a href="#cb24-274" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb24-275"><a href="#cb24-275" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-276"><a href="#cb24-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-277"><a href="#cb24-277" aria-hidden="true" tabindex="-1"></a>While the script correctly recognizes that <span class="in">`shardLeveMetrics`</span> should be set in <span class="in">`kinesis.py`</span>, it doesn't either set the default in the <span class="in">`Kinesis`</span> class inside <span class="in">`kinesis.py`</span> nor pass <span class="in">`shardLevelMetrics`</span> to the class constructor inside <span class="in">`__main__.py`</span>. To fix this, we simply pass this argument inside <span class="in">`__main__.py`</span>,as shown <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/SergeiOssokine/mlops-zoomcamp-misc/blob/main/streaming-deployment/model_deployment_pulumi_autogen/__main__.py#L34)</span>.  I also had to fix a whole bunch of things and in the process encountered the concepts out <span class="co">[</span><span class="ot">`Outputs`</span><span class="co">](https://www.pulumi.com/docs/concepts/inputs-outputs/apply/#accessing-single-output-values)</span> in <span class="in">`pulumi`</span> which were a bit awkward. The final version of the code is <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/SergeiOssokine/mlops-zoomcamp-misc/tree/main/streaming-deployment/model_deployment_pulumi_autogen)</span></span>
+<span id="cb24-278"><a href="#cb24-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-279"><a href="#cb24-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-280"><a href="#cb24-280" aria-hidden="true" tabindex="-1"></a>Finally, we still need to add all the correct config variables. You can do this by running:</span>
+<span id="cb24-281"><a href="#cb24-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-282"><a href="#cb24-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-283"><a href="#cb24-283" aria-hidden="true" tabindex="-1"></a><span class="in">```bash</span></span>
+<span id="cb24-284"><a href="#cb24-284" aria-hidden="true" tabindex="-1"></a><span class="ex">pulumi</span> config set-all <span class="at">--path</span> <span class="at">--plaintext</span> aws-native:region=<span class="va">${REGION}</span> <span class="at">--plaintext</span> modelBucket=<span class="va">${BUCKET_NAME}</span> <span class="at">--plaintext</span> runId=<span class="va">${RUN_ID}</span> <span class="at">--plaintext</span> image_uri=<span class="va">${REMOTE_IMAGE}</span> <span class="at">--plaintext</span> sourceStreamName=<span class="va">${INPUT_STREAM}</span> <span class="at">--plaintext</span> outputStreamName=<span class="va">${OUTPUT_STREAM}</span> <span class="at">--plaintext</span> lambdaFunctionName=<span class="st">"predict-lambda"</span> <span class="at">--plaintext</span>  <span class="st">"shardLevelMetrics[0]"</span>=IncomingBytes  <span class="at">--plaintext</span> <span class="st">"shardLevelMetrics[1]"</span>=OutgoingBytes</span>
+<span id="cb24-285"><a href="#cb24-285" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb24-286"><a href="#cb24-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-287"><a href="#cb24-287" aria-hidden="true" tabindex="-1"></a>Doing <span class="in">`pulumi preview`</span> should now show that all the resources we want will be deployed which you can do with <span class="in">`pulumi up`</span>.</span>
+<span id="cb24-288"><a href="#cb24-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-289"><a href="#cb24-289" aria-hidden="true" tabindex="-1"></a>For our simple stack here this certainly wasn't too painful, but I was happy to learn more about <span class="in">`pulumi`</span> by doing it from scratch.</span>
+<span id="cb24-290"><a href="#cb24-290" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-291"><a href="#cb24-291" aria-hidden="true" tabindex="-1"></a><span class="fu">## Local testing with `localstack`</span></span>
+<span id="cb24-292"><a href="#cb24-292" aria-hidden="true" tabindex="-1"></a>Just as one can use <span class="in">`localstack`</span> to test <span class="in">`terraform`</span> code, one can do the same with <span class="in">`pulumi`</span> as well. All one has to do is to install the handy <span class="in">`pulumilocal`</span> <span class="co">[</span><span class="ot">script</span><span class="co">](https://docs.localstack.cloud/user-guide/integrations/pulumi/)</span> and proceed as before.</span>
+<span id="cb24-293"><a href="#cb24-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-294"><a href="#cb24-294" aria-hidden="true" tabindex="-1"></a><span class="ot">[^1]: </span>Note that at the time of writing, this will generate python code using the <span class="in">`aws`</span> module, not <span class="in">`aws_native`</span></span>
+<span id="cb24-295"><a href="#cb24-295" aria-hidden="true" tabindex="-1"></a><span class="ot">[^2]: </span>I think this particular bug can be avoided simply by always using triple quotes, f""" for the generated f-string expression</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

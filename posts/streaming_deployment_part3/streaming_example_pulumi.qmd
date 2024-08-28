@@ -11,7 +11,7 @@ format:
         code-summary: "Show the code"
         number-sections: true
 
-
+date: last-modified
 from: markdown+emoji
 
 filters:
@@ -183,11 +183,11 @@ If you get an error like this:
 ```bash
 error: --yes or --skip-preview must be passed in to proceed when running in non-interactive mode
 ```
-then instead execute `PULUMI_DISABLE_CI_DETECTION=true`. See the discussion [here](https://github.com/pulumi/pulumi/issues/4503)
+then instead execute `PULUMI_DISABLE_CI_DETECTION=true pulumi up`. See the discussion [here](https://github.com/pulumi/pulumi/issues/4503)
 :::
 
 
-As always we can test everything is working right by putting an event into the input stream as follows:
+As always we can test everything is working right by putting an event into the input stream as follows
 
 ```bash
 aws kinesis put-record     --cli-binary-format raw-in-base64-out --stream-name ${INPUT_STREAM}     --partition-key 999     --data '{
@@ -222,6 +222,74 @@ To clean up, simply run
 pulumi down
 ```
 
+## Automatic conversion from `terraform`
+`pulumi` supports migration from several different other IaC tools, including `terraform`, as described [here](https://www.pulumi.com/docs/using-pulumi/adopting-pulumi/migrating-to-pulumi/#conversion). For `terraform` there is a built-in tool to generate `pulumi` code. Since we already have a `terraform` implementation, it's interesting to see what kind of code would be generated. To do so, navigate to `model_deployment_tf` and run [^1]
+
+```bash
+pulumi convert --from terraform --language python
+```
+You will also need to initialize the stack with
+
+```bash
+pulumi stack init dev
+```
+
+The tool is clever enough to recognize that the `terraform` implementation used modules for AWS Kinesis and AWS Lambda and creates 2 files `kinesis.py` and `lambda.py` which implement corresponding Python classes. It also preserves the correct comments from terraform and even adds trhe descriptions of the `terraform` variables as comments prior to getting them from the config, e.g. [here]().
+
+In my conversion, the code produced was not syntactically correct, but fortunately the errors were mostly trivial, for example, running `pulumi preview` on the raw generated code gave errors like:
+
+``` bash
+File "mlops-zoomcamp-misc/streaming-deployment/model_deployment_tf/__main__.py", line 3
+    from lambda import Lambda
+            ^^^^^^
+SyntaxError: invalid syntax
+```
+or (which happens several times)
+
+```bash
+File "mlops-zoomcamp-misc/streaming-deployment/model_deployment_tf/__main__.py", line 3, in <module>
+from lambda_ import Lambda
+File "mlops-zoomcamp-misc/streaming-deployment/model_deployment_tf/lambda_.py", line 21
+name=f"iam_{args["lambdaFunctionName"]}",
+                    ^^^^^^^^^^^^^^^^^^
+SyntaxError: f-string: unmatched '['
+```
+Fortunately, in this particular case they are all trivial to fix: in the first case, simply rename `lambda.py` to `lambda_.py` and change the import statement, in the latter, correct the quotes so that the ones used inside the {} are different from the outside[^2].
+The other issue arises with default values of variables set inside a module, in particular in the `kinesis` module we had a variable like this:
+
+```terraform
+
+variable "shard_level_metrics" {
+  type        = list(string)
+  description = "shard_level_metrics"
+  default = [
+    "IncomingBytes",
+    "OutgoingBytes",
+    "OutgoingRecords",
+    "ReadProvisionedThroughputExceeded",
+    "WriteProvisionedThroughputExceeded",
+    "IncomingRecords",
+    "IteratorAgeMilliseconds",
+  ]
+}
+```
+
+While the script correctly recognizes that `shardLeveMetrics` should be set in `kinesis.py`, it doesn't either set the default in the `Kinesis` class inside `kinesis.py` nor pass `shardLevelMetrics` to the class constructor inside `__main__.py`. To fix this, we simply pass this argument inside `__main__.py`,as shown [here](https://github.com/SergeiOssokine/mlops-zoomcamp-misc/blob/main/streaming-deployment/model_deployment_pulumi_autogen/__main__.py#L34).  I also had to fix a whole bunch of things and in the process encountered the concepts out [`Outputs`](https://www.pulumi.com/docs/concepts/inputs-outputs/apply/#accessing-single-output-values) in `pulumi` which were a bit awkward. The final version of the code is [here](https://github.com/SergeiOssokine/mlops-zoomcamp-misc/tree/main/streaming-deployment/model_deployment_pulumi_autogen)
+
+
+Finally, we still need to add all the correct config variables. You can do this by running:
+
+
+```bash
+pulumi config set-all --path --plaintext aws-native:region=${REGION} --plaintext modelBucket=${BUCKET_NAME} --plaintext runId=${RUN_ID} --plaintext image_uri=${REMOTE_IMAGE} --plaintext sourceStreamName=${INPUT_STREAM} --plaintext outputStreamName=${OUTPUT_STREAM} --plaintext lambdaFunctionName="predict-lambda" --plaintext  "shardLevelMetrics[0]"=IncomingBytes  --plaintext "shardLevelMetrics[1]"=OutgoingBytes
+```
+
+Doing `pulumi preview` should now show that all the resources we want will be deployed which you can do with `pulumi up`.
+
+For our simple stack here this certainly wasn't too painful, but I was happy to learn more about `pulumi` by doing it from scratch.
+
 ## Local testing with `localstack`
 Just as one can use `localstack` to test `terraform` code, one can do the same with `pulumi` as well. All one has to do is to install the handy `pulumilocal` [script](https://docs.localstack.cloud/user-guide/integrations/pulumi/) and proceed as before.
 
+[^1]: Note that at the time of writing, this will generate python code using the `aws` module, not `aws_native`
+[^2]: I think this particular bug can be avoided simply by always using triple quotes, f""" for the generated f-string expression
