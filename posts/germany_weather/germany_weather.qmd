@@ -1,0 +1,200 @@
+---
+title: "Feeling the heat"
+author: "Serguei Ossokine"
+
+format:
+    html:
+        theme: cosmo
+        code-tools: true
+        page-layout: full
+        number-offset: 1
+        code-summary: "Show the code"
+        number-sections: true
+
+
+from: markdown+emoji
+
+filters:
+  - d2
+d2:
+  layout: "dagre"
+  theme: "NeutralDefault"
+---
+
+
+In the last few weeks, Berlin has been experiencing a late-summer heat wave. While quite tame compared to some of the record-breaking temperatures around the globe, it still felt hotter than it normally is. As such, I decided to dig into some weather data to see if the summers have indeed been getting hotter.
+
+To conduct the analysis I used the fantastic package called [`meteostat`](https://dev.meteostat.net/) for getting quick access to global historical weather data. `meteostat`  makes it very easy to get weather data by location, region or latitude and longitude. For Germany, sources its data from the DWD(Deutscher Wetterdienst), ensuring reliable and extensive datasets.
+
+It turns out Germany has a _lot_ of weather stations. Let's take a look at them in more detail [^1].
+
+```{python}
+# Import Meteostat library and dependencies
+from datetime import datetime
+
+import matplotlib.pyplot as plt
+import pandas as pd
+from meteostat import Daily, Hourly, Monthly, Point, Stations
+
+# Time period
+start = datetime(1950, 1, 1)
+end = datetime(2024, 9, 5)
+
+# Get all the stations in Germany
+stations = Stations()
+sts = stations.region("DE")
+# Get all the stations within 35 km of Berlin
+sts_BE = stations.nearby(52.5200, 13.4050, radius=35000)
+sts = sts.fetch()
+sts_BE = sts_BE.fetch()
+```
+
+In total there are `{python} sts.shape[0]` and they are pretty uniformly distributed around the country:
+
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show the code"
+
+from lets_plot import *
+
+LetsPlot.setup_html()
+from lets_plot.geo_data import *
+
+DE = geocode_countries(names="Germany").inc_res(3).get_boundaries()
+points = geom_point(
+    aes(x="longitude", y="latitude"), data=sts, alpha=0.5, shape=18, color="#7570b3"
+)
+(
+    ggplot()
+    + geom_livemap()
+    + geom_polygon(data=DE, fill="#F8F4F0", color="#B71234", alpha=0.1)
+    + points
+    + ggsize(650, 600)
+)
+```
+
+
+Let's now focus on Berlin:
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show the code"
+BE = geocode_cities(names="Berlin").inc_res(2).get_boundaries()
+points_BE = geom_point(aes(x='longitude',y='latitude'),data=sts_BE,alpha=1,shape=18,color="#7570b3",size=10)
+(
+    ggplot()
+    + geom_livemap()
+    + geom_polygon(data=BE, fill="#F8F4F0", color="#B71234", alpha=0.1)
+    + points_BE
+    + ggsize(650, 600)
+)
+
+```
+
+Some of these weather stations have data reaching back a long time, so let's look at how different this summer is from the past. The quantity of interest to us will be the average across all the Berlin weather stations of the daily maximum temperature.
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show the code"
+data = Daily(sts_BE, start=start, end=end)
+data = data.fetch().reset_index()
+data_nn = data[~data["tmax"].isna()]
+
+
+mask = ((data_nn["time"].dt.month >= 5) & (data_nn["time"].dt.month <= 9)) & (
+    data_nn["time"].dt.year < 2024
+)
+historical_all = data_nn[mask].reset_index(drop=True)
+historical_all["month_day"] = historical_all["time"].dt.strftime("%m-%d")
+
+historical_decade = historical_all[
+    historical_all.time > datetime(2014, 4, 30)
+].reset_index(drop=True)
+historical_decade["month_day"] = historical_decade["time"].dt.strftime("%m-%d")
+
+historical_2decade = historical_all[
+    historical_all.time > datetime(2004, 4, 30)
+].reset_index(drop=True)
+historical_2decade["month_day"] = historical_2decade["time"].dt.strftime("%m-%d")
+
+
+def get_station_average_data(df_input: pd.DataFrame) -> pd.DataFrame:
+    """
+    Average data for every day for all years across all stations
+    """
+    df = df_input.copy()
+    df = df.groupby("month_day")[["tmax", "tmin", "tavg"]].mean().reset_index()
+    df["date"] = pd.to_datetime(
+        historical_all["month_day"] + "-2024", format="%m-%d-%Y"
+    )
+    return df
+
+
+historical_all = get_station_average_data(historical_all)
+historical_decade = get_station_average_data(historical_decade)
+historical_2decade = get_station_average_data(historical_2decade)
+
+recent_months = (
+    data_nn[
+        (data_nn.time > datetime(2024, 5, 1)) & (data_nn.time < datetime(2024, 9, 5))
+    ]
+    .groupby("time")[["tmax", "tmin", "tavg"]]
+    .mean()
+    .reset_index()
+)
+
+(
+    ggplot()
+    + geom_line(aes(x="time", y="tmax"), data=recent_months, manual_key="2024")
+    + geom_line(
+        aes(x="date", y="tmax"),
+        data=historical_decade,
+        color="#7570b3",
+        manual_key="2014-2023 average",
+    )
+    + geom_line(
+        aes(x="date", y="tmax"),
+        data=historical_2decade,
+        color="#1b9e77",
+        manual_key="2004-2023 average",
+    )
+    + geom_line(
+        aes(x="date", y="tmax"),
+        data=historical_all,
+        color="#B71234",
+        manual_key="1950-2023 average",
+    )
+    + labs(x="Date", y=r"Maximum temperature °C")
+    + ggtitle("Maximum temperature in the Berlin area")
+    + ggsize(800, 500)
+)
+```
+
+As one can see, while the maximum temperature for the period of June to mid-August in 2024 is not exceptional (even if there are spikes of higher temperature), it is clear that **the 2nd half of August and start of September this year is hotter than in the past**. We can also see that overall the maximum temperature in the last decade are higher than the average over the previous 2 decades and significantly higher than the average over the historical data from 1950 onwards.
+
+Another important statistic to look at is simply the number of days per year of extreme heat (which here we define as the maximum temperature being above 30 °C).
+
+```{python}
+#| code-fold: true
+#| code-summary: "Show the code"
+# Average over the weather stations
+res = data_nn.groupby(data.time)[["tmax", "tmin", "tavg"]].mean().reset_index()
+# Count all days where the maximum temperature is above 30 degrees
+res = res[res["tmax"] >= 30].groupby(res.time.dt.year)["tmax"].count().reset_index()
+res["time"] = pd.to_datetime(res["time"].astype(str))
+title = "Number of days with temperature about 30 C in Berlin area"
+LetsPlot.setup_html()
+(
+    ggplot(res, aes(x="time", y="tmax"))
+    + geom_line()
+    + ggtitle(title)
+    + labs(x="Date", y=r"# of days with max temp > 30 °C")
+    + ggsize(800, 500)
+)
+```
+
+Our results match closely other more authoritative analyses, for example [here](https://www.umweltbundesamt.de/en/image/number-of-days-when-maximum-air-temperature-exceeds).
+Thus we see that indeed summers are heating up in Berlin, and are projected to continue to do so due to climate change. As the world adapts to the rising temperatures I am sure I will see more mesures being taken by Berlin government to manage the heat. The new air-conditioned S-Bhans for example have definitely saved me a few times.
+
+[^1]: We show all weather stations that are listed for Germany, including those that are no longer active
