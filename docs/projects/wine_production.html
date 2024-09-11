@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Serguei Ossokine">
+<meta name="description" content="An in-depth analysis of wine production in Europe">
 
-<title>The elephant of surprise</title>
+<title>Wine production analysis – The elephant of surprise</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,22 +25,22 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -67,18 +69,47 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="styles.css">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed fullcontent">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">The elephant of surprise</span>
     </a>
   </div>
@@ -89,19 +120,19 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./cv.html"> 
+    <a class="nav-link" href="../cv.html"> 
 <span class="menu-text">CV</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./portfolio.html"> 
+    <a class="nav-link" href="../portfolio.html"> 
 <span class="menu-text">Portfolio</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./blog.html"> 
+    <a class="nav-link" href="../blog.html"> 
 <span class="menu-text">Blog</span></a>
   </li>  
   <li class="nav-item compact">
@@ -120,69 +151,49 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#welcome" id="toc-welcome" class="nav-link active" data-scroll-target="#welcome">Welcome</a>
-  <ul class="collapse">
-  <li><a href="#about-me" id="toc-about-me" class="nav-link" data-scroll-target="#about-me">About Me</a></li>
-  <li><a href="#curious-explore-further" id="toc-curious-explore-further" class="nav-link" data-scroll-target="#curious-explore-further">Curious? Explore Further:</a></li>
-  <li><a href="#contact" id="toc-contact" class="nav-link" data-scroll-target="#contact">Contact</a></li>
-  </ul></li>
-  </ul>
-</nav>
-    </div>
+    
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Wine production analysis</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Data analysis</div>
+    <div class="quarto-category">Python</div>
+  </div>
+  </div>
 
-
-
-<section id="welcome" class="level2">
-<h2 class="anchored" data-anchor-id="welcome">Welcome</h2>
-<div class="columns">
-<div class="column" style="width:40%;">
-<div style="font-size: 28px">
-<p>Hello!</p>
-<p>I’m Serguei, a Data Scientist and software engineer with a background in gravitational wave astrophysics.</p>
-<p>I use data, statistics and machine learning to solve complex problems.</p>
+<div>
+  <div class="description">
+    An in-depth analysis of wine production in Europe
+  </div>
 </div>
-</div><div class="column" style="width:60%;">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="./images/bns.png" class="img-fluid figure-img"></p>
-<figcaption>Visualization of the binary neutron star merger event GW170817 created by me and my colleagues from full numerical simulations. See more visualizations <a href="https://www.aei.mpg.de/145347/gravitational-waves">here</a>.</figcaption>
-</figure>
-</div>
-</div>
-</div>
-<section id="about-me" class="level3">
-<h3 class="anchored" data-anchor-id="about-me">About Me</h3>
-<p>I recently transitioned from academia, where I specialized in modelling signals from compact object binaries (mostly black holes, but sometimes neutron stars and <a href="https://arxiv.org/pdf/1807.06959">even more exotic things</a>). For 7 years I was part of the LIGO collaboration, working on understanding gravitational wave events with scientists around the globe. Now, I apply the same skills to many diverse problems in data science.</p>
-</section>
-<section id="curious-explore-further" class="level3">
-<h3 class="anchored" data-anchor-id="curious-explore-further">Curious? Explore Further:</h3>
-<ul>
-<li><a href="./blog.html">Blog</a> - Thoughts and insights on data science, machine learning and the associated software.</li>
-<li><a href="./portfolio.html">Portfolio</a> - Various data science, machine learning and data engineering projects.</li>
-<li><a href="./cv.html">CV</a> - A detailed look at my academic and professional journey.</li>
-<li><a href="./resources.html">Resources</a> - Tools and resources I found useful</li>
-</ul>
-</section>
-<section id="contact" class="level3">
-<h3 class="anchored" data-anchor-id="contact">Contact</h3>
-<p>I’m always open to discussing new opportunities, collaborations, or just chatting about data science (or astrophysics, or statistics, or board games). Feel free to reach out!</p>
-<ul>
-<li>Email: serguei.ossokine at tutantota.com</li>
-<li>LinkedIn: <a href="www.linkedin.com/in/serguei-ossokine">Serguei Ossokine</a></li>
-<li>GitHub: <a href="https://github.com/SergeiOssokine">SergeiOssokine</a></li>
-</ul>
 
 
-</section>
-</section>
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Serguei Ossokine </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In this project I analyze the spatial distribution of wine-making in Europe.</p>
+<p>First, I use GIS data from the Corine Land Cover survey to pinpoint the location of vineyards, showing that they are currently confined to regions south of the <span class="math inline">\(50^\circ N\)</span> parallel. I then examine the most prominent wine-making regions both in terms of the land area devoted to wine, as well as the total production volume. I find that Italy, Spain and France to be dominant among European contries on both of these characterstics. Finally, I investigate historical wine production trends, drawing from multiple sources. My analysis uncovers interesting long-term patterns, particularly that for Italy and France,the production peaked around 1975 followed by a decline to current levels, while for Spain the production has remained mostly flat. You can find the full analysis described in this <a href="https://sergeiossokine.github.io/posts/wine_production/wine_production.html">blogpost</a> and the code <a href="https://github.com/SergeiOssokine/SergeiOssokine.github.io/tree/main/analysis">here</a>.</p>
+<p><img src="posts/wine_production/wine_production_files/figure-html/cell-9-output-1.png" class="img-fluid"></p>
+
+
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

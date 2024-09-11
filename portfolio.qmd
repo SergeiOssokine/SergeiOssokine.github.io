@@ -1,0 +1,14 @@
+---
+title: "My Projects"
+listing:
+  contents: projects
+  sort: "date desc"
+  type: grid
+  categories: true
+  sort-ui: false
+  filter-ui: false
+  fields: [image, date, title, author, description]
+  image-height: 200px
+page-layout: full
+title-block-banner: true
+---

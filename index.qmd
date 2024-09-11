@@ -1,14 +1,58 @@
 ---
-title: "Veni, vidi, computavi"
-listing:
-  contents: posts
-  sort: "date desc"
-  type: default
-  categories: true
-  sort-ui: false
-  filter-ui: false
-page-layout: full
-title-block-banner: true
+page-layout: article
+toc: true
+title-block-banner: false
+
+
+
+format:
+  html:
+    grid:
+      body-width: 2000px
+      sidebar-width: 200px
+      margin-width: 200px
+    toc: true
 ---
 
 
+## Welcome
+
+::: columns
+::: {.column width="40%"}
+<div style="font-size: 28px">
+Hello!
+
+I'm Serguei, a Data Scientist and software engineer with a background in gravitational wave astrophysics.
+
+I use data, statistics and machine learning to solve complex problems.
+</div>
+
+:::
+
+::: {.column width="60%"}
+![Visualization of the binary neutron star merger event GW170817 created by me and my colleagues from full numerical simulations. See more visualizations [here](https://www.aei.mpg.de/145347/gravitational-waves).](./images/bns.png)
+
+:::
+:::
+
+
+
+### About Me
+
+I recently transitioned from academia, where I specialized in modelling signals from compact object binaries (mostly black holes, but sometimes neutron stars and [even more exotic things](https://arxiv.org/pdf/1807.06959)). For 7 years I was part of the LIGO collaboration, working on understanding gravitational wave events with scientists around the globe. Now, I apply the same skills to many diverse problems in data science.
+
+### Curious? Explore Further:
+
+- [Blog](/blog.html) - Thoughts and insights on data science, machine learning and the associated software.
+- [Portfolio](/portfolio.html) - Various data science, machine learning and data engineering projects.
+- [CV](/cv.html) - A detailed look at my academic and professional journey.
+- [Resources](/resources.html) - Tools and resources I found useful
+
+
+### Contact
+
+I'm always open to discussing new opportunities, collaborations, or just chatting about data science (or astrophysics, or statistics, or board games). Feel free to reach out!
+
+- Email: serguei.ossokine at tutantota.com
+- LinkedIn: [Serguei Ossokine](www.linkedin.com/in/serguei-ossokine)
+- GitHub: [SergeiOssokine](https://github.com/SergeiOssokine)

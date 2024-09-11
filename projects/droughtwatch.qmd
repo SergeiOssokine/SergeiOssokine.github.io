@@ -1,0 +1,10 @@
+---
+title: "Droughtwatch capstone"
+description: "An end-to-end pipeline to build, deploy and monitor a CNN model predicting forage  quality of land from satallite data"
+author: "Serguei Ossokine"
+categories: [Deep Learning, Cloud computing, AWS, Keras]
+image: "./images/architecture_droughtwatch_inference.svg"
+---
+
+In this project, I construct a pipeline to train, deploy and monitor a CNN model to classify the forage quality of land based on satallite imagery (specifically from the [LANDSAT8 mission](https://www.usgs.gov/landsat-missions/landsat-8)). The training is orchestrated with Airflow and experimentation tracking can be done with Weights & Biases or MLFlow. The model is deployed as an AWS StepFunctions pipeline and monitored via Grafana. You can find the code [here](https://github.com/SergeiOssokine/droughtwatch_capstone) and extensive documentation [here](https://sergeiossokine.github.io/droughtwatch_capstone/).
+![](./images/architecture_droughtwatch_inference.svg)

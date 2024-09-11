@@ -5,11 +5,15 @@ website:
   title: "The elephant of surprise"
   navbar:
     right:
-      - about.qmd
+      - text: "Home"
+        href: index.qmd
+      - text: "CV"
+        href: cv.qmd
+      - text: "Portfolio"
+        href: portfolio.qmd
+      - blog.qmd
       - icon: github
-        href: https://github.com/
-      - icon: twitter
-        href: https://twitter.com
+        href: https://github.com/SergeiOssokine
 format:
   html:
     theme: cosmo

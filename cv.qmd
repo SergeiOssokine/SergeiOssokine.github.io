@@ -1,0 +1,82 @@
+---
+title: "About Me"
+toc: true
+format:
+    html:
+        theme: cosmo
+        number-sections: false
+        number-offset: 1
+        page-layout: full
+
+lightbox: true
+---
+## CV
+
+```{=html}
+<iframe width="100%" height="700" src="./resume.html"></iframe>
+```
+
+{{< downloadthis resume.pdf label="Download CV as pdf"  type="light">}}
+
+
+## Certifications
+::: {layout-ncol=2}
+
+![](./images/DataTalks_MLOps_Zoomcamp.png){.lightbox group="my-gallery" }
+
+![](./images/Coursera_Google_Data_Analytics.png){.lightbox group="my-gallery" }
+
+![](./images/Coursera_Intro_to_Machine_Learning.png){.lightbox group="my-gallery"}
+
+![](./images/Coursera_Nvidia.png){.lightbox group="my-gallery"}
+
+:::
+
+## Audited courses
+
+- [Statistical Learning with Python](https://www.edx.org/learn/python/stanford-university-statistical-learning-with-python?index=product&queryID=4a8f806cfb6977362ac16f29efd7b22d&position=3&linked_from=autocomplete&c=autocomplete): a comprehensive course on statistical modelling ranging from classical ML techniques like Logistic Regression and Support Vector Machines to more modern techinqiues like Gradient Boosting Machines and Deep Learning.
+
+## Publications
+### Short-author papers
+
+```{python}
+# | echo: false
+# | output: asis
+import requests
+
+base_url = "https://inspirehep.net/api/literature?"
+query_string = "size=200&sort=mostrecent&q=a:S.Ossokine"
+response = requests.get(base_url + query_string)
+body = response.json()
+articles = body["hits"]["hits"]
+print()
+for article in articles:
+    meta = article["metadata"]
+    title = meta["titles"][0]["title"]
+    authors = meta["authors"]
+    N = len(authors)
+    if N > 25:
+        continue
+    if N > 3:
+        author_string = f"{authors[0]['last_name']} et al."
+    else:
+        author_string = ""
+        for i in range(N):
+            if i < N - 1:
+                author_string += f"{authors[i]['full_name']}, "
+            else:
+                author_string += f"and {authors[i]['full_name']}"
+
+    try:
+        doi = meta["dois"][0]["value"]
+        print(f'- {author_string}, "{title}". [DOI:{doi}](https://doi.org/{doi})  ')
+    except:
+        # no DOI, fallback to arxiv
+        arxiv = meta["arxiv_eprints"][0]["value"]
+        print(
+            f'- {author_string}, "{title}". [arXiv:{arxiv}](https://arxiv.org/abs/{arxiv})  '
+        )
+print()
+```
+
+You can find all papers where I am an author [here](https://inspirehep.net/literature?sort=mostrecent&size=25&page=1&q=au%20ossokine&ui-citation-summary=true).

@@ -1,0 +1,15 @@
+---
+title: "IaC Rosetta Stone for streaming models in AWS"
+description: "This project shows how to deploy a simple ML model to AWS in a variety of ways, providing a 'Rosetta stone'."
+author: "Serguei Ossokine"
+categories: [Cloud computing, AWS]
+image: "./images/architecture_rosetta_stone.svg"
+---
+
+In this project I build a simple ML model that ingests data from a Kinesis stream, runs inference via a Dockerized Lambda function and puts the result into another stream. This is done in 4 different ways:
+
+- Using AWS cli as the most manual method with no reusability
+- Using 3 different popular IaC tools: AWS CloudFormation, Terraform and Pulumi
+
+The [code](https://github.com/SergeiOssokine/mlops-zoomcamp-misc/tree/main/streaming-deployment) and detailed instructions as well as my experiences are summarized in several blog posts ([1](https://sergeiossokine.github.io/posts/streaming_deployment/streaming_example.html),[2](https://sergeiossokine.github.io/posts/streaming_deployment_part2/stream_example_contd.html),[3](https://sergeiossokine.github.io/posts/streaming_deployment_part3/streaming_example_pulumi.html))
+![](posts/streaming_deployment/streaming_example_files/mediabag/architecture.svg)

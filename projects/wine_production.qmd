@@ -1,0 +1,12 @@
+---
+title: "Wine production analysis"
+description: "An in-depth analysis of wine production in Europe"
+author: "Serguei Ossokine"
+categories: [Data analysis, Python]
+image: "./images/wine_production.png"
+---
+In this project I analyze the spatial distribution of wine-making in Europe.
+
+First, I use GIS data from the Corine Land Cover survey to pinpoint the location of vineyards, showing that they are currently confined to regions south of the $50^\circ N$ parallel.  I then examine the most prominent wine-making regions both in terms of the land area devoted to wine, as well as the total production volume. I find that Italy, Spain and France to be dominant among European contries on both of these characterstics. Finally, I investigate historical wine production trends, drawing from multiple sources. My analysis uncovers interesting long-term patterns, particularly that for Italy and  France,the production peaked around 1975 followed by a decline to current levels, while for Spain the production has remained mostly flat.  You can find the full analysis described in this [blogpost](https://sergeiossokine.github.io/posts/wine_production/wine_production.html) and the code [here](https://github.com/SergeiOssokine/SergeiOssokine.github.io/tree/main/analysis).
+
+![](posts/wine_production/wine_production_files/figure-html/cell-9-output-1.png)
