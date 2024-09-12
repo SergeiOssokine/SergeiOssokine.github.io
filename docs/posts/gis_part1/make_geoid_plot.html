@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.56">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>make_geoid_plot – The elephant of surprise</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed fullcontent">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">The elephant of surprise</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv.html"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../portfolio.html"> 
+<span class="menu-text">Portfolio</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/SergeiOssokine"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<div id="cell-0" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tqdm</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>matplotlib.rcParams[<span class="st">'axes.linewidth'</span>] <span class="op">=</span> <span class="fl">2.0</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>matplotlib.rcParams[<span class="st">'font.family'</span>] <span class="op">=</span> <span class="st">'sans-serif'</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>matplotlib.rcParams[<span class="st">'font.sans-serif'</span>] <span class="op">=</span> [<span class="st">'Helvetica'</span>]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>matplotlib.rcParams[<span class="st">'mathtext.default'</span>] <span class="op">=</span> <span class="st">'regular'</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.cm <span class="im">as</span> cm</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.colors <span class="im">as</span> colors</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.ticker <span class="im">as</span> ticker</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.crs <span class="im">as</span> ccrs</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geoid_toolkit.utilities</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geoid_toolkit.read_ICGEM_harmonics <span class="im">import</span> read_ICGEM_harmonics</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geoid_toolkit.geoid_undulation <span class="im">import</span> geoid_undulation</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="co"># gfc file with spherical harmonic coefficients</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>MODELS <span class="op">=</span> geoid_toolkit.utilities.icgem_list()</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(MODELS)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>MODEL <span class="op">=</span> MODELS[<span class="st">'GGM05C'</span>]</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>GRAVITY <span class="op">=</span> geoid_toolkit.utilities.get_data_path([<span class="st">'data'</span>,MODEL[<span class="op">-</span><span class="dv">1</span>]])</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>MD5 <span class="op">=</span> geoid_toolkit.utilities.get_hash(GRAVITY)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Download coefficients from GFZ ICGEM server</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co">#geoid_toolkit.utilities.from_http(['http://icgem.gfz-potsdam.de',*MODEL],</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co">#    local=GRAVITY, hash=MD5, verbose=True)</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="co"># use maximum degree and order of model</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>LMAX <span class="op">=</span> <span class="dv">24</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="co"># use original tide system</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>TIDE <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co"># read gravity model Ylms and change tide if specified</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>Ylms <span class="op">=</span> read_ICGEM_harmonics(GRAVITY,LMAX<span class="op">=</span>LMAX,TIDE<span class="op">=</span>TIDE)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="co"># extract parameters</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>R <span class="op">=</span> np.float64(Ylms[<span class="st">'radius'</span>])</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>GM <span class="op">=</span> np.float64(Ylms[<span class="st">'earth_gravity_constant'</span>])</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>LMAX <span class="op">=</span> np.int64(Ylms[<span class="st">'max_degree'</span>]) <span class="cf">if</span> <span class="kw">not</span> LMAX <span class="cf">else</span> LMAX</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co"># PURPOSE: calculate geoid heights at a set of latitudes and longitudes</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>dlon,dlat <span class="op">=</span> (<span class="fl">1.0</span>,<span class="fl">1.0</span>)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>lon <span class="op">=</span> np.arange(<span class="op">-</span><span class="dv">180</span><span class="op">+</span>dlon<span class="op">/</span><span class="fl">2.0</span>,<span class="dv">180</span><span class="op">+</span>dlon<span class="op">/</span><span class="fl">2.0</span>,dlon)</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>lat <span class="op">=</span> np.arange(<span class="op">-</span><span class="dv">90</span><span class="op">+</span>dlat<span class="op">/</span><span class="fl">2.0</span>,<span class="dv">90</span><span class="op">+</span>dlat<span class="op">/</span><span class="fl">2.0</span>,dlat)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>nlon <span class="op">=</span> <span class="bu">len</span>(lon)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>nlat <span class="op">=</span> <span class="bu">len</span>(lat)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="co"># reference to WGS84 ellipsoid</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>REFERENCE <span class="op">=</span> <span class="st">'WGS84'</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Gaussian Smoothing Radius in km (default is no filtering)</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="co"># no gaussian smoothing</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>GAUSS <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="co"># calculate geoid at coordinates</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> np.zeros((nlat,nlon))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>{'WHU-SWPU-GOGR2022S': ('getmodel', 'gfc', '5ecd256bfe5f630deaf9b387a9e739a31dc4aafc008bbfee8c3e970c64e7983c', 'WHU-SWPU-GOGR2022S.gfc'), 'GOSG02S': ('getmodel', 'gfc', '254a68a7c4d8970476cf85da3feab411a0d4e635bd0af41265adc4fca7fd37a1', 'GOSG02S.gfc'), 'Tongji-GMMG2021S': ('getmodel', 'gfc', 'f81966ed1ca42cd6c0d5c7b5733fab62f6c5136cace452f1f009474b3bd2c0a3', 'Tongji-GMMG2021S.gfc'), 'SGG-UGM-2': ('getmodel', 'gfc', '3b3a7e227093cbad89bbe33f515c3f2d762b24392b64cabffd890cc016293526', 'SGG-UGM-2.gfc'), 'XGM2019e_2159': ('getmodel', 'gfc', 'eeb03971cf6e533e6eeb6b010336463286dcda0846684248d5530acf8e800055', 'XGM2019e_2159.gfc'), 'XGM2019e': ('getmodel', 'gfc', '8e01a2aba4f291ac0638b79a390155713b70fdc9b266981023c756839c11c9b8', 'XGM2019e.gfc'), 'XGM2019': ('getmodel', 'gfc', '38f8a3efe050bab49acaa41f9624e564d5288260188b6511a063597efaa4dc99', 'XGM2019.gfc'), 'GO_CONS_GCF_2_TIM_R6e': ('getmodel', 'gfc', '2b82cfe40a06ab1d7cf36cbdb954f5ca0753fb711f20c9c63b3eb70de0f8fac8', 'GO_CONS_GCF_2_TIM_R6e.gfc'), 'ITSG-Grace2018s': ('getmodel', 'gfc', 'cdcab005ac449315efdb79244dbd7a7f2426dff747305644f6d9e509843f3968', 'ITSG-Grace2018s.gfc'), 'EIGEN-GRGS.RL04.MEAN-FIELD': ('getmodel', 'gfc', '96e984f23a31505411d943341767e9ff082ad2c77fbbdcba1be2e393cf35110a', 'EIGEN-GRGS.RL04.MEAN-FIELD.gfc'), 'GOCO06s': ('getmodel', 'gfc', '32ec2884630a02670476f752d2a2bf1c395d8c8d6d768090ed95b4f04b0d5863', 'GOCO06s.gfc'), 'GO_CONS_GCF_2_TIM_R6': ('getmodel', 'gfc', '48b3a4a83f17db2621744774a594ce60f2f8583847e2330a1e08f036483a24de', 'GO_CONS_GCF_2_TIM_R6.gfc'), 'GO_CONS_GCF_2_DIR_R6': ('getmodel', 'gfc', 'acffd529e1949c6055ab5a503bda803906ed8e85ae6750dc71dd881b37a34757', 'GO_CONS_GCF_2_DIR_R6.gfc'), 'IGGT_R1C': ('getmodel', 'gfc', '9d971f8d1969d8d1d4e2b485a63e875f6b68c65ecbbed9ccfd65980af51eb2c9', 'IGGT_R1C.gfc'), 'Tongji-Grace02k': ('getmodel', 'gfc', '3b2b6e97907904c636a42d187a65bce18e3c4f4b4f384861ad4021eefa350fa5', 'Tongji-Grace02k.gfc'), 'SGG-UGM-1': ('getmodel', 'gfc', '88855f2a04db5362a70f327fa1a071aed9bbe276bbe0ca969ec37f2aa534b54e', 'SGG-UGM-1.gfc'), 'GOSG01S': ('getmodel', 'gfc', '9b0b4c2b7cdc04fe0f3c54b56fa195a3022c20dcff5bbd2ad6a0afe7d98d461b', 'GOSG01S.gfc'), 'IGGT_R1': ('getmodel', 'gfc', 'c5edb180901554de3c9f280f3c2994acea39453aa6016d5a2dabbbfdd14c05fe', 'IGGT_R1.gfc'), 'IfE_GOCE05s': ('getmodel', 'gfc', 'e1d168f5c30855944dd9afeaad975c129de17cca7d2d6939dc0116af15282598', 'IfE_GOCE05s.gfc'), 'GO_CONS_GCF_2_SPW_R5': ('getmodel', 'gfc', '3e12c154b0e94e44637d8192aa9b5f2eec6c175f07b9c2b6ff3e7565e7d8a7eb', 'GO_CONS_GCF_2_SPW_R5.gfc'), 'GAO2012': ('getmodel', 'gfc', 'd70c77c81d1b47dd8e672ce1868178258d95d14e72f75fd74b6a30b49473b1f7', 'GAO2012.gfc'), 'XGM2016': ('getmodel', 'gfc', '9d5b5c3439c3cddd3e419f6fd416c289be2751df92f84509f66687638dadc4d6', 'XGM2016.gfc'), 'Tongji-Grace02s': ('getmodel', 'gfc', '98ad3c073aef674db5fe5e3780041c7b0c3268c588457e5ce268526060034be2', 'Tongji-Grace02s.gfc'), 'NULP-02s': ('getmodel', 'gfc', '5bbb1f419b4faecff7952385e7b5842f7511d00501c027cc0dcd99e97cf64e99', 'NULP-02s.gfc'), 'HUST-Grace2016s': ('getmodel', 'gfc', 'f9e5a5aca9d8550ceb94ff27aba8e1571fd7eaf703b5b351641e9fa20d8cd67c', 'HUST-Grace2016s.gfc'), 'ITU_GRACE16': ('getmodel', 'gfc', '0cbbaba92c08482d2d221c5d375264f4c6233e8f695cbcfb86ecfc5e19345a42', 'ITU_GRACE16.gfc'), 'ITU_GGC16': ('getmodel', 'gfc', 'ce010e734a1d706501699bf4862e2c264587e417b975a49c43937b7f83a92617', 'ITU_GGC16.gfc'), 'EIGEN-6S4 (v2)': ('getmodel', 'gfc', '4cc119d62d3f83adce857914bcabdfa7ca2f91677ed2905934cf52698584b4c9', 'EIGEN-6S4 (v2).gfc'), 'GOCO05c': ('getmodel', 'gfc', '17de3c1a5391d7d0397425eb7cfc8367ccbf77e33b8709600550ff8ea7ae9ceb', 'GOCO05c.gfc'), 'GGM05C': ('getmodel', 'gfc', '778a683780a5b0ad3163f4772b97b9075a0a13c389d2bd8ea3f891b64cfa383d', 'GGM05C.gfc'), 'GECO': ('getmodel', 'gfc', '62543e631aed9909373442747e4dcb2cbd716937c948434e78ea4ab81572c4f9', 'GECO.gfc'), 'GGM05G': ('getmodel', 'gfc', '8f5c8ba977572bc2d3d64714cac20a188e33f27fb992534c12eff41e8a3c27a8', 'GGM05G.gfc'), 'GOCO05s': ('getmodel', 'gfc', 'f77139b673203554b2445a94818a4d35ca6e2b5fca1042177434b7e0b72cf4d1', 'GOCO05s.gfc'), 'GO_CONS_GCF_2_SPW_R4': ('getmodel', 'gfc', 'e06e3bcb9cb2b3cfe94c97b09f16ab7fb45955fd1187acd1b220d27faec9eaa9', 'GO_CONS_GCF_2_SPW_R4.gfc'), 'EIGEN-6C4': ('getmodel', 'gfc', '7fd8fe44aa1518cd79ca84300aef4b41ddb2364aef9e82b7cdaabdb60a9053f1', 'EIGEN-6C4.gfc'), 'ITSG-Grace2014s': ('getmodel', 'gfc', 'ffdae83eb9473af3972e1833da6c1fa5bbadc7e77e9d39da07de7814f436b729', 'ITSG-Grace2014s.gfc'), 'ITSG-Grace2014k': ('getmodel', 'gfc', '7dabc3fcb066077024aa92984c141e96956d5c7168a580d36bc0e1f532e378a7', 'ITSG-Grace2014k.gfc'), 'GO_CONS_GCF_2_TIM_R5': ('getmodel', 'gfc', '692919a51bf5c27824b2964055227fa70e8a779b21e4477dc766285acee90ad8', 'GO_CONS_GCF_2_TIM_R5.gfc'), 'GO_CONS_GCF_2_DIR_R5': ('getmodel', 'gfc', 'b3bf408e4542018a3fc0cad63c3728fe92dfe7cde5d1081c2f8915df91dbd66f', 'GO_CONS_GCF_2_DIR_R5.gfc'), 'JYY_GOCE04S': ('getmodel', 'gfc', 'abe3f85e5670f6e572798d105e0ea468d5eac7d9189aab5f77c0a318b2b8cc37', 'JYY_GOCE04S.gfc'), 'GOGRA04S': ('getmodel', 'gfc', '5fd699d34827e057f871b50e568fbe59d110a0fa8dea4a41575d2264e3293355', 'GOGRA04S.gfc'), 'EIGEN-6S2': ('getmodel', 'gfc', '964132f7ca728149373a427965eddeb2553056e2daa281d9b86eb7a1b2203df8', 'EIGEN-6S2.gfc'), 'GGM05S': ('getmodel', 'gfc', '06a6faa24892df587d29c8a345e09e7031428cf97d4fcc9435b31ae8e4ccc021', 'GGM05S.gfc'), 'EIGEN-6C3stat': ('getmodel', 'gfc', '7de5f4776818768629ccc05741eab71caea0753f591b5fa16769d49a58c8d9ea', 'EIGEN-6C3stat.gfc'), 'Tongji-GRACE01': ('getmodel', 'gfc', '38ab6257492131cf0b97001b2a13845a0000a4971b9a0bc4da1fa76bdc6e9d7d', 'Tongji-GRACE01.gfc'), 'JYY_GOCE02S': ('getmodel', 'gfc', 'a9d64c2f9a31b5bbdec2bb0ad47f853e1af01202daa82c2c09bf9f2e68204102', 'JYY_GOCE02S.gfc'), 'GOGRA02S': ('getmodel', 'gfc', 'c5a936e7bb1d510536a42f2388656d03251cb52e771a2a03a5ff3aea74eb8764', 'GOGRA02S.gfc'), 'ULux_CHAMP2013s': ('getmodel', 'gfc', '57f505ff0ccd2abe271627238f005390607a38b0dfd4cc9f73f08675b57f2d9e', 'ULux_CHAMP2013s.gfc'), 'ITG-Goce02': ('getmodel', 'gfc', '0b2481ada9095a39fb5849f0c031b18603d6cb824b95b5908f17932187d161bb', 'ITG-Goce02.gfc'), 'GO_CONS_GCF_2_TIM_R4': ('getmodel', 'gfc', 'd402a877b3659c2b6fb8a8359ed110e7f3a0bfa1723affd3c6945ef7ddbcf7bb', 'GO_CONS_GCF_2_TIM_R4.gfc'), 'GO_CONS_GCF_2_DIR_R4': ('getmodel', 'gfc', 'b7d7c74ab683c99db7f554cf119cb784831c4cadc1c80270c260e54b47c3b8da', 'GO_CONS_GCF_2_DIR_R4.gfc'), 'EIGEN-6C2': ('getmodel', 'gfc', 'dbc1ec5b24ad63b1cabc83497cd2e38c486aed3ee8b08a866f057cd2baa58fcc', 'EIGEN-6C2.gfc'), 'DGM-1S': ('getmodel', 'gfc', '27ede3663d822037901974f094f28523f3cc622a1c8d440b8f4188711673fefa', 'DGM-1S.gfc'), 'GOCO03s': ('getmodel', 'gfc', 'bc90304a935b78227298a116cf55c977460d4d3d4d1dafb4994f2aea4705041f', 'GOCO03s.gfc'), 'GO_CONS_GCF_2_DIR_R3': ('getmodel', 'gfc', 'a3d297b0c541a877c4a53a0031cf5767a59bdf8b752f4b432cfaa7d0c63e8db4', 'GO_CONS_GCF_2_DIR_R3.gfc'), 'GO_CONS_GCF_2_TIM_R3': ('getmodel', 'gfc', 'fdba04544ad9d12658e000f643bdf287997782fdc3daaf4195e4c5e70d3dba4a', 'GO_CONS_GCF_2_TIM_R3.gfc'), 'GIF48': ('getmodel', 'gfc', '8c90e8bd08ca3d65b871238fb16c60182643df62ded5bd7621d69d85532e1fa2', 'GIF48.gfc'), 'EIGEN-6C': ('getmodel', 'gfc', '0776caed6c65af24051697a65147b59e436cb464cb0930c1863fee6ecfbc31b0', 'EIGEN-6C.gfc'), 'EIGEN-6S': ('getmodel', 'gfc', '12a07b4177cb72a2a84598d66248f2645638c012e6e10cfb77f9a144dfcb17ec', 'EIGEN-6S.gfc'), 'GOCO02s': ('getmodel', 'gfc', '00b3c41ff1666a7944945ee0069b4a49ab2ad2b9c9483e5397fe191d286a0681', 'GOCO02s.gfc'), 'AIUB-GRACE03S': ('getmodel', 'gfc', 'adcddf84c12be7804b762e2883d61a680c2c755e6dc8a8c971cce68ba6e490bd', 'AIUB-GRACE03S.gfc'), 'GO_CONS_GCF_2_DIR_R2': ('getmodel', 'gfc', 'd8044bd8ae5984858c06cd6dba8bbdb9ea275079bfa9caf686e995066dd7c84f', 'GO_CONS_GCF_2_DIR_R2.gfc'), 'GO_CONS_GCF_2_TIM_R2': ('getmodel', 'gfc', '50ab0404b8c85abbef1671a327400f7fc818f72dd8fcf1042c50e024264c0050', 'GO_CONS_GCF_2_TIM_R2.gfc'), 'GO_CONS_GCF_2_SPW_R2': ('getmodel', 'gfc', '1afe108ccedcda1d2b7c34ff0ef40060ae89cfa8afdea04f05dc5d19f4b72482', 'GO_CONS_GCF_2_SPW_R2.gfc'), 'GO_CONS_GCF_2_DIR_R1': ('getmodel', 'gfc', '2c47a816b731d2dfff1083eab016f655199f3eeac9d3f51a7a230ad1a10ae6b0', 'GO_CONS_GCF_2_DIR_R1.gfc'), 'GO_CONS_GCF_2_TIM_R1': ('getmodel', 'gfc', 'd64925acadc1fc512db61d5b3c773cfe5da67a725c7afa036c67e4b00a94a5d8', 'GO_CONS_GCF_2_TIM_R1.gfc'), 'GO_CONS_GCF_2_SPW_R1': ('getmodel', 'gfc', 'e61fde28495a26c4e9543d202aef591168a604f9d6f5c2acc9fbebd28e069d91', 'GO_CONS_GCF_2_SPW_R1.gfc'), 'GOCO01S': ('getmodel', 'gfc', '7a3dbee2101de5cbf878512c9306bfc0d50fd79373c842edc0c9908cd2989dfb', 'GOCO01S.gfc'), 'EIGEN-51C': ('getmodel', 'gfc', '9c8df7d2e12c0f86087465ab64239b6e8859f20c7480ed158bea1ba03a629c9b', 'EIGEN-51C.gfc'), 'AIUB-CHAMP03S': ('getmodel', 'gfc', 'b25ea1f192702c2c2d6a9955913c9401633db4be951ff674f1dfbeb143225ede', 'AIUB-CHAMP03S.gfc'), 'EIGEN-CHAMP05S': ('getmodel', 'gfc', '57185999c8ae4c3852032808a0e2c7cb0244bcd4a66559166c019b8deb4981fb', 'EIGEN-CHAMP05S.gfc'), 'ITG-Grace2010s': ('getmodel', 'gfc', 'e1137252ffe386e01eb3e77005ec5f170d518c67797b8ec0945f849a1660e9c0', 'ITG-Grace2010s.gfc'), 'AIUB-GRACE02S': ('getmodel', 'gfc', 'c2ea66021b1a0329609d01abb3bd13f94748b634a95182e7b3b970e09261dcaa', 'AIUB-GRACE02S.gfc'), 'GGM03C': ('getmodel', 'gfc', '78f8d1cf5f78d8a7161762fba0d996940b3ae6741676904cc2fa986cf8f45522', 'GGM03C.gfc'), 'GGM03S': ('getmodel', 'gfc', 'cd87c2eab7ae4904fd9a6c53f317af811bc27da4dba103a09d89f7dce77ee238', 'GGM03S.gfc'), 'AIUB-GRACE01S': ('getmodel', 'gfc', '5ae34f45861448ca9bda9784103836d643961702bdbc6dcaad1217d9a328a7eb', 'AIUB-GRACE01S.gfc'), 'EIGEN-5S': ('getmodel', 'gfc', 'cb435fdc583f41a17acb58152b371788a577290f81af86ebded1696c56aea124', 'EIGEN-5S.gfc'), 'EIGEN-5C': ('getmodel', 'gfc', 'fc51e0803271a9355bd55be4eea2790049c50a2e0a96a2077503da1df7db3bd0', 'EIGEN-5C.gfc'), 'EGM2008': ('getmodel', 'gfc', 'c50128797a9cb62e936337c890e4425f03f0461d7329b09a8cc8561504465340', 'EGM2008.gfc'), 'ITG-Grace03': ('getmodel', 'gfc', 'aa45aad8427a87efdb462fe0b5910b44920ad705962de0fa58376e914ad21f28', 'ITG-Grace03.gfc'), 'AIUB-CHAMP01S': ('getmodel', 'gfc', '1d3d282b3afc8422a3e10eda2261754b447f429797cb025512210f6e0b5995c2', 'AIUB-CHAMP01S.gfc'), 'ITG-Grace02s': ('getmodel', 'gfc', 'c83bea8a3a7308e9a37751399572747f4f952f3824a5dfbef93eb00d4d9294e2', 'ITG-Grace02s.gfc'), 'EIGEN-GL04S1': ('getmodel', 'gfc', '6cea9609189e66c728d0a04b906225bde206b445cf183f0bbe0ca2e06ad2e7de', 'EIGEN-GL04S1.gfc'), 'EIGEN-GL04C': ('getmodel', 'gfc', '34e80bcb3c40498b7bd3735e3511d70ce82106acb84d41f03ee3677da4f59af0', 'EIGEN-GL04C.gfc'), 'eigen-cg03c': ('getmodel', 'gfc', '4005ed898a508916c78bdedaef6571427e1c13860594097e5f42ef5c2da2a55e', 'eigen-cg03c.gfc'), 'GGM02C': ('getmodel', 'gfc', '7656b79145d344c300815c46e82b1c47c49c8afc5393e178d2d8dec8c325be04', 'GGM02C.gfc'), 'GGM02S': ('getmodel', 'gfc', '36ae01cbc2a7338d2884d11b897e1bec8003a1968254da2a1430f1ab1560daee', 'GGM02S.gfc'), 'EIGEN-CG01C': ('getmodel', 'gfc', '1bf59ea6b930bcdb5cce02986b1fdc175fb746b1dec2a56a815d1f7d6edb3876', 'EIGEN-CG01C.gfc'), 'EIGEN-CHAMP03S': ('getmodel', 'gfc', '1b7deafee195bae7ba1273199823b9f1ae2f0d6d506b7858b5f72a9f93e5dc24', 'EIGEN-CHAMP03S.gfc'), 'EIGEN-GRACE02S': ('getmodel', 'gfc', '0f050448f497886f4aee9f3c1cb337ab31a174ce2d00e1fee299255db83ef49f', 'EIGEN-GRACE02S.gfc'), 'TUM-2S': ('getmodel', 'gfc', '7821fcb32fc5ad5202352789d8c92562ffad95c9bd9c13429ca29c66ecba5238', 'TUM-2S.gfc'), 'DEOS_CHAMP-01C': ('getmodel', 'gfc', '3c9e9a6052f3b8e0377691ed3c94217b1a9199ae80f1047d22d74b8cdf8f1531', 'DEOS_CHAMP-01C.gfc'), 'ITG_Champ01K': ('getmodel', 'gfc', '77fbe879a8910171df42ffeff96cd1b4b6a46bf942850355840faebda7d99391', 'ITG_Champ01K.gfc'), 'ITG_Champ01S': ('getmodel', 'gfc', 'cf7734d6928dea5d744d6c7e2981ab792a45fa1b82a740faad2ae526299c60f3', 'ITG_Champ01S.gfc'), 'ITG_Champ01E': ('getmodel', 'gfc', '9809c3c914c40cee609641e24f11318110852a7f2f33fe2881526cfd3ddce406', 'ITG_Champ01E.gfc'), 'TUM-2Sp': ('getmodel', 'gfc', '8fceacf15f4ea0d86d774749d150a50c3ce3827d6c7e594a4803cbab2b65f895', 'TUM-2Sp.gfc'), 'TUM-1S': ('getmodel', 'gfc', 'c1623d1a059f19782d10135c6ffb6426a38a37570559b2ccd3bb75677805d3d8', 'TUM-1S.gfc'), 'GGM01C': ('getmodel', 'gfc', '847bf1ca0a9f53ec3bd6e05c0a720bd447c32e158e0a8175aea6e2ca6bbf6277', 'GGM01C.gfc'), 'GGM01S': ('getmodel', 'gfc', '6766f3700482c1c1ff200dbbe135e2ff29a763fe74b87b59177267a6615a1371', 'GGM01S.gfc'), 'EIGEN-GRACE01S': ('getmodel', 'gfc', 'a4eedec090a3eb6067a0f0f22f4f73f776249470bb64ea68f1bae809e39cd2b8', 'EIGEN-GRACE01S.gfc'), 'EIGEN-CHAMP03Sp': ('getmodel', 'gfc', '0c5fe7c7ef3b0d47fab6348f8be22f7c8c5807c5f1cb28b04fb656bcabc93eb1', 'EIGEN-CHAMP03Sp.gfc'), 'EIGEN-2': ('getmodel', 'gfc', '4dbcdba7387ea4621f5306a55e91f82e346242791f23a4912b18fc40effdca4e', 'EIGEN-2.gfc'), 'EIGEN-1': ('getmodel', 'gfc', 'a7c3a5964fc24e0ba21759774c4e51fb08d4ac16aae89d6b7c66384dcb1f15da', 'EIGEN-1.gfc'), 'EIGEN-1s': ('getmodel', 'gfc', 'ea767cd71d4326f6c8bb8bdc2db58fa7f0a9bbd5853a4a360c0a649979c23027', 'EIGEN-1s.gfc'), 'PGM2000a': ('getmodel', 'gfc', '7b3892a214fa7903bb92a6a0a5df099bd660e347c54d2bb14ac8f83ea706c88c', 'PGM2000a.gfc'), 'TEG4': ('getmodel', 'gfc', '4e2d8cd72b3f4f1238c10ab859203a1d70bf1c6a6d3719d7e4f32e572c9c3e32', 'TEG4.gfc'), 'GRIM5c1': ('getmodel', 'gfc', '80b4b93da67044f3dec1f393858943d2e88489e01a7c388d138448b6b8627c07', 'GRIM5c1.gfc'), 'GRIM5s1': ('getmodel', 'gfc', '3b1fe9e4419e55e5b664fa1f09f0997103d3569a54c5f7f78f6caf632af31d86', 'GRIM5s1.gfc'), 'GRIM4S4G': ('getmodel', 'gfc', 'c26268777120d71cf682e31a06d520503c29c3fb6600d2d0535487f63ca0b01d', 'GRIM4S4G.gfc'), 'GFZ97': ('getmodel', 'gfc', 'f48d76aca478540f70e4e3ff40a01ae883852ccb568ef29f1e2d241278db9417', 'GFZ97.gfc'), 'EGM96': ('getmodel', 'gfc', '971b0a3b49a497910aad23cd85e066d4cd9af0aeafe7ce6301a696bed8570be3', 'EGM96.gfc'), 'GFZ96': ('getmodel', 'gfc', '4b9115a354863738e68b0e76bdb1c9948b39de5af7ec90d91eb5ac335f7f18ae', 'GFZ96.gfc'), 'TEG3': ('getmodel', 'gfc', 'bf24e145e388c8aed5fb9109d7c2f5c6409a85bfd8b22a8db027b980591033cb', 'TEG3.gfc'), 'EGM96s': ('getmodel', 'gfc', '0c8a799f3afc1bd14539b7b8be8892935490f67e6ad5e7765c8873ba0b5c6359', 'EGM96s.gfc'), 'GFZ95A': ('getmodel', 'gfc', 'd13a17c5fcc40068e289a39f063e72ed9b6872c797d8b5e230755b3b3baa480e', 'GFZ95A.gfc'), 'GRIM4c4': ('getmodel', 'gfc', '65f5370ad1a6af82bb24ffb5ecb941166f86b2c2324677c900e58abb0a633686', 'GRIM4c4.gfc'), 'GRIM4s4': ('getmodel', 'gfc', '1b188d842a81ab4c57cf92e449c8324960fbec154ae8316fac40689c59992e60', 'GRIM4s4.gfc'), 'JGM3': ('getmodel', 'gfc', 'a3375e01a717ac162962138a5e94f10466b71aa4a130d7f7d5b18ab3d5f90c3d', 'JGM3.gfc'), 'JGM2': ('getmodel', 'gfc', '291f7d127f49fe3bcb4a633a06e8b50f461d4b13ff8e7f2046644a8148b57fc6', 'JGM2.gfc'), 'JGM2s': ('getmodel', 'gfc', '65e1a59ebffd694c3c658e742723548a450e01809617e6fb58259fe09f2e293a', 'JGM2s.gfc'), 'GFZ93a': ('getmodel', 'gfc', 'cf3f5274bc5ef079b60f3d4d33eaaa57b7ffef5472af57db6556623d4958d1eb', 'GFZ93a.gfc'), 'JGM1s': ('getmodel', 'gfc', 'f0a847d10d72be294cbe5f2dd6a2da8fc6569e996e1d924f3c99541b0b62d548', 'JGM1s.gfc'), 'GRIM4s3': ('getmodel', 'gfc', 'e0c04a2aa85865e9e4bff0298aae16661850f4205d45f7ee4a7da27aa40744e9', 'GRIM4s3.gfc'), 'OSU91a': ('getmodel', 'gfc', '5daa0b1034149011fad23ab020f91bc7ed9b1d1a13cb6467d5769dcce95f7072', 'OSU91a.gfc'), 'GRIM4c2': ('getmodel', 'gfc', '66038e0f69161adb61e344566e439ca1a5a8664d1f1eca81cd501502a438f865', 'GRIM4c2.gfc'), 'GRIM4s2': ('getmodel', 'gfc', '7616137660a891cd1875f3c280ef790ee5032f9a1cebb4841d1c4349e6734016', 'GRIM4s2.gfc'), 'GEMT3': ('getmodel', 'gfc', '7460b208e796c9ce86ea1ec8fd8853ffd7589300b7ba3c2ddd0dedb69989146b', 'GEMT3.gfc'), 'GEMT3s': ('getmodel', 'gfc', 'e5b8b2a67ee35e7f53dc4e6af9e38de2290a2a3eb45cdae2d8a4e9792c8cde7e', 'GEMT3s.gfc'), 'GRIM4c1': ('getmodel', 'gfc', 'd0e6d344e993d231a10b90af559861189b3197205b0b0f10265303c408839492', 'GRIM4c1.gfc'), 'GRIM4s1': ('getmodel', 'gfc', 'e5872f782a951c30e37ae5d52aa61b3f939c586ac7fb7218e118200b714db1af', 'GRIM4s1.gfc'), 'GEMT2': ('getmodel', 'gfc', '50c47737eaffda3f1686d03cb3bf1f25ff440907a429f8103f717ced8d50fe78', 'GEMT2.gfc'), 'POEM-L1': ('getmodel', 'gfc', 'a87cd417531c9eee72b9cc323544d1aa0f15caa6947f870eeea7e0a12e37c085', 'POEM-L1.gfc'), 'OSU89b': ('getmodel', 'gfc', '1e0a27d22947e679639531cd1599325f84bbf80a0acfab1f379df782cffe0cf4', 'OSU89b.gfc'), 'OSU89a': ('getmodel', 'gfc', 'ff92eb9121977a5f7488ef73e7801608fbfcae10923ce4adac1b4f673992cdaa', 'OSU89a.gfc'), 'GEMT1': ('getmodel', 'gfc', '1229da8e38d35db33d5b9d30e030418156bd37d0206cc00b2c6c083c9beaa56a', 'GEMT1.gfc'), 'OSU86f': ('getmodel', 'gfc', 'a44b3ad56045b76f37b539ba7092dd370d32da9e79f83d46114af992f54494fa', 'OSU86f.gfc'), 'OSU86e': ('getmodel', 'gfc', '194845ef6d61a5e24b80184a66a5ff0a2dbf222529603307f047128530d624ae', 'OSU86e.gfc'), 'GPM2': ('getmodel', 'gfc', 'f8e3e26e0f65217c83759e727000447569c0b78cbc09529e44020cac99d4b763', 'GPM2.gfc'), 'GRIM3L1': ('getmodel', 'gfc', '3ae6e52c2b5d90f2b6e7412ce9eb2f9fcf9b6309d2e69bceb0dcb9f9f9aea4eb', 'GRIM3L1.gfc'), 'GEML2': ('getmodel', 'gfc', '20d7a8f33dc5af5815ec4857dc9cf9015c0ee5f239d43b6359a1648deff8e842', 'GEML2.gfc'), 'GRIM3': ('getmodel', 'gfc', '7b2ae80283eb48e766f70c39de530d9eb07df7a7d0592eaeab919efc95502a56', 'GRIM3.gfc'), 'OSU81': ('getmodel', 'gfc', '10a17ba18f56b814576cd33e8fe6d0cc4a38320f2197c416e93d735ceae69661', 'OSU81.gfc'), 'GEM10b': ('getmodel', 'gfc', 'f546226a6c0fc92b61fdb2425e3c8cdeabb2a7a0ef3ef4283baf76a780020ece', 'GEM10b.gfc'), 'GEM10a': ('getmodel', 'gfc', '6d5e868035ce1b07fc4adab5020341dda83e15b1eb3980da5e16dc95c9b8d9d7', 'GEM10a.gfc'), 'GEM10': ('getmodel', 'gfc', '84e7b3a46b06ea0f4a4ec82668e74658a57d433738a7ec86b7f77074158c8d04', 'GEM10.gfc'), 'GEM9': ('getmodel', 'gfc', '142c79b29e4293cc4cedbd7c5e8331c3ba9e089226316437210fe2470db7ad2a', 'GEM9.gfc'), 'GRIM2': ('getmodel', 'gfc', 'e3fe9ed7adc28842113b6a9b8c437d202647974c9017c215def63b4d6dba9ff7', 'GRIM2.gfc'), 'GEM8': ('getmodel', 'gfc', '55e37a6b1b3d009f7cf26f01b1a90d398b3026789f1a077d6a1be8cc9ab63f9a', 'GEM8.gfc'), 'GEM7': ('getmodel', 'gfc', '606bf32fc85e914102ea2f62bbf4a8f1a42d3eb87cd61f93f9213caefe37e4bf', 'GEM7.gfc'), 'HARMOGRAV': ('getmodel', 'gfc', '5dcada64eb51dcb648f64aca10a1c8664087540c2e729d2cbde88f23fbcfe792', 'HARMOGRAV.gfc'), 'GRIM1': ('getmodel', 'gfc', '7bfe8efd2e820d49c2d5334c5b9a66552ddfe6db4f989c04762fb9ef66d6fd10', 'GRIM1.gfc'), 'KOCH74': ('getmodel', 'gfc', 'c6af3248c30fce61c88a8a7e075aba7027c81cefd21ff70eddd28f4603839f20', 'KOCH74.gfc'), 'GEM6': ('getmodel', 'gfc', '5d13bac798f2054c01233a69fb44c7469f8a3d8275b27000804580d3d56c36f3', 'GEM6.gfc'), 'GEM5': ('getmodel', 'gfc', '378069c6186f0d96180491f020b69751e495018325a070fe8fb386bdf9f3fed1', 'GEM5.gfc'), 'OSU73': ('getmodel', 'gfc', '03ba1f566b80be84d0df9db6ec701cdaa4238e19bdf4bf5038e30b9d4ebd8418', 'OSU73.gfc'), 'SE3': ('getmodel', 'gfc', 'aeb857ffc49b9b70111dfe71c8b4e9e4b76fe66d452e3c8491ebe5a3161409a0', 'SE3.gfc'), 'WGS72': ('getmodel', 'gfc', 'e9285ae179453f7d6b0a24bb1bca3e001a413e2c9bd52c3b97fbe6369c90bbd2', 'WGS72.gfc'), 'GEM4': ('getmodel', 'gfc', '3beba4b09c6e4c3196592a8801648fe5e71c0f32d9c5d14a531b15a76542fdc8', 'GEM4.gfc'), 'GEM3': ('getmodel', 'gfc', 'c687c7ac22f60b5201c4de3fdaf2d629544fabda8f56241aae01de56f9c62491', 'GEM3.gfc'), 'GEM2': ('getmodel', 'gfc', 'fcef2ac775943cc41acda092af1c3cbde39125b2c59e6e4d811ecb69b7cbb10a', 'GEM2.gfc'), 'GEM1': ('getmodel', 'gfc', 'dd5c5cfb0f2ab27bb3f56f9e2f3c7fdf9081f0115b1a6b47fd06612b9216ae64', 'GEM1.gfc'), 'KOCH71': ('getmodel', 'gfc', '0aedffec5b6a7f24f22779548246dd012961c4ec742cee5384f45ff690735242', 'KOCH71.gfc'), 'KOCH70': ('getmodel', 'gfc', 'c7a39409b2d10d37e6f3a83f29fec77f27a734ddcdfbaa1241e12a1e0e394cfc', 'KOCH70.gfc'), 'SE2': ('getmodel', 'gfc', '8de2a50875da49fc596cb9fa852754861b0e271162248b9ef04df6ab9d8379be', 'SE2.gfc'), 'OSU68': ('getmodel', 'gfc', '3cbccbdcb076b43077d5889eaf7d1badf951306a735c54158451a0a772b5868c', 'OSU68.gfc'), 'WGS66': ('getmodel', 'gfc', '8cbd6e2334c106dc5db0546790d87ac08db79949b08fde47d1dae2003d6cf627', 'WGS66.gfc'), 'SE1': ('getmodel', 'gfc', '3cf592095893358cf08264d93af36b6932563f5b15dd64b349964562e015ee9d', 'SE1.gfc')}</code></pre>
+</div>
+</div>
+<div id="cell-1" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>LMAX</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>24</code></pre>
+</div>
+</div>
+<div id="cell-2" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> tqdm.tqdm(<span class="bu">range</span>(nlat)):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    N[i,:] <span class="op">=</span> geoid_undulation(np.ones((nlon))<span class="op">*</span>lat[i], lon, REFERENCE,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        Ylms[<span class="st">'clm'</span>], Ylms[<span class="st">'slm'</span>], LMAX, R, GM, GAUSS<span class="op">=</span>GAUSS,EPS<span class="op">=</span><span class="fl">1e-4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>100%|██████████| 180/180 [00:26&lt;00:00,  6.82it/s]</code></pre>
+</div>
+</div>
+<div id="cell-3" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>N.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>(180, 360)</code></pre>
+</div>
+</div>
+<div id="cell-4" class="cell" data-execution_count="72">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># setup Plate Carree projection</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fig, ax1 <span class="op">=</span> plt.subplots(num<span class="op">=</span><span class="dv">1</span>, nrows<span class="op">=</span><span class="dv">1</span>, ncols<span class="op">=</span><span class="dv">1</span>, figsize<span class="op">=</span>(<span class="fl">10.375</span>,<span class="fl">6.625</span>),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    subplot_kw<span class="op">=</span><span class="bu">dict</span>(projection<span class="op">=</span>ccrs.PlateCarree()))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># contours</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>PRANGE <span class="op">=</span> (<span class="op">-</span><span class="dv">80</span>,<span class="dv">80</span>,<span class="dv">20</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>levels <span class="op">=</span> np.arange(PRANGE[<span class="dv">0</span>],PRANGE[<span class="dv">1</span>]<span class="op">+</span>PRANGE[<span class="dv">2</span>],PRANGE[<span class="dv">2</span>])</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>norm <span class="op">=</span> colors.Normalize(vmin<span class="op">=</span>PRANGE[<span class="dv">0</span>],vmax<span class="op">=</span>PRANGE[<span class="dv">1</span>])</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># plot image with transparency using normalization</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>im <span class="op">=</span> ax1.imshow(N, interpolation<span class="op">=</span><span class="st">'nearest'</span>, cmap<span class="op">=</span>cm.viridis_r,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    extent<span class="op">=</span>(lon.<span class="bu">min</span>(),lon.<span class="bu">max</span>(),lat.<span class="bu">min</span>(),lat.<span class="bu">max</span>()),</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    norm<span class="op">=</span>norm, alpha<span class="op">=</span><span class="fl">1.0</span>, transform<span class="op">=</span>ccrs.PlateCarree(),</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    origin<span class="op">=</span><span class="st">'lower'</span>)</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co"># add generic coastlines</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>ax1.coastlines()</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co"># draw lat/lon grid lines</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>GRID <span class="op">=</span> [<span class="dv">15</span>,<span class="dv">15</span>]</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>grid_meridians <span class="op">=</span> np.arange(<span class="dv">0</span>,<span class="dv">360</span><span class="op">+</span>GRID[<span class="dv">0</span>],GRID[<span class="dv">0</span>])</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>grid_parallels <span class="op">=</span> np.arange(<span class="op">-</span><span class="dv">90</span>,<span class="dv">90</span><span class="op">+</span>GRID[<span class="dv">1</span>],GRID[<span class="dv">1</span>])</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>gl <span class="op">=</span> ax1.gridlines(crs<span class="op">=</span>ccrs.PlateCarree(), draw_labels<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    linewidth<span class="op">=</span><span class="fl">0.1</span>, color<span class="op">=</span><span class="st">'0.25'</span>, linestyle<span class="op">=</span><span class="st">'-'</span>)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>gl.xlocator <span class="op">=</span> ticker.FixedLocator(grid_meridians)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>gl.ylocator <span class="op">=</span> ticker.FixedLocator(grid_parallels)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Add horizontal colorbar and adjust size</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co"># extend = add extension triangles to upper and lower bounds</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co"># options: neither, both, min, max</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co"># pad = distance from main plot axis</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co"># shrink = percent size of colorbar</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co"># aspect = lengthXwidth aspect of colorbar</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>cbar <span class="op">=</span> plt.colorbar(im, ax<span class="op">=</span>ax1, extend<span class="op">=</span><span class="st">'both'</span>, extendfrac<span class="op">=</span><span class="fl">0.0375</span>,</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    orientation<span class="op">=</span><span class="st">'horizontal'</span>, pad<span class="op">=</span><span class="fl">0.025</span>, shrink<span class="op">=</span><span class="fl">0.90</span>, aspect<span class="op">=</span><span class="dv">22</span>,</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    drawedges<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co"># rasterized colorbar to remove lines</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>cbar.solids.set_rasterized(<span class="va">True</span>)</span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Add label to the colorbar</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>cbar.ax.set_xlabel(<span class="st">'Geoidal Undulation'</span>, labelpad<span class="op">=</span><span class="dv">10</span>, fontsize<span class="op">=</span><span class="dv">20</span>)</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>cbar.ax.set_ylabel(<span class="st">'m'</span>, fontsize<span class="op">=</span><span class="dv">20</span>, rotation<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>cbar.ax.yaxis.set_label_coords(<span class="fl">1.04</span>, <span class="fl">0.15</span>)</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the tick levels for the colorbar</span></span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>cbar.set_ticks(levels)</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>cbar.set_ticklabels([<span class="ss">f'</span><span class="sc">{</span>ct<span class="sc">:d}</span><span class="ss">'</span> <span class="cf">for</span> ct <span class="kw">in</span> levels])</span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="co"># ticks lines all the way across</span></span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>cbar.ax.tick_params(which<span class="op">=</span><span class="st">'both'</span>, width<span class="op">=</span><span class="dv">1</span>, length<span class="op">=</span><span class="dv">27</span>, labelsize<span class="op">=</span><span class="dv">20</span>,</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    direction<span class="op">=</span><span class="st">'in'</span>)</span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a><span class="co"># axis = equal</span></span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>ax1.set_aspect(<span class="st">'equal'</span>, adjustable<span class="op">=</span><span class="st">'box'</span>)</span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a><span class="co"># no ticks on the x and y axes</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>ax1.get_xaxis().set_ticks([])</span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>ax1.get_yaxis().set_ticks([])</span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a><span class="co"># add main title</span></span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a><span class="co">#ax1.set_title(modelDropdown.value, fontsize=24)</span></span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>ax1.title.set_y(<span class="fl">1.01</span>)</span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a><span class="co"># stronger linewidth on frame</span></span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a><span class="co">#ax1.outline_patch.set_linewidth(2.0)</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a><span class="co">#ax1.outline_patch.set_capstyle('projecting')</span></span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a><span class="co"># output to file</span></span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>fig.subplots_adjust(left<span class="op">=</span><span class="fl">0.04</span>,right<span class="op">=</span><span class="fl">0.96</span>,bottom<span class="op">=</span><span class="fl">0.05</span>,top<span class="op">=</span><span class="fl">0.96</span>)</span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="make_geoid_plot_files/figure-html/cell-6-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-5" class="cell" data-execution_count="37">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>LAT,LON <span class="op">=</span> np.meshgrid(lon,lat)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-6" class="cell" data-execution_count="38">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>LAT.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="38">
+<pre><code>(180, 360)</code></pre>
+</div>
+</div>
+<div id="cell-7" class="cell" data-execution_count="52">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>positions <span class="op">=</span> np.vstack([LON.ravel(), LAT.ravel()]).T</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-8" class="cell" data-execution_count="53">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>positions.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="53">
+<pre><code>(64800, 2)</code></pre>
+</div>
+</div>
+<div id="cell-9" class="cell" data-execution_count="58">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-error">
+<div class="ansi-escaped-output">
+<pre><span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
+Cell <span class="ansi-green-fg">In[58], line 1</span>
+<span class="ansi-green-fg">----&gt; 1</span> im <span style="color:rgb(98,98,98)">=</span> <span class="ansi-yellow-bg">Image</span>(N)
+
+<span class="ansi-red-fg">NameError</span>: name 'Image' is not defined</pre>
+</div>
+</div>
+</div>
+<div id="cell-10" class="cell" data-execution_count="75">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> vedo <span class="im">import</span> ParametricShape, Sphere, show,Earth,IcoSphere,Image,Grid</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># interpolate such values on a completely different Mesh.</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># pick n=4 closest points and assign an ave value based on shepard kernel.</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> Earth().triangulate()</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>msh <span class="op">=</span> Sphere(r<span class="op">=</span><span class="fl">1.02</span>)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>msh.texture(N,tcoords<span class="op">=</span>positions)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>msh.alpha(<span class="fl">0.2</span>)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="co">#s.texture(N)</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>show(s,msh)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>[vedo.visual:2544] ERROR: nr of texture coords must match nr of points</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="75">
+<div>
+<figure class="figure">
+<p><img src="make_geoid_plot_files/figure-html/cell-12-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-11" class="cell" data-execution_count="85">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the sphere's vertices</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>radius<span class="op">=</span><span class="dv">6371</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>sphere <span class="op">=</span> Earth(r<span class="op">=</span>radius)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>vertices <span class="op">=</span> sphere.points()</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the latitude and longitude for each vertex</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>lats <span class="op">=</span> np.arcsin(vertices[:, <span class="dv">2</span>] <span class="op">/</span> radius)</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>lons <span class="op">=</span> np.arctan2(vertices[:, <span class="dv">1</span>], vertices[:, <span class="dv">0</span>])</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert lat/lon to indices</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>lat_idx <span class="op">=</span> np.<span class="bu">round</span>((lats <span class="op">+</span> np.pi<span class="op">/</span><span class="dv">2</span>) <span class="op">/</span> np.pi <span class="op">*</span> <span class="dv">179</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>lon_idx <span class="op">=</span> np.<span class="bu">round</span>((lons <span class="op">+</span> np.pi) <span class="op">/</span> (<span class="dv">2</span><span class="op">*</span>np.pi) <span class="op">*</span> <span class="dv">359</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the undulation values for each vertex</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>vert_undulation <span class="op">=</span> <span class="dv">10</span><span class="op">*</span>N[lat_idx, lon_idx]</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply the undulation to the vertex positions</span></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>vertices <span class="op">+=</span> vertices <span class="op">/</span> radius <span class="op">*</span> vert_undulation.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Update the sphere's vertices</span></span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>sphere.points(vertices)</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>sphere.texture(N_f)</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a grid for reference</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>grid <span class="op">=</span> Grid(res<span class="op">=</span>[<span class="dv">36</span>, <span class="dv">18</span>])</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>show(sphere, grid, viewup<span class="op">=</span><span class="st">"z"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="85">
+<div>
+<figure class="figure">
+<p><img src="make_geoid_plot_files/figure-html/cell-13-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-12" class="cell" data-execution_count="67">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>N_min <span class="op">=</span> np.amin(N)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>N_s <span class="op">=</span> N<span class="op">-</span>N_min</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>N_max <span class="op">=</span> np.amax(N_s)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>N_f <span class="op">=</span> N_s<span class="op">/</span>N_max<span class="op">*</span><span class="dv">255</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-13" class="cell" data-execution_count="87">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>lat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="87">
+<pre><code>array([-89.5, -88.5, -87.5, -86.5, -85.5, -84.5, -83.5, -82.5, -81.5,
+       -80.5, -79.5, -78.5, -77.5, -76.5, -75.5, -74.5, -73.5, -72.5,
+       -71.5, -70.5, -69.5, -68.5, -67.5, -66.5, -65.5, -64.5, -63.5,
+       -62.5, -61.5, -60.5, -59.5, -58.5, -57.5, -56.5, -55.5, -54.5,
+       -53.5, -52.5, -51.5, -50.5, -49.5, -48.5, -47.5, -46.5, -45.5,
+       -44.5, -43.5, -42.5, -41.5, -40.5, -39.5, -38.5, -37.5, -36.5,
+       -35.5, -34.5, -33.5, -32.5, -31.5, -30.5, -29.5, -28.5, -27.5,
+       -26.5, -25.5, -24.5, -23.5, -22.5, -21.5, -20.5, -19.5, -18.5,
+       -17.5, -16.5, -15.5, -14.5, -13.5, -12.5, -11.5, -10.5,  -9.5,
+        -8.5,  -7.5,  -6.5,  -5.5,  -4.5,  -3.5,  -2.5,  -1.5,  -0.5,
+         0.5,   1.5,   2.5,   3.5,   4.5,   5.5,   6.5,   7.5,   8.5,
+         9.5,  10.5,  11.5,  12.5,  13.5,  14.5,  15.5,  16.5,  17.5,
+        18.5,  19.5,  20.5,  21.5,  22.5,  23.5,  24.5,  25.5,  26.5,
+        27.5,  28.5,  29.5,  30.5,  31.5,  32.5,  33.5,  34.5,  35.5,
+        36.5,  37.5,  38.5,  39.5,  40.5,  41.5,  42.5,  43.5,  44.5,
+        45.5,  46.5,  47.5,  48.5,  49.5,  50.5,  51.5,  52.5,  53.5,
+        54.5,  55.5,  56.5,  57.5,  58.5,  59.5,  60.5,  61.5,  62.5,
+        63.5,  64.5,  65.5,  66.5,  67.5,  68.5,  69.5,  70.5,  71.5,
+        72.5,  73.5,  74.5,  75.5,  76.5,  77.5,  78.5,  79.5,  80.5,
+        81.5,  82.5,  83.5,  84.5,  85.5,  86.5,  87.5,  88.5,  89.5])</code></pre>
+</div>
+</div>
+<div id="cell-14" class="cell" data-execution_count="116">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mpl_toolkits.mplot3d <span class="im">import</span> Axes3D</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cartopy.feature <span class="im">as</span> cfeature</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a meshgrid of latitudes and longitudes</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>lons, lats <span class="op">=</span> np.meshgrid(lon, lat)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert lat/lon to 3D coordinates</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>radius <span class="op">=</span> <span class="dv">6371</span>  <span class="co"># Earth's approximate radius in km</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> radius <span class="op">*</span> np.cos(np.radians(lats)) <span class="op">*</span> np.cos(np.radians(lons))</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> radius <span class="op">*</span> np.cos(np.radians(lats)) <span class="op">*</span> np.sin(np.radians(lons))</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> radius <span class="op">*</span> np.sin(np.radians(lats))</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>N_scaled <span class="op">=</span> N<span class="op">*</span><span class="dv">10</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply the undulation</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>x <span class="op">+=</span> x <span class="op">/</span> radius <span class="op">*</span> N_scaled</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>y <span class="op">+=</span> y <span class="op">/</span> radius <span class="op">*</span> N_scaled</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>z <span class="op">+=</span> z <span class="op">/</span> radius <span class="op">*</span> N_scaled</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the plot</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>fig <span class="op">=</span> plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>))</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> fig.add_subplot(<span class="dv">111</span>, projection<span class="op">=</span><span class="st">'3d'</span>)</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the surface</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>surface <span class="op">=</span> ax.plot_surface(x, y, z, cmap<span class="op">=</span><span class="st">'viridis'</span>, edgecolor<span class="op">=</span><span class="st">'none'</span>,alpha<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a color bar</span></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a><span class="co">#fig.colorbar(surface, ax=ax, shrink=0.5, aspect=5)</span></span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Set the aspect ratio to be equal</span></span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>ax.set_box_aspect((np.ptp(x), np.ptp(y), np.ptp(z)))</span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Add continent outlines</span></span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a>resolution <span class="op">=</span> <span class="st">'110m'</span></span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a>land_feature <span class="op">=</span> cfeature.NaturalEarthFeature(<span class="st">'physical'</span>, <span class="st">'land'</span>, resolution,</span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a>                                            edgecolor<span class="op">=</span><span class="st">'black'</span>, facecolor<span class="op">=</span><span class="st">'none'</span>)</span>
+<span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> geom <span class="kw">in</span> land_feature.geometries():</span>
+<span id="cb24-44"><a href="#cb24-44" aria-hidden="true" tabindex="-1"></a>    lons, lats <span class="op">=</span> <span class="bu">zip</span>(<span class="op">*</span>geom.exterior.coords)</span>
+<span id="cb24-45"><a href="#cb24-45" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> radius <span class="op">*</span> np.cos(np.radians(lats)) <span class="op">*</span> np.cos(np.radians(lons))</span>
+<span id="cb24-46"><a href="#cb24-46" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> radius <span class="op">*</span> np.cos(np.radians(lats)) <span class="op">*</span> np.sin(np.radians(lons))</span>
+<span id="cb24-47"><a href="#cb24-47" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> radius <span class="op">*</span> np.sin(np.radians(lats))</span>
+<span id="cb24-48"><a href="#cb24-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-49"><a href="#cb24-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Apply undulation to continent outlines</span></span>
+<span id="cb24-50"><a href="#cb24-50" aria-hidden="true" tabindex="-1"></a>    undulation_values <span class="op">=</span> <span class="dv">2</span><span class="op">*</span>np.array([N_scaled[<span class="bu">int</span>((lat<span class="op">+</span><span class="dv">90</span>)<span class="op">*</span><span class="dv">179</span><span class="op">/</span><span class="dv">180</span>), <span class="bu">int</span>((lon<span class="op">+</span><span class="dv">180</span>)<span class="op">*</span><span class="dv">359</span><span class="op">/</span><span class="dv">360</span>)] <span class="cf">for</span> lat, lon <span class="kw">in</span> <span class="bu">zip</span>(lats, lons)])</span>
+<span id="cb24-51"><a href="#cb24-51" aria-hidden="true" tabindex="-1"></a>    x <span class="op">+=</span> x <span class="op">/</span> radius <span class="op">*</span> undulation_values</span>
+<span id="cb24-52"><a href="#cb24-52" aria-hidden="true" tabindex="-1"></a>    y <span class="op">+=</span> y <span class="op">/</span> radius <span class="op">*</span> undulation_values</span>
+<span id="cb24-53"><a href="#cb24-53" aria-hidden="true" tabindex="-1"></a>    z <span class="op">+=</span> z <span class="op">/</span> radius <span class="op">*</span> undulation_values</span>
+<span id="cb24-54"><a href="#cb24-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-55"><a href="#cb24-55" aria-hidden="true" tabindex="-1"></a>    ax.plot(x, y, z, color<span class="op">=</span><span class="st">'black'</span>, linewidth<span class="op">=</span><span class="dv">1</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb24-56"><a href="#cb24-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-57"><a href="#cb24-57" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Earth's Surface with Geoid Undulation"</span>)</span>
+<span id="cb24-58"><a href="#cb24-58" aria-hidden="true" tabindex="-1"></a>ax.view_init(elev<span class="op">=-</span><span class="dv">45</span>, azim<span class="op">=</span><span class="dv">75</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica
+findfont: Generic family 'sans-serif' not found because none of the following families were found: Helvetica</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="make_geoid_plot_files/figure-html/cell-16-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
