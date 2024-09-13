@@ -70,7 +70,7 @@ z &= R\sin\theta
 $$
 
 
-While the spherical model is remarkably good, modern applications require a more accurate representation. The most important effect to take into account is the (very slight) bulging out of the surface close to the equator, caused by Earth's rotation.  An approptriate model for this is a ellipsoid of revolution (aka a prolate spheroid) which is created by rotating an ellipse around its semiminor axis (which we take to be the $z$ axis). Since we have azimuthal symmetry, it's easier to examine the properties and parametrization of the spheroid by considering an arbitrary cross-section. Without loss of generality, we work in the $x-z$ plane.
+While the spherical model is remarkably good, modern applications require a more accurate representation. The most important effect to take into account is the (very slight) bulging out of the surface close to the equator, caused by Earth's rotation.  An appropriate model for this is a ellipsoid of revolution (aka a oblate spheroid) which is created by rotating an ellipse around its semi-minor axis (which we take to be the $z$ axis). Since we have azimuthal symmetry, it's easier to examine the properties and parametrization of the spheroid by considering an arbitrary cross-section. Without loss of generality, we work in the $x-z$ plane.
 
 In Cartesian coordinates, the ellipse is given by
 
@@ -129,11 +129,11 @@ with $\lambda \in (0,2\pi)$ and $\phi \in (-\pi/2,\pi/2)$.
 
 
 
-An important parameter while frequently encountered in descriping ellipsoid is the _flattening_ which is equal to
+An important parameter while frequently encountered in describing ellipsoid is the _flattening_ which is equal to
 
 $$ f = 1-\frac{b}{a} $$
 
-It describes the degree of "squashing" of the spheroid - the deviation of being a perfect sphere. Remarkably, for the Earth this flattening is extremely small ($\sim 1/298.26$) [^2], corrsesponding to a difference of just $\sim 21$ km between the polar and equatorial axes.
+It describes the degree of "squashing" of the spheroid - the deviation of being a perfect sphere. Remarkably, for the Earth this flattening is extremely small ($\sim 1/298.26$) [^2], corresponding to a difference of just $\sim 21$ km between the polar and equatorial axes.
 
 
 
@@ -146,20 +146,27 @@ It describes the degree of "squashing" of the spheroid - the deviation of being 
 ### The geoid
 The actual shape of the Earth is extremely complex and can only be determined via measurement.  Indeed, the complicated surface topology of the land masses is very difficult to model mathematically. Instead, one can define some reference surfaces.
 
-A particularly important surface is the _geoid_ which is defined as the shape the Earth's oceans would take under the influence of gravity and centrifugal forces, if we turned off all other interactions like tides and currents. In such a case, the surface of the oceans would be an equipotential surface of the potential (expressed in the co-rotating frame)[@barthelm2013]:
+A particularly important surface is the _geoid_ which is defined as the shape the Earth's oceans would take under the influence of gravity and centrifugal forces, if we turned off all other interactions like tides and currents (and its imaginary extension under the continents). In such a case, the surface of the oceans would be an equipotential surface of the potential (expressed in the co-rotating frame)[@barthelm2013]:
 
 $$ W = W_{a}+\Phi_{c}$$
 
 where $W_{a}(\vec{r})\equiv G\int_{v}\frac{\rho(\vec{r'})}{|\vec{r}-\vec{r'}|}dV$ is the Newtonian gravitational potential and $\Phi_{c}\equiv \frac{1}{2}\Omega^{2}d_{z}^{2}$ is the centrifugal potential.  That is, the geoid is defined as a particular $W = \rm{const}$ surface.
 
-It should be noted that the geoid is a very complicated surface as the potential $W$ depends on the non-uniform mass density distribution inside the Earth.   The measurement of the Earth's potential has been carried out by multiple satellite missions and variations have now been mapped to scales of about 10 km. Below is an example of  geoid modulations from the XGM2019e model[@Zingerle2020] (the modulations have been exaggerated be a factor of 10000):
+It should be noted that the geoid is a very complicated surface as the potential $W$ depends on the non-uniform mass density distribution inside the Earth.   The measurement of the Earth's potential has been carried out by multiple satellite missions and variations have now been mapped to very small scales. Below is an example of  geoid undulations from the XGM2019e model[@Zingerle2020] as measured with respect to a reference ellipsoidal model of the Earth (undulations have been exaggerated be a factor of 10000):
 
 ![Image generated using the visualization software [here](https://icgem.gfz-potsdam.de/vis3d/longtime)](./geoid_XGM2019e.jpeg){.lightbox width=50%}
 
 
 
 ### The geodetic datum
-Given a model of the geoid, a natual question arises of how to align a spheroidal model of the Earth to "best" represent it. One obvious choice is to align the ellipsoid so that it approximates the shape of the geoid in the least-squares sense for the entire globe, forming a so called _geocentric_ datum. We then map the Earth's surface features onto the aligned ellipsoid.   A very widely used example of this is the WGS84 datum, which is the standard datum used in most GPS systems. Another possibility is to try to approximate the geoid as well as possible in particular region. Such datums are known as _local_ datums. For example, the NAD83 (North American Datum 83) datum is particularly well suited for representing the US but is less well suited for Europe. Since a datum is a _reference_ surface  that determines the geographic coordinate system, it is important to always keep in mind which datum is being used, especially when combining data from different sources.
+This is perhaps the most crucial concept of all: the geodetic datum provides a reference system for representing the locations on the Earth surface[^3].
+Given the complex shape of the geoid, it is hard to use it directly to construct a useful reference coordinate system to represent locations on the Earth. Thus we usually seek an ellipsoidal model on which to base our coordinate system. This model can be determined by 2 parameters, for example the semi-major axis and the flattening.  Given this model, a natural question is how to align[^4] it to "best" represent the geoid. One obvious choice is to align the ellipsoid so that it approximates the shape of the geoid in the least-squares sense for the entire globe, forming a so called _geocentric_ datum. A very widely used example of this is the WGS84 datum, which is the standard datum used in most GPS systems. Another possibility is to try to approximate the geoid as well as possible in particular region, such that the deviations from the geoid surface are minimized there. Such datums are known as _local_ datums. For example, the NAD27 (North American Datum of 1927) datum is particularly well suited for representing the US but is less well suited for Europe.
+
+Given an ellipsoidal we can construct the geodetic coordinates on it, as described in @sec-earthmodel. Of course, one still actually needs to determine  the geodetic coordinates of different locations on the surface of Earth. Since this may be difficult to do directly everywhere (e.g. exactly at the point where you are standing with your cellphone), it is usually done in two steps. First one constructs a network of physical stations equipped with high quality GPS/GNSS receivers which allows  a precise measurement of their position in our desired coordinate system. Then given any new location on the surface of the Earth, one uses these stations as references via so-called differential positioning, which allows centimeter-level accuracy.
+
+
+
+Note that since a datum is a _reference_ surface  that determines the geographic coordinate system, it is important to always keep in mind which datum is being used, especially when combining data from different sources.
 
 
 # Maps: from Earth to paper
@@ -169,7 +176,7 @@ One of the most famous results in classical differential geometry due to Carl Fr
 
 One approach that is very frequently presented when developing projections is by the use of the so-called developable surfaces. For our purposes here, a _developable_ surface is simply a surface that has zero Gaussian curvature and thus can be unrolled into a flat plane without bending (i.e. without distortions). In 3D, there are only a few such surfaces which are of use: cylinders, cones and (trivially) planes. The idea is then to project the surface of the Earth onto the developable surface and then to unroll that surface into a flat map.
 
-Based on the type of developable surface one can classify many projections[^3]:
+Based on the type of developable surface one can classify many projections[^5]:
 
 
 
@@ -184,10 +191,10 @@ In the above we only considered the cases where the developable surfaces touch t
 {{< video https://youtu.be/VyNd4fLsPwo >}}
 
 
-Note that there are many modern projections which cannnot be classified in any of the above categories. For this and other reasons some authors have criticised this classical classification scheme[@geographies2020019]. Indeed, _modern_ projections do not need developable surfaces to be defined and are derived by considering desirable properties of the mapping.
+Note that there are many modern projections which cannot be classified in any of the above categories. For this and other reasons some authors have criticized this classical classification scheme[@geographies2020019]. Indeed, _modern_ projections do not need developable surfaces to be defined and are derived by considering desirable properties of the mapping.
 
 ### To be continued
-In the next post we will present a modern way of classifying and deriving projections, based on the notion of certain desirable properties (such as preserving angles) and derive a couple of famous projections from scrach.  Stay tuned!
+In the next post we will present a modern way of classifying and deriving projections, based on the notion of certain desirable properties (such as preserving angles) and derive a couple of famous projections from scratch.  Stay tuned!
 
 
 
@@ -205,7 +212,7 @@ In the next post we will present a modern way of classifying and deriving projec
 A simple parametrization in terms of angles is given by $(a\cos t,a\sin t)$. Note, however, that here $t$ is **not** the angle between the semi-major axis and the point on the spheroid (see figure below). Indeed, the construction is done as follows:
 
 * Draw 2 circles centered at (0,0) with radii $a$ and $b$
-* Given any point $P$ on the ellipse draw a vertical line from $P$ until it intersects the larger circle with radius $a$ and a horizontal line that intersects with circle of radius $b$. Note that there is a unique line from the origin that passes through both interesection points.
+* Given any point $P$ on the ellipse draw a vertical line from $P$ until it intersects the larger circle with radius $a$ and a horizontal line that intersects with circle of radius $b$. Note that there is a unique line from the origin that passes through both intersection points.
 * The angle between the semi-major axis and this line is denoted $t$. From trigonometric considerations it follows immediately that the Cartesian coordinates of $P$ are indeed  $(a\cos t,a\sin t)$
 
 ### Polar
@@ -218,7 +225,7 @@ $$ r(\theta) = \frac{ab}{\sqrt{b^2\cos^2\theta+a^2\sin^2\theta}} $$
 
 ### Geodetic
 
-Finally, for GIS applications a particularly important parametrization is one involving the so-called geodetic lattitude ($\phi$) which is the angle between the semi-major axis and the normal to the ellipse. Note that unlike the case of a circle, the normal does _not_ generally pass through the center of the ellipse. To derive this parametrization  we will proceed as follows. Consider the normal to the ellipse at some point $P=(x_0,z_0)$.  Let $f(x,z)=\frac{x^2}{a^2}+\frac{z^2}{b^2}$. Then the ellipse is the level set of $f$, given by $f(x,z)=1$. A well known result is that the gradient of the function is normal to the level sets [^4]. Thus $\nabla f$ is a vector in the direction of the normal. We have
+Finally, for GIS applications a particularly important parametrization is one involving the so-called geodetic latitude ($\phi$) which is the angle between the semi-major axis and the normal to the ellipse. Note that unlike the case of a circle, the normal does _not_ generally pass through the center of the ellipse. To derive this parametrization  we will proceed as follows. Consider the normal to the ellipse at some point $P=(x_0,z_0)$.  Let $f(x,z)=\frac{x^2}{a^2}+\frac{z^2}{b^2}$. Then the ellipse is the level set of $f$, given by $f(x,z)=1$. A well known result is that the gradient of the function is normal to the level sets [^6]. Thus $\nabla f$ is a vector in the direction of the normal. We have
 
 $$ \nabla f = (f_x,f_z) =  \left(\frac{2x}{a^2},\frac{2z}{b^2}\right) $$
 
@@ -258,5 +265,7 @@ The 2D figures in @sec-earthmodel were created using [Asymptote Vector Graphics 
 
 [^1]: In principle this is not quite  correct - there is no single coordinate chart that can cover the whole sphere. Indeed the polar coordinates do not cover the poles (the intervals for the angles must be _open_). See e.g. Example 4.1.4 in  [@leesmooth].
 [^2]: The data can be found in many sources, e.g. In Table 1.1. of [this report](https://www.iers.org/IERS/EN/Publications/TechnicalNotes/tn36.html)
-[^3]: You can find the code to generate these figures [here](https://github.com/SergeiOssokine/gis_exploration/tree/master/gis_part1/projection_figures)
-[^4]: See e.g. [here](https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/85c1d85363d9808505351b571d2750aa_MIT18_02SC_notes_19.pdf) for a proof in $\mathbb{R}^3$.
+[^3]: Note that the actual process of constructing a geodetic datum and the practical implementation of the resulting coordinate system are extremely complicated. Below we omit a lot of detail, including the temporal aspects, corrections due to various effects like tides and many others.
+[^4]: Here by aligning we mean choosing the center of the ellipsoid as well as the orientation of its axes. Note that for local datums, we may choose a particular point where the reference ellipsoid is tangent to the geoid, and this, along with the orientation implicitly defines the location of its center.
+[^5]: You can find the code to generate these figures [here](https://github.com/SergeiOssokine/gis_exploration/tree/master/gis_part1/projection_figures)
+[^6]: See e.g. [here](https://ocw.mit.edu/courses/18-02sc-multivariable-calculus-fall-2010/85c1d85363d9808505351b571d2750aa_MIT18_02SC_notes_19.pdf) for a proof in $\mathbb{R}^3$.
