@@ -22,6 +22,10 @@ lightbox: true
 ## Certifications
 ::: {layout-ncol=2}
 
+![](./images/aws-certified-cloud-practitioner.png){.lightbox group="my-gallery" }
+
+![](./images/dlt_advanced_etl_specialist.png){.lightbox group="my-gallery" }
+
 ![](./images/DataTalks_MLOps_Zoomcamp.png){.lightbox group="my-gallery" }
 
 ![](./images/Coursera_Google_Data_Analytics.png){.lightbox group="my-gallery" }
