@@ -53,6 +53,6 @@ I recently transitioned from academia, where I specialized in modelling signals 
 
 I'm always open to discussing new opportunities, collaborations, or just chatting about data science (or astrophysics, or statistics, or board games). Feel free to reach out!
 
-- Email: serguei.ossokine at tutantota.com
+- Email: serguei.ossokine at tutanota.com
 - LinkedIn: [Serguei Ossokine](www.linkedin.com/in/serguei-ossokine)
 - GitHub: [SergeiOssokine](https://github.com/SergeiOssokine)
