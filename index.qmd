@@ -22,9 +22,9 @@ format:
 <div style="font-size: 28px">
 Hello!
 
-I'm Serguei, a Data Scientist and software engineer with a background in gravitational wave astrophysics.
+I'm Serguei, a data engineer, data scientist and software developer with a background in gravitational wave astrophysics.
 
-I use data, statistics and machine learning to solve complex problems.
+I build pipelines that use data, statistics and machine learning to solve complex problems.
 </div>
 
 :::

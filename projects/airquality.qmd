@@ -1,0 +1,10 @@
+---
+title: "Air quality capstone"
+description: "An end-to-end data engineering project to analyse air quality data for Berlin"
+author: "Serguei Ossokine"
+categories: [Data pipelines, Cloud computing, GCP, dbt]
+image: "./images/architecture_airquality.svg"
+---
+
+In this project, I construct an end-to-end data  pipeline to download, clean, enrich and  transform air quality data for Berlin. The pipeline is orchestrated using Prefect Cloud, leveraging GCP infrastructure provisioned via Terraform. The data is transformed via dbt and findings are presented in a dashboard hosted on Preset cloud. You can find the code [here](hhttps://github.com/SergeiOssokine/airquality_capstone) and extensive documentation [here](https://sergeiossokine.github.io/airquality_capstone/).
+![](./images/architecture_airquality.svg)
