@@ -22,6 +22,8 @@ lightbox: true
 ## Certifications
 ::: {layout-ncol=2}
 
+![](./images/DataTalks_DE_Zoomcamp.png){.lightbox group="my-gallery" }
+
 ![](./images/aws-certified-cloud-practitioner.png){.lightbox group="my-gallery" }
 
 ![](./images/dlt_advanced_etl_specialist.png){.lightbox group="my-gallery" }
