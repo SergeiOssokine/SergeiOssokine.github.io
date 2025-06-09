@@ -51,7 +51,7 @@ lightbox: true
 import requests
 
 base_url = "https://inspirehep.net/api/literature?"
-query_string = "size=200&sort=mostrecent&q=a:S.Ossokine"
+query_string = "size=200&sort=mostrecent&q=au%20ossokine"
 response = requests.get(base_url + query_string)
 body = response.json()
 articles = body["hits"]["hits"]
