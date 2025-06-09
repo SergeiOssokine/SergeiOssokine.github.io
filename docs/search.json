@@ -110,5 +110,12 @@
     "title": "My Projects",
     "section": "",
     "text": "Air quality capstone\n\n\nAn end-to-end data engineering project to analyse air quality data for Berlin\n\n\n\nSerguei Ossokine\n\n\n\n\n\n\n\n\n\n\n\n\n\nIaC Rosetta Stone for streaming models in AWS\n\n\nThis project shows how to deploy a simple ML model to AWS in a variety of ways, providing a ‘Rosetta stone’.\n\n\n\nSerguei Ossokine\n\n\n\n\n\n\n\n\n\n\n\n\n\nDroughtwatch capstone\n\n\nAn end-to-end pipeline to build, deploy and monitor a CNN model predicting forage quality of land from satallite data\n\n\n\nSerguei Ossokine\n\n\n\n\n\n\n\n\n\n\n\n\n\nWine production analysis\n\n\nAn in-depth analysis of wine production in Europe\n\n\n\nSerguei Ossokine\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "projects/airquality.html",
+    "href": "projects/airquality.html",
+    "title": "Air quality capstone",
+    "section": "",
+    "text": "In this project, I construct an end-to-end data pipeline to download, clean, enrich and transform air quality data for Berlin. The pipeline is orchestrated using Prefect Cloud, leveraging GCP infrastructure provisioned via Terraform. The data is transformed via dbt and findings are presented in a dashboard hosted on Preset cloud. You can find the code here and extensive documentation here."
   }
 ]
