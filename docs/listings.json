@@ -4,5 +4,14 @@
     "items": [
       "/posts/wine_production/wine_production.html"
     ]
+  },
+  {
+    "listing": "/portfolio.html",
+    "items": [
+      "/projects/airquality.html",
+      "/projects/rosetta_stone_iac.html",
+      "/projects/droughtwatch.html",
+      "/projects/wine_production.html"
+    ]
   }
 ]

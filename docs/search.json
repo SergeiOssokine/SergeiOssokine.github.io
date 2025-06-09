@@ -58,8 +58,57 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Veni, vidi, bibi",
+    "title": "The elephant of surprise",
     "section": "",
-    "text": "Veni, vidi, bibi\n\n\n\n\n\n\n\n\n\n\n\n\nSerguei Ossokine\n\n\n\n\n\n\nNo matching items"
+    "text": "Hello!\nI’m Serguei, a data engineer, data scientist and software developer with a background in gravitational wave astrophysics.\nI build pipelines that use data, statistics and machine learning to solve complex problems.\n\n\n\n\n\nVisualization of the binary neutron star merger event GW170817 created by me and my colleagues from full numerical simulations. See more visualizations here.\n\n\n\n\n\n\nI recently transitioned from academia, where I specialized in modelling signals from compact object binaries (mostly black holes, but sometimes neutron stars and even more exotic things). For 7 years I was part of the LIGO collaboration, working on understanding gravitational wave events with scientists around the globe. Now, I apply the same skills to many diverse problems in data science.\n\n\n\n\nBlog - Thoughts and insights on data science, machine learning and the associated software.\nPortfolio - Various data science, machine learning and data engineering projects.\nCV - A detailed look at my academic and professional journey.\nResources - Tools and resources I found useful\n\n\n\n\nI’m always open to discussing new opportunities, collaborations, or just chatting about data science (or astrophysics, or statistics, or board games). Feel free to reach out!\n\nEmail: serguei.ossokine at tutanota.com\nLinkedIn: Serguei Ossokine\nGitHub: SergeiOssokine"
+  },
+  {
+    "objectID": "index.html#welcome",
+    "href": "index.html#welcome",
+    "title": "The elephant of surprise",
+    "section": "",
+    "text": "Hello!\nI’m Serguei, a data engineer, data scientist and software developer with a background in gravitational wave astrophysics.\nI build pipelines that use data, statistics and machine learning to solve complex problems.\n\n\n\n\n\nVisualization of the binary neutron star merger event GW170817 created by me and my colleagues from full numerical simulations. See more visualizations here.\n\n\n\n\n\n\nI recently transitioned from academia, where I specialized in modelling signals from compact object binaries (mostly black holes, but sometimes neutron stars and even more exotic things). For 7 years I was part of the LIGO collaboration, working on understanding gravitational wave events with scientists around the globe. Now, I apply the same skills to many diverse problems in data science.\n\n\n\n\nBlog - Thoughts and insights on data science, machine learning and the associated software.\nPortfolio - Various data science, machine learning and data engineering projects.\nCV - A detailed look at my academic and professional journey.\nResources - Tools and resources I found useful\n\n\n\n\nI’m always open to discussing new opportunities, collaborations, or just chatting about data science (or astrophysics, or statistics, or board games). Feel free to reach out!\n\nEmail: serguei.ossokine at tutanota.com\nLinkedIn: Serguei Ossokine\nGitHub: SergeiOssokine"
+  },
+  {
+    "objectID": "cv.html",
+    "href": "cv.html",
+    "title": "About Me",
+    "section": "",
+    "text": "Download CV as pdf"
+  },
+  {
+    "objectID": "cv.html#cv",
+    "href": "cv.html#cv",
+    "title": "About Me",
+    "section": "",
+    "text": "Download CV as pdf"
+  },
+  {
+    "objectID": "cv.html#certifications",
+    "href": "cv.html#certifications",
+    "title": "About Me",
+    "section": "Certifications",
+    "text": "Certifications"
+  },
+  {
+    "objectID": "cv.html#audited-courses",
+    "href": "cv.html#audited-courses",
+    "title": "About Me",
+    "section": "Audited courses",
+    "text": "Audited courses\n\nStatistical Learning with Python: a comprehensive course on statistical modelling ranging from classical ML techniques like Logistic Regression and Support Vector Machines to more modern techinqiues like Gradient Boosting Machines and Deep Learning."
+  },
+  {
+    "objectID": "cv.html#publications",
+    "href": "cv.html#publications",
+    "title": "About Me",
+    "section": "Publications",
+    "text": "Publications\n\nShort-author papers\n\nSennett et al., “Distinguishing Boson Stars from Black Holes and Neutron Stars from Tidal Interactions in Inspiraling Binary Systems”. DOI:10.1103/PhysRevD.96.024002\n\nBohé et al., “Improved effective-one-body model of spinning, nonprecessing binary black holes for the era of gravitational-wave astrophysics with advanced detectors”. DOI:10.1103/PhysRevD.95.044028\n\nTacik et al., “Binary Neutron Stars with Arbitrary Spins in Numerical Relativity”. DOI:10.1103/PhysRevD.92.124012\n\nOssokine et al., “Improvements to the construction of binary black hole initial data”. DOI:10.1088/0264-9381/32/24/245010\n\nOssokine et al., “Comparing Post-Newtonian and Numerical-Relativity Precession Dynamics”. DOI:10.1103/PhysRevD.92.104028\n\nBoyle et al., “Gravitational-wave modes from precessing black-hole binaries”. arXiv:1409.4431\n\nOssokine, Serguei, Kidder, Lawrence E., and Pfeiffer, Harald P., “Precession-tracking coordinates for simulations of compact-object-binaries”. DOI:10.1103/PhysRevD.88.084031\n\nYou can find all papers where I am an author here."
+  },
+  {
+    "objectID": "portfolio.html",
+    "href": "portfolio.html",
+    "title": "My Projects",
+    "section": "",
+    "text": "Air quality capstone\n\n\nAn end-to-end data engineering project to analyse air quality data for Berlin\n\n\n\nSerguei Ossokine\n\n\n\n\n\n\n\n\n\n\n\n\n\nIaC Rosetta Stone for streaming models in AWS\n\n\nThis project shows how to deploy a simple ML model to AWS in a variety of ways, providing a ‘Rosetta stone’.\n\n\n\nSerguei Ossokine\n\n\n\n\n\n\n\n\n\n\n\n\n\nDroughtwatch capstone\n\n\nAn end-to-end pipeline to build, deploy and monitor a CNN model predicting forage quality of land from satallite data\n\n\n\nSerguei Ossokine\n\n\n\n\n\n\n\n\n\n\n\n\n\nWine production analysis\n\n\nAn in-depth analysis of wine production in Europe\n\n\n\nSerguei Ossokine\n\n\n\n\n\n\nNo matching items"
   }
 ]
